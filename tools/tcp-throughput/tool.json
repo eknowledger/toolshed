@@ -1,0 +1,108 @@
+{
+  "sdk": 3,
+  "id": "tcp-throughput",
+  "name": "TCP throughput ceiling",
+  "blurb": "A fast link is not a fast transfer. One connection is capped by its window and by packet loss, and on a long path the cap is far below what was paid for.",
+  "version": "1.0.0",
+  "capabilities": ["pure"],
+  "runtime": { "entry": "index.ts", "thread": "main" },
+  "kinds": ["fields", "series", "table", "group", "error"],
+  "card": "live",
+  "cardFields": 4,
+  "inputs": [
+    {
+      "id": "rtt",
+      "type": "number",
+      "label": "Round-trip time",
+      "description": "Milliseconds there and back. London to Sydney is about 250.",
+      "unit": "ms",
+      "primary": true,
+      "default": 80,
+      "min": 0.1,
+      "max": 5000,
+      "step": 1
+    },
+    {
+      "id": "loss",
+      "type": "number",
+      "label": "Packet loss",
+      "description": "Percent. A tenth of a percent is unremarkable on a long path and costs more than people expect.",
+      "unit": "%",
+      "primary": true,
+      "default": 0.1,
+      "min": 0,
+      "max": 99.9,
+      "step": 0.01
+    },
+    {
+      "id": "window",
+      "type": "number",
+      "label": "Receive window",
+      "description": "Kilobytes the receiver will accept unacknowledged. 64 is the largest TCP could express before window scaling.",
+      "unit": "KB",
+      "primary": true,
+      "default": 64,
+      "min": 1,
+      "max": 1048576,
+      "step": 8
+    },
+    {
+      "id": "mss",
+      "type": "number",
+      "label": "Segment size",
+      "description": "Payload bytes per packet. 1460 on Ethernet; 9000-byte jumbo frames give about 8960.",
+      "unit": "B",
+      "default": 1460,
+      "min": 88,
+      "max": 65495,
+      "step": 4
+    },
+    {
+      "id": "sweep",
+      "type": "select",
+      "label": "Chart",
+      "description": "Which variable the curve moves. Against loss the two ceilings cross; against distance they fall together and never cross.",
+      "default": "loss",
+      "options": [
+        { "value": "rtt", "label": "Against round-trip time" },
+        { "value": "loss", "label": "Against packet loss" }
+      ]
+    }
+  ],
+  "samples": [
+    {
+      "label": "Across an ocean",
+      "input": {
+        "rtt": 250,
+        "loss": 0.5,
+        "window": 4096,
+        "sweep": "loss"
+      }
+    },
+    {
+      "label": "Clean local path",
+      "input": {
+        "rtt": 2,
+        "loss": 0.01,
+        "window": 64,
+        "sweep": "rtt"
+      }
+    },
+    {
+      "label": "Jumbo frames",
+      "input": {
+        "rtt": 100,
+        "loss": 0.1,
+        "window": 8192,
+        "mss": 8960,
+        "sweep": "rtt"
+      }
+    }
+  ],
+  "help": "README.md",
+  "tags": ["tcp", "networking", "performance", "throughput"],
+  "links": [
+    { "label": "Mathis et al., the sqrt(p) result", "href": "https://dl.acm.org/doi/10.1145/263932.264023" },
+    { "label": "RFC 7323: window scaling and timestamps", "href": "https://www.rfc-editor.org/rfc/rfc7323" }
+  ]
+}

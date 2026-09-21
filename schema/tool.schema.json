@@ -1,0 +1,375 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/eknowledger/toolshed/blob/main/schema/tool.schema.json",
+  "title": "Toolbench tool manifest",
+  "description": "An editor aid for tool.json. NOT the authority: @toolbench/sdk's validate() is, and it checks things a schema cannot, such as a sample naming an input that does not exist or a fixture whose output kind the tool never declared. scripts/check-schema.mjs asserts the two agree on every manifest here.",
+  "type": "object",
+  "required": [
+    "sdk",
+    "id",
+    "name",
+    "blurb",
+    "version",
+    "capabilities",
+    "runtime",
+    "inputs",
+    "kinds"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "sdk": {
+      "description": "Contract version this manifest is written against. 3 is current.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3
+    },
+    "id": {
+      "description": "Directory name, and the id every route and relation uses.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "blurb": {
+      "description": "One sentence, shown on a card and under the title. Says what the tool answers, not how.",
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "capabilities": {
+      "description": "pure: a function of its inputs. No I/O, no clock, no unseeded randomness.",
+      "type": "array",
+      "items": {
+        "enum": [
+          "pure"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "runtime": {
+      "type": "object",
+      "required": [
+        "entry"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "entry": {
+          "const": "index.ts"
+        },
+        "thread": {
+          "description": "worker keeps a long computation off the main thread. main is the default.",
+          "enum": [
+            "main",
+            "worker"
+          ]
+        }
+      }
+    },
+    "kinds": {
+      "description": "Every output kind run() can return. A fixture must exercise each one.",
+      "type": "array",
+      "items": {
+        "enum": [
+          "fields",
+          "text",
+          "code",
+          "table",
+          "series",
+          "group",
+          "error",
+          "bytes"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "status": {
+      "description": "live is the default. retired does not run; deprecated runs with a marker.",
+      "enum": [
+        "live",
+        "deprecated",
+        "retired"
+      ]
+    },
+    "card": {
+      "description": "live: cheap and pure enough to run where a reader did not come for it. Not the same as a site wanting it on a landing page, which is the site's decision.",
+      "enum": [
+        "live",
+        "info",
+        "none"
+      ]
+    },
+    "cardFields": {
+      "description": "How many fields a compact card shows before it stops counting.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "autoRun": {
+      "description": "Re-run on every input change instead of waiting for Run. Only for a tool that is instant.",
+      "type": "boolean"
+    },
+    "timeoutMs": {
+      "description": "Worker-mode limit. The run is stopped and the reader is told the number.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "help": {
+      "const": "README.md"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "links": {
+      "description": "Where the reader goes to check the tool's claims. A specification, a paper, a reference.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "label",
+          "href"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "href": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    },
+    "samples": {
+      "description": "Example inputs, rendered as buttons under the form. Clicking one fills the form; it does not run.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "label",
+          "input"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "input": {
+            "type": "object",
+            "minProperties": 1
+          }
+        }
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "label",
+          "default"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "primary": {
+            "description": "Shown on a compact card. Mark every input the question cannot be asked without.",
+            "type": "boolean"
+          },
+          "type": {
+            "enum": [
+              "text",
+              "textarea",
+              "number",
+              "select",
+              "toggle"
+            ]
+          },
+          "dir": {
+            "description": "Force text direction. Bytes, code and identifiers read left-to-right even inside right-to-left prose, and a runtime cannot know which is which, so the tool says.",
+            "enum": [
+              "ltr",
+              "auto"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "number"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            "then": {
+              "required": [
+                "min",
+                "max"
+              ],
+              "properties": {
+                "default": {
+                  "type": "number"
+                },
+                "min": {
+                  "type": "number"
+                },
+                "max": {
+                  "type": "number"
+                },
+                "step": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "select"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            "then": {
+              "required": [
+                "options"
+              ],
+              "properties": {
+                "default": {
+                  "type": "string"
+                },
+                "options": {
+                  "type": "array",
+                  "minItems": 2,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "value",
+                      "label"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "value": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "toggle"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "default": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "text"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "default": {
+                  "type": "string"
+                },
+                "maxLength": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "textarea"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "default": {
+                  "type": "string"
+                },
+                "rows": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "maxLength": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false,
+        "$comment": "unevaluatedProperties, not additionalProperties: the latter only sees properties declared in the same schema object, so putting it inside each if/then branch rejected id, label and type, which are declared here in the parent. This keyword is why the schema needs draft 2020-12."
+      }
+    }
+  }
+}

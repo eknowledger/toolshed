@@ -1,0 +1,377 @@
+[
+  {
+    "name": "a minimal RTP packet: PCMU, no extension, no CSRCs",
+    "input": {
+      "packet": "8000002a000000a0deadbeefaabbccdd",
+      "view": "fields"
+    },
+    "match": "subset",
+    "why": "pins the field values; the byte highlights and their offsets are asserted as invariants in index.test.ts, where a rule can say why it holds instead of restating eight offsets",
+    "fieldCount": 8,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Protocol",
+          "value": "RTP"
+        },
+        {
+          "label": "Payload type",
+          "value": "0 (PCMU)"
+        },
+        {
+          "label": "Sequence",
+          "value": "42"
+        },
+        {
+          "label": "SSRC",
+          "value": "0xDEADBEEF"
+        },
+        {
+          "label": "Payload",
+          "value": "4 bytes"
+        }
+      ]
+    }
+  },
+  {
+    "name": "RTP with two CSRCs and a one-byte RFC 8285 extension",
+    "input": {
+      "packet": "92e003e800015f9011223344aaaa0001aaaa0002bede0002103021aabb0000000102",
+      "view": "fields"
+    },
+    "match": "subset",
+    "why": "pins the extension form and both CSRCs; the element offsets are asserted in the table case below",
+    "fieldCount": 14,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "V / P / X / CC",
+          "value": "2 / 0 / 1 / 2"
+        },
+        {
+          "label": "Payload type",
+          "value": "96",
+          "note": "dynamic; only the signalling says what it is"
+        },
+        {
+          "label": "Marker",
+          "value": "set"
+        },
+        {
+          "label": "CSRC 2",
+          "value": "0xAAAA0002"
+        },
+        {
+          "label": "Extension profile",
+          "value": "0xBEDE",
+          "note": "one-byte form (RFC 8285)"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the extension elements, with the offsets they were found at",
+    "input": {
+      "packet": "92e003e800015f9011223344aaaa0001aaaa0002bede0002103021aabb0000000102",
+      "view": "fields"
+    },
+    "match": "subset",
+    "why": "element 1 must be at offset 24: a 12-byte fixed header, plus 8 bytes of CSRCs, plus the 4-byte extension header. Getting this wrong decodes the extension from the wrong place and still produces plausible output",
+    "expect": {
+      "kind": "table",
+      "caption": "Header extension elements, one-byte form",
+      "columns": [
+        {
+          "label": "ID",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Length",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Offset",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Data",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "24",
+            "mono": true
+          },
+          {
+            "text": "30",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "26",
+            "mono": true
+          },
+          {
+            "text": "aa bb",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "RTP with padding: the last byte is a count, not payload",
+    "input": {
+      "packet": "a008000700001f40010203041122000003",
+      "view": "fields"
+    },
+    "match": "subset",
+    "why": "the load-bearing assertion is that the payload is 2 bytes and not 5. A decoder that ignores the padding count reports three padding bytes as data and looks right",
+    "fieldCount": 9,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "V / P / X / CC",
+          "value": "2 / 1 / 0 / 0"
+        },
+        {
+          "label": "Padding",
+          "value": "3 bytes",
+          "tone": "warn"
+        },
+        {
+          "label": "Payload",
+          "value": "2 bytes",
+          "note": "not decoded; the payload type says how"
+        }
+      ]
+    }
+  },
+  {
+    "name": "a compound RTCP packet: SR with a report block, then SDES with a CNAME",
+    "input": {
+      "packet": "81c8000c11111111e8754700499602d20036ee8000001388000c3500222222221a000005000005dc00000028aabbccdd0000303981ca0006111111110111616c696365406578616d706c652e636f6d00",
+      "view": "fields"
+    },
+    "match": "subset",
+    "why": "pins the compound walk: finding the second sub-packet at all depends on reading the length field as words-minus-one, which is the classic RTCP off-by-one",
+    "fieldCount": 16,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Protocol",
+          "value": "RTCP"
+        },
+        {
+          "label": "Sub-packets",
+          "value": "2",
+          "note": "SR + SDES"
+        },
+        {
+          "label": "#1 Length",
+          "value": "12 (52 bytes)"
+        },
+        {
+          "label": "#1 Packets sent",
+          "value": "5000"
+        },
+        {
+          "label": "#1 Octets sent",
+          "value": "800000"
+        },
+        {
+          "label": "#2 CNAME",
+          "value": "alice@example.com"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the report block, including the loss percentage nobody can check by eye",
+    "input": {
+      "packet": "81c8000c11111111e8754700499602d20036ee8000001388000c3500222222221a000005000005dc00000028aabbccdd0000303981ca0006111111110111616c696365406578616d706c652e636f6d00",
+      "view": "fields"
+    },
+    "match": "subset",
+    "why": "0x1a is 26, and 26/256 is 10.16%, which rounds to 10.2%. The tone is bad because that is above the 10% threshold, so the fixture pins the derivation and the judgement together",
+    "expect": {
+      "kind": "table",
+      "caption": "SR #1: 1 report block",
+      "columns": [
+        {
+          "label": "Source SSRC",
+          "mono": true
+        },
+        {
+          "label": "Fraction lost",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Cumulative lost",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Highest seq",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Jitter",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "LSR",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "DLSR",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "0x22222222",
+            "mono": true
+          },
+          {
+            "text": "10.2%",
+            "mono": true,
+            "tone": "bad"
+          },
+          {
+            "text": "5",
+            "mono": true
+          },
+          {
+            "text": "1500",
+            "mono": true
+          },
+          {
+            "text": "40",
+            "mono": true
+          },
+          {
+            "text": "0xAABBCCDD",
+            "mono": true
+          },
+          {
+            "text": "12345",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "BYE carries an optional, length-prefixed reason",
+    "input": {
+      "packet": "81cb0004111111110874656172646f776e000000",
+      "view": "fields"
+    },
+    "match": "subset",
+    "why": "finding the reason depends on comparing the cursor against the length field rather than the end of the packet, since the chunk is null-padded past it",
+    "fieldCount": 8,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Leaving because",
+          "value": "teardown",
+          "group": "BYE"
+        },
+        {
+          "label": "#1 BYE SSRC 1",
+          "value": "0x11111111"
+        },
+        {
+          "label": "#1 BYE reason",
+          "value": "teardown"
+        }
+      ]
+    }
+  },
+  {
+    "name": "prose is named as prose, not filtered into nonsense",
+    "input": {
+      "packet": "hello there",
+      "view": "all"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Not hex: found \"h\", \"l\", \"o\", \"t\", \"r\". Expected hex digits, optionally separated by spaces, colons or commas.",
+      "input": "packet"
+    }
+  },
+  {
+    "name": "an odd number of hex digits cannot be bytes",
+    "input": {
+      "packet": "8000002a0",
+      "view": "all"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Odd number of hex digits (9); a byte needs two.",
+      "input": "packet"
+    }
+  },
+  {
+    "name": "a truncated packet says where it ran out",
+    "input": {
+      "packet": "8000002a0000",
+      "view": "all"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Truncated: the RTP fixed header needs 12 bytes at offset 0, but the packet ends at 6.",
+      "input": "packet",
+      "at": 0,
+      "len": 6
+    }
+  },
+  {
+    "name": "version 1 is not RTP, and saying so beats decoding it anyway",
+    "input": {
+      "packet": "4000002a000000a0deadbeef",
+      "view": "all"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Version is 1, but RTP is always version 2. This is probably not an RTP packet.",
+      "input": "packet",
+      "at": 0,
+      "len": 1
+    }
+  }
+]

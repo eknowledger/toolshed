@@ -1,0 +1,100 @@
+{
+  "sdk": 3,
+  "id": "capacity-planner",
+  "name": "Queueing capacity planner",
+  "blurb": "Requests at a rate, work that takes a while, and a target for how often anyone waits. Erlang C answers how many servers, and draws the cliff.",
+  "version": "1.0.0",
+  "capabilities": ["pure"],
+  "runtime": { "entry": "index.ts", "thread": "worker" },
+  "kinds": ["fields", "series", "table", "group", "error"],
+  "card": "live",
+  "cardFields": 5,
+  "timeoutMs": 15000,
+  "inputs": [
+    {
+      "id": "rate",
+      "type": "number",
+      "label": "Arrivals",
+      "description": "Requests per second.",
+      "primary": true,
+      "default": 120,
+      "min": 0.01,
+      "max": 1000000,
+      "step": 1
+    },
+    {
+      "id": "service",
+      "primary": true,
+      "type": "number",
+      "label": "Service time",
+      "description": "Mean milliseconds of work per request. The mean, not the p99.",
+      "default": 45,
+      "min": 0.01,
+      "max": 600000,
+      "step": 1
+    },
+    {
+      "id": "target",
+      "primary": true,
+      "type": "number",
+      "label": "Target wait chance",
+      "description": "The percentage of arrivals allowed to queue at all.",
+      "default": 5,
+      "min": 0.01,
+      "max": 99,
+      "step": 0.5
+    },
+    {
+      "id": "mode",
+      "type": "select",
+      "label": "Check",
+      "description": "Simulating runs a seeded Monte Carlo of the same queue, so the formula has something to disagree with.",
+      "default": "closed",
+      "options": [
+        { "value": "closed", "label": "Formula only" },
+        { "value": "simulate", "label": "Formula and simulation" }
+      ]
+    },
+    {
+      "id": "trials",
+      "type": "number",
+      "label": "Trials",
+      "description": "Arrivals to simulate. Ignored unless simulating. The first tenth is discarded as warmup.",
+      "default": 200000,
+      "min": 1000,
+      "max": 2000000,
+      "step": 1000
+    }
+  ],
+  "samples": [
+    {
+      "label": "Tight target",
+      "input": {
+        "rate": 500,
+        "service": 20,
+        "target": 1
+      }
+    },
+    {
+      "label": "Barely one erlang",
+      "input": {
+        "rate": 10,
+        "service": 100,
+        "target": 10
+      }
+    },
+    {
+      "label": "Check it by simulation",
+      "input": {
+        "mode": "simulate",
+        "trials": 20000
+      }
+    }
+  ],
+  "help": "README.md",
+  "tags": ["queueing", "capacity", "performance", "erlang"],
+  "links": [
+    { "label": "Erlang C, and where it comes from", "href": "https://en.wikipedia.org/wiki/Erlang_(unit)" },
+    { "label": "Kingman's formula, for when service times have a tail", "href": "https://en.wikipedia.org/wiki/Kingman%27s_formula" }
+  ]
+}

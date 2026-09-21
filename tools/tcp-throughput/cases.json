@@ -1,0 +1,297 @@
+[
+  {
+    "name": "the defaults: an 80ms path where loss and a 64KB window nearly tie",
+    "input": {
+      "rtt": 80,
+      "loss": 0.1,
+      "window": 64,
+      "mss": 1460,
+      "sweep": "rtt"
+    },
+    "match": "subset",
+    "why": "The ceilings and which one binds are the assertion; the chart and the table are the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Throughput ceiling",
+          "value": "5.65 Mbit/s",
+          "note": "one connection, loss limited",
+          "tone": "warn"
+        },
+        {
+          "label": "What binds it",
+          "value": "Packet loss"
+        },
+        {
+          "label": "Window allows",
+          "value": "6.55 Mbit/s",
+          "note": "64.0 KB in flight per 80.00 ms"
+        },
+        {
+          "label": "Loss allows",
+          "value": "5.65 Mbit/s",
+          "note": "at 0.1000% loss"
+        },
+        {
+          "label": "Window to lift that limit",
+          "value": "55.2 KB",
+          "note": "the bandwidth-delay product at the other ceiling"
+        },
+        {
+          "label": "Data in flight at the ceiling",
+          "value": "55.2 KB"
+        }
+      ]
+    }
+  },
+  {
+    "name": "no loss at all, so only the window binds and the answer is unbounded loss",
+    "input": {
+      "rtt": 80,
+      "loss": 0,
+      "window": 64,
+      "mss": 1460,
+      "sweep": "rtt"
+    },
+    "match": "subset",
+    "why": "The ceilings and which one binds are the assertion; the chart and the table are the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Throughput ceiling",
+          "value": "6.55 Mbit/s",
+          "note": "one connection, window limited",
+          "tone": "normal"
+        },
+        {
+          "label": "What binds it",
+          "value": "Receive window"
+        },
+        {
+          "label": "Window allows",
+          "value": "6.55 Mbit/s",
+          "note": "64.0 KB in flight per 80.00 ms"
+        },
+        {
+          "label": "Loss allows",
+          "value": "unbounded",
+          "note": "no loss, so nothing tells the sender to stop"
+        },
+        {
+          "label": "Window to lift that limit",
+          "value": "64.0 KB",
+          "note": "the bandwidth-delay product at the other ceiling"
+        },
+        {
+          "label": "Data in flight at the ceiling",
+          "value": "64.0 KB"
+        }
+      ]
+    }
+  },
+  {
+    "name": "a continent away with a big window: loss binds and configuration cannot help",
+    "input": {
+      "rtt": 250,
+      "loss": 0.5,
+      "window": 4096,
+      "mss": 1460,
+      "sweep": "loss"
+    },
+    "match": "subset",
+    "why": "The ceilings and which one binds are the assertion; the chart and the table are the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Throughput ceiling",
+          "value": "809.2 kbit/s",
+          "note": "one connection, loss limited",
+          "tone": "warn"
+        },
+        {
+          "label": "What binds it",
+          "value": "Packet loss"
+        },
+        {
+          "label": "Window allows",
+          "value": "134.22 Mbit/s",
+          "note": "4.00 MB in flight per 250.00 ms"
+        },
+        {
+          "label": "Loss allows",
+          "value": "809.2 kbit/s",
+          "note": "at 0.5000% loss"
+        },
+        {
+          "label": "Window to lift that limit",
+          "value": "24.7 KB",
+          "note": "the bandwidth-delay product at the other ceiling"
+        },
+        {
+          "label": "Data in flight at the ceiling",
+          "value": "24.7 KB"
+        }
+      ]
+    }
+  },
+  {
+    "name": "a clean local path: the window binds and the fix is a bigger one",
+    "input": {
+      "rtt": 2,
+      "loss": 0.001,
+      "window": 64,
+      "mss": 1460,
+      "sweep": "rtt"
+    },
+    "match": "subset",
+    "why": "The ceilings and which one binds are the assertion; the chart and the table are the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Throughput ceiling",
+          "value": "262.14 Mbit/s",
+          "note": "one connection, window limited",
+          "tone": "normal"
+        },
+        {
+          "label": "What binds it",
+          "value": "Receive window"
+        },
+        {
+          "label": "Window allows",
+          "value": "262.14 Mbit/s",
+          "note": "64.0 KB in flight per 2.00 ms"
+        },
+        {
+          "label": "Loss allows",
+          "value": "2.26 Gbit/s",
+          "note": "at 0.0010% loss"
+        },
+        {
+          "label": "Window to lift that limit",
+          "value": "552.2 KB",
+          "note": "the bandwidth-delay product at the other ceiling"
+        },
+        {
+          "label": "Data in flight at the ceiling",
+          "value": "64.0 KB"
+        }
+      ]
+    }
+  },
+  {
+    "name": "jumbo frames raise the loss ceiling in proportion to the segment",
+    "input": {
+      "rtt": 100,
+      "loss": 0.1,
+      "window": 8192,
+      "mss": 8960,
+      "sweep": "rtt"
+    },
+    "match": "subset",
+    "why": "The ceilings and which one binds are the assertion; the chart and the table are the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Throughput ceiling",
+          "value": "27.76 Mbit/s",
+          "note": "one connection, loss limited",
+          "tone": "warn"
+        },
+        {
+          "label": "What binds it",
+          "value": "Packet loss"
+        },
+        {
+          "label": "Window allows",
+          "value": "671.09 Mbit/s",
+          "note": "8.00 MB in flight per 100.00 ms"
+        },
+        {
+          "label": "Loss allows",
+          "value": "27.76 Mbit/s",
+          "note": "at 0.1000% loss"
+        },
+        {
+          "label": "Window to lift that limit",
+          "value": "338.9 KB",
+          "note": "the bandwidth-delay product at the other ceiling"
+        },
+        {
+          "label": "Data in flight at the ceiling",
+          "value": "338.9 KB"
+        }
+      ]
+    }
+  },
+  {
+    "name": "a round trip of zero is not a network",
+    "input": {
+      "rtt": 0,
+      "loss": 0.1,
+      "window": 64,
+      "mss": 1460,
+      "sweep": "rtt"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Round-trip time must be greater than zero.",
+      "input": "rtt"
+    }
+  },
+  {
+    "name": "total loss is not a throughput question",
+    "input": {
+      "rtt": 80,
+      "loss": 100,
+      "window": 64,
+      "mss": 1460,
+      "sweep": "rtt"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Loss must be from 0 up to but not including 100 percent.",
+      "input": "loss"
+    }
+  },
+  {
+    "name": "a window of nothing carries nothing",
+    "input": {
+      "rtt": 80,
+      "loss": 0.1,
+      "window": 0,
+      "mss": 1460,
+      "sweep": "rtt"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Receive window must be greater than zero.",
+      "input": "window"
+    }
+  },
+  {
+    "name": "a segment of nothing is not a segment",
+    "input": {
+      "rtt": 80,
+      "loss": 0.1,
+      "window": 64,
+      "mss": 0,
+      "sweep": "rtt"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Segment size must be greater than zero.",
+      "input": "mss"
+    }
+  }
+]

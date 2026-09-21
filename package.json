@@ -1,0 +1,26 @@
+{
+  "name": "@eknowledger/toolshed",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Small, exact tools for systems and networking questions. Each one shows how it got its answer.",
+  "license": "MIT",
+  "author": "Ahmed Elmalt",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.test.json",
+    "test": "node --test tools/*/*.test.ts",
+    "fixtures": "node scripts/run-fixtures.mjs",
+    "isolation": "node scripts/check-isolation.mjs",
+    "schema": "node scripts/check-schema.mjs",
+    "check": "pnpm typecheck && pnpm test && pnpm fixtures && pnpm isolation && pnpm schema"
+  },
+  "devDependencies": {
+    "@toolbench/sdk": "0.6.0",
+    "@types/node": "24.10.1",
+    "ajv": "8.17.1",
+    "typescript": "5.9.3"
+  }
+}

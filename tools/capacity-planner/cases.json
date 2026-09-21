@@ -1,0 +1,422 @@
+[
+  {
+    "name": "the defaults: 120/s of 45ms work, and no more than 5% may queue",
+    "input": {
+      "rate": 120,
+      "service": 45,
+      "target": 5,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Erlang C is the assertion; the chart and the table are the same numbers drawn, and pinning them again would only pin the drawing. Values derived from the closed form with exact rational arithmetic, independently of this implementation, and cross-checked against the Erlang B recursion.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Offered load",
+          "value": "5.40 erlangs",
+          "note": "120/s x 45 ms"
+        },
+        {
+          "label": "Minimum servers",
+          "value": "6",
+          "note": "below this the queue is unstable"
+        },
+        {
+          "label": "Servers for 5.00% wait",
+          "value": "11",
+          "tone": "good"
+        },
+        {
+          "label": "Utilisation there",
+          "value": "49.09%"
+        },
+        {
+          "label": "Chance of waiting",
+          "value": "2.52%"
+        },
+        {
+          "label": "Mean wait",
+          "value": "203 µs",
+          "note": "queueing only, excluding service"
+        }
+      ]
+    }
+  },
+  {
+    "name": "one erlang exactly: the stability floor is two servers, not one",
+    "input": {
+      "rate": 10,
+      "service": 100,
+      "target": 10,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Erlang C is the assertion; the chart and the table are the same numbers drawn, and pinning them again would only pin the drawing. Values derived from the closed form with exact rational arithmetic, independently of this implementation, and cross-checked against the Erlang B recursion.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Offered load",
+          "value": "1.00 erlangs",
+          "note": "10/s x 100 ms"
+        },
+        {
+          "label": "Minimum servers",
+          "value": "2",
+          "note": "below this the queue is unstable"
+        },
+        {
+          "label": "Servers for 10.00% wait",
+          "value": "3",
+          "tone": "good"
+        },
+        {
+          "label": "Utilisation there",
+          "value": "33.33%"
+        },
+        {
+          "label": "Chance of waiting",
+          "value": "9.09%"
+        },
+        {
+          "label": "Mean wait",
+          "value": "4.5 ms",
+          "note": "queueing only, excluding service"
+        }
+      ]
+    }
+  },
+  {
+    "name": "less than one erlang still queues, because arrivals collide",
+    "input": {
+      "rate": 1,
+      "service": 800,
+      "target": 20,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Erlang C is the assertion; the chart and the table are the same numbers drawn, and pinning them again would only pin the drawing. Values derived from the closed form with exact rational arithmetic, independently of this implementation, and cross-checked against the Erlang B recursion.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Offered load",
+          "value": "0.80 erlangs",
+          "note": "1/s x 800 ms"
+        },
+        {
+          "label": "Minimum servers",
+          "value": "1",
+          "note": "below this the queue is unstable"
+        },
+        {
+          "label": "Servers for 20.00% wait",
+          "value": "3",
+          "tone": "good"
+        },
+        {
+          "label": "Utilisation there",
+          "value": "26.67%"
+        },
+        {
+          "label": "Chance of waiting",
+          "value": "5.20%"
+        },
+        {
+          "label": "Mean wait",
+          "value": "18.9 ms",
+          "note": "queueing only, excluding service"
+        }
+      ]
+    }
+  },
+  {
+    "name": "ten erlangs at a 1% target: the answer is nearly double the floor",
+    "input": {
+      "rate": 500,
+      "service": 20,
+      "target": 1,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Erlang C is the assertion; the chart and the table are the same numbers drawn, and pinning them again would only pin the drawing. Values derived from the closed form with exact rational arithmetic, independently of this implementation, and cross-checked against the Erlang B recursion.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Offered load",
+          "value": "10.00 erlangs",
+          "note": "500/s x 20 ms"
+        },
+        {
+          "label": "Minimum servers",
+          "value": "11",
+          "note": "below this the queue is unstable"
+        },
+        {
+          "label": "Servers for 1.00% wait",
+          "value": "19",
+          "tone": "good"
+        },
+        {
+          "label": "Utilisation there",
+          "value": "52.63%"
+        },
+        {
+          "label": "Chance of waiting",
+          "value": "0.79%"
+        },
+        {
+          "label": "Mean wait",
+          "value": "17 µs",
+          "note": "queueing only, excluding service"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the table brackets the answer, two either side",
+    "input": {
+      "rate": 120,
+      "service": 45,
+      "target": 5,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Pins the rows either side of the answer, which is where the decision actually gets made: the step from 10 servers to 11 is what a reader is choosing between. Same exact-rational source as the field cases.",
+    "expect": {
+      "kind": "table",
+      "caption": "Either side of the answer, because the step between two counts is the decision",
+      "columns": [
+        {
+          "label": "Servers",
+          "mono": true
+        },
+        {
+          "label": "Utilisation",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Chance of waiting",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Mean wait",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "9",
+            "mono": true
+          },
+          {
+            "text": "60.00%",
+            "mono": true
+          },
+          {
+            "text": "11.86%",
+            "mono": true
+          },
+          {
+            "text": "1.5 ms",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "54.00%",
+            "mono": true
+          },
+          {
+            "text": "5.66%",
+            "mono": true
+          },
+          {
+            "text": "553 µs",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "11",
+            "mono": true
+          },
+          {
+            "text": "49.09%",
+            "mono": true
+          },
+          {
+            "text": "2.52%",
+            "mono": true,
+            "tone": "good"
+          },
+          {
+            "text": "203 µs",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "12",
+            "mono": true
+          },
+          {
+            "text": "45.00%",
+            "mono": true
+          },
+          {
+            "text": "1.05%",
+            "mono": true
+          },
+          {
+            "text": "72 µs",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "13",
+            "mono": true
+          },
+          {
+            "text": "41.54%",
+            "mono": true
+          },
+          {
+            "text": "0.41%",
+            "mono": true
+          },
+          {
+            "text": "24 µs",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "simulating adds a second opinion without changing the first",
+    "input": {
+      "rate": 120,
+      "service": 45,
+      "target": 5,
+      "mode": "simulate",
+      "trials": 20000
+    },
+    "match": "subset",
+    "why": "Asserts the FORMULA fields are untouched by simulating. The simulated numbers are deliberately not pinned here: their exact values follow from the PRNG stream, so a fixture on them would be derived from the implementation rather than from the specification. That they converge on the closed form is a property, and index.test.ts asserts it as one.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Offered load",
+          "value": "5.40 erlangs",
+          "note": "120/s x 45 ms"
+        },
+        {
+          "label": "Minimum servers",
+          "value": "6",
+          "note": "below this the queue is unstable"
+        },
+        {
+          "label": "Servers for 5.00% wait",
+          "value": "11",
+          "tone": "good"
+        },
+        {
+          "label": "Utilisation there",
+          "value": "49.09%"
+        },
+        {
+          "label": "Chance of waiting",
+          "value": "2.52%"
+        },
+        {
+          "label": "Mean wait",
+          "value": "203 µs",
+          "note": "queueing only, excluding service"
+        }
+      ]
+    }
+  },
+  {
+    "name": "a rate of zero is not a queue",
+    "input": {
+      "rate": 0,
+      "service": 45,
+      "target": 5,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Arrival rate must be greater than zero.",
+      "input": "rate"
+    }
+  },
+  {
+    "name": "work that takes no time needs no servers",
+    "input": {
+      "rate": 120,
+      "service": 0,
+      "target": 5,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Service time must be greater than zero.",
+      "input": "service"
+    }
+  },
+  {
+    "name": "a target of 100% is met by doing nothing, so it is refused",
+    "input": {
+      "rate": 120,
+      "service": 45,
+      "target": 100,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Target must be between 0 and 100 percent, exclusive.",
+      "input": "target"
+    }
+  },
+  {
+    "name": "simulating a handful of arrivals estimates nothing",
+    "input": {
+      "rate": 120,
+      "service": 45,
+      "target": 5,
+      "mode": "simulate",
+      "trials": 10
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Simulating needs at least 1000 trials.",
+      "input": "trials"
+    }
+  }
+]

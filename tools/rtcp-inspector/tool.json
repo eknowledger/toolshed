@@ -1,0 +1,72 @@
+{
+  "sdk": 3,
+  "id": "rtcp-inspector",
+  "name": "RTP / RTCP inspector",
+  "blurb": "Paste a packet as hex and see the header fields marked on the bytes themselves, not just listed beside them.",
+  "version": "1.0.0",
+  "capabilities": ["pure"],
+  "runtime": { "entry": "index.ts", "thread": "main" },
+  "kinds": ["group", "fields", "table", "bytes", "error"],
+  "card": "live",
+  "cardFields": 5,
+  "inputs": [
+    {
+      "id": "packet",
+      "type": "textarea",
+      "label": "Packet",
+      "description": "Hex, however you copied it. Offsets at the start of a line and an ASCII gutter are both stripped.",
+      "primary": true,
+      "dir": "ltr",
+      "rows": 4,
+      "maxLength": 8192,
+      "default": "81c8000c 11111111 e8754700 499602d2 0036ee80 00001388 000c3500 22222222 1a000005 000005dc 00000028 aabbccdd 00003039 81ca0006 11111111 0111616c 69636540 6578616d 706c652e 636f6d00"
+    },
+    {
+      "id": "view",
+      "type": "select",
+      "label": "Show",
+      "description": "The byte view marks every field in place. Turn it off for a long packet.",
+      "default": "all",
+      "options": [
+        { "value": "all", "label": "Fields and bytes" },
+        { "value": "fields", "label": "Fields only" }
+      ]
+    }
+  ],
+  "samples": [
+    {
+      "label": "RTP with CSRCs",
+      "input": {
+        "packet": "92e003e800015f9011223344aaaa0001aaaa0002bede0002103021aabb0000000102",
+        "view": "all"
+      }
+    },
+    {
+      "label": "Padded RTP",
+      "input": {
+        "packet": "a008000700001f40010203041122000003",
+        "view": "all"
+      }
+    },
+    {
+      "label": "BYE",
+      "input": {
+        "packet": "81cb0004111111110874656172646f776e000000",
+        "view": "fields"
+      }
+    },
+    {
+      "label": "Truncated",
+      "input": {
+        "packet": "8000002a0000",
+        "view": "all"
+      }
+    }
+  ],
+  "help": "README.md",
+  "tags": ["rtp", "rtcp", "webrtc", "networking"],
+  "links": [
+    { "label": "RFC 3550: RTP", "href": "https://www.rfc-editor.org/rfc/rfc3550" },
+    { "label": "RFC 8285: header extensions", "href": "https://www.rfc-editor.org/rfc/rfc8285" }
+  ]
+}

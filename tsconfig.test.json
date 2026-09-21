@@ -1,0 +1,14 @@
+{
+  /*
+   * A tool's tests, which need the Node test runner that the tool itself must not have.
+   *
+   * Inherits everything from the sibling config, then adds `types: ["node"]`. Keeping this separate is
+   * the whole point: tsconfig.json can go on refusing `process` and `fs` inside a tool while the tests
+   * that exercise it still compile.
+   */
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["tools/*/*.test.ts", "tools/*/index.ts", "globals.d.ts"]
+}

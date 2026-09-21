@@ -1,0 +1,39 @@
+{
+  /*
+   * Stricter than a typical site config, because a tool has to run in three places and only one of them
+   * has a bundler: a Web Worker, the browser's main thread, and plain Node during a fixture run or a
+   * build-time seed.
+   *
+   * `erasableSyntaxOnly` is the flag that matters. Node executes TypeScript by stripping types, so
+   * anything that EMITS code (an enum, a namespace, a decorator, a constructor parameter property)
+   * works through a bundler and fails in Node. The compiler refuses it here rather than letting it be
+   * discovered at runtime.
+   *
+   * ⚠️ No DOM in `lib`, deliberately: a tool must not reach for `document` or `window`. The globals that
+   * genuinely exist everywhere a tool runs are declared in globals.d.ts as an allowlist.
+   *
+   * ⚠️ Tests are NOT checked here; tsconfig.test.json covers them. A test legitimately imports
+   * `node:test`, and adding `types: ["node"]` here would hand the tool itself `process` and `fs`.
+   */
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "erasableSyntaxOnly": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "lib": ["ES2023"],
+    "types": []
+  },
+  "include": ["tools/*/index.ts", "globals.d.ts"]
+}

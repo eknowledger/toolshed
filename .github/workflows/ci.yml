@@ -1,0 +1,44 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # ⚠️ Full history, because a consumer derives each tool's added and updated dates from `git log`
+          # rather than from a hand-maintained field. A shallow clone silently makes every date wrong.
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          # 22.18 is the floor: Node runs a tool's TypeScript by stripping types, and that is what makes
+          # `erasableSyntaxOnly` in tsconfig.json a requirement rather than a preference.
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Types first: a tool that does not compile cannot be usefully tested.
+      - run: pnpm typecheck
+
+      # The tool's own tests: the properties a fixture cannot express.
+      - run: pnpm test
+
+      # The framework's contract test: manifest, declared kinds, every fixture, every sample.
+      - run: pnpm fixtures
+
+      # A tool must be readable and copyable on its own.
+      - run: pnpm isolation
+
+      # The schema and the SDK must agree, and both must reject a broken manifest.
+      - run: pnpm schema
