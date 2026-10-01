@@ -18,7 +18,7 @@
     "check": "pnpm typecheck && pnpm test && pnpm fixtures && pnpm isolation && pnpm schema"
   },
   "devDependencies": {
-    "@toolbench/sdk": "0.6.0",
+    "@toolbench/sdk": "0.7.0",
     "@types/node": "24.10.1",
     "ajv": "8.17.1",
     "typescript": "5.9.3"

@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@toolbench/sdk':
-        specifier: 0.6.0
-        version: 0.6.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@types/node':
         specifier: 24.10.1
         version: 24.10.1
@@ -23,8 +23,8 @@ importers:
 
 packages:
 
-  '@toolbench/sdk@0.6.0':
-    resolution: {integrity: sha512-ucN8Q9GCxIZoXYxay0yF9ZnC9Qj7XIaEkinndDguTxQF7RMF6IFLiIGyy3/BszbNwKadyZXLramsmBDUH2W/BQ==}
+  '@toolbench/sdk@0.7.0':
+    resolution: {integrity: sha512-+H5jm6LtMjzqsPKAnZ9H4gX/UHphVEPH2fyjB+xPVIi9VvT1YaXxjDPZLWRUK/68GVMe2qjYlUAWw0KHL664aQ==}
     engines: {node: '>=20'}
 
   '@types/node@24.10.1':
@@ -56,7 +56,7 @@ packages:
 
 snapshots:
 
-  '@toolbench/sdk@0.6.0': {}
+  '@toolbench/sdk@0.7.0': {}
 
   '@types/node@24.10.1':
     dependencies:
