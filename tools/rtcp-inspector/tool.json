@@ -35,6 +35,13 @@
   ],
   "samples": [
     {
+      "label": "Voice packet",
+      "input": {
+        "packet": "806f03f2000025801f2e3d4c4b411098fe7eb5246000b41fa06177c378b7d770cbed5ce56a269e1dc8543518d2b7f7cb6adf8b0761dceac805ce3ec4caf1a6813262eafa0b85f09400e1613c00000000000000000000000000000000",
+        "view": "all"
+      }
+    },
+    {
       "label": "RTP with CSRCs",
       "input": {
         "packet": "92e003e800015f9011223344aaaa0001aaaa0002bede0002103021aabb0000000102",

@@ -18,10 +18,10 @@
   "additionalProperties": false,
   "properties": {
     "sdk": {
-      "description": "Contract version this manifest is written against. 3 is current.",
+      "description": "Contract version this manifest is written against. 4 is current.",
       "type": "integer",
       "minimum": 1,
-      "maximum": 3
+      "maximum": 4
     },
     "id": {
       "description": "Directory name, and the id every route and relation uses.",

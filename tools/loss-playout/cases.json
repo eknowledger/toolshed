@@ -1,0 +1,160 @@
+[
+  {
+    "name": "the defaults: frame 5 lost, 20 ms frames, 30 ms each way, 40 ms of buffer",
+    "input": { "frame": "20", "delay": 30, "buffer": 40, "lost": 5, "rto": 200, "frames": 20 },
+    "match": "subset",
+    "why": "The reference case. Frame n is sent at 20n, arrives at 20n + 30 and must play by 20n + 70. Fast retransmit: frame 8 is sent at 160 and arrives at 190, its duplicate ACK is back at 220, the resend arrives at 250, and 250 > 20n + 70 for n < 9, so frames 5 to 8 miss. Timeout: resend at 100 + 200 = 300, arrives at 330, and 330 > 20n + 70 for n < 13, so frames 5 to 12 miss. The chart and table are the same numbers per frame and have their own cases.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        { "label": "UDP", "value": "20 ms concealed", "note": "1 frame: 5, never delivered", "tone": "normal" },
+        { "label": "TCP, fast retransmit", "value": "80 ms concealed", "note": "4 frames: 5 to 8, released at 250 ms", "tone": "warn" },
+        { "label": "TCP, 200 ms timeout", "value": "160 ms concealed", "note": "8 frames: 5 to 12, released at 330 ms", "tone": "warn" },
+        { "label": "Frame 5 plays at", "value": "170 ms", "note": "sent at 100, arrives at 130, then 40 ms of buffer" },
+        { "label": "Fast retransmit resends at", "value": "220 ms", "note": "the third duplicate ACK, drawn by frame 8, reaches the sender" },
+        { "label": "Timeout resends at", "value": "300 ms", "note": "200 ms after frame 5 was sent" }
+      ]
+    }
+  },
+  {
+    "name": "a 120 ms buffer absorbs fast retransmit entirely, and halves the timeout's damage",
+    "input": { "frame": "20", "delay": 30, "buffer": 120, "lost": 5, "rto": 200, "frames": 20 },
+    "match": "subset",
+    "why": "Frame n must now play by 20n + 150. Fast retransmit's repair still arrives at 250, which is exactly frame 5's deadline (100 + 30 + 120), and arriving at the deadline is on time, so nothing is missed. The timeout's repair arrives at 330, and 330 > 20n + 150 for n < 9, so frames 5 to 8 miss.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        { "label": "UDP", "value": "20 ms concealed", "note": "1 frame: 5, never delivered", "tone": "normal" },
+        { "label": "TCP, fast retransmit", "value": "nothing concealed", "note": "the resend arrived at 250 ms, in time for frame 5", "tone": "good" },
+        { "label": "TCP, 200 ms timeout", "value": "80 ms concealed", "note": "4 frames: 5 to 8, released at 330 ms", "tone": "warn" },
+        { "label": "Frame 5 plays at", "value": "250 ms", "note": "sent at 100, arrives at 130, then 120 ms of buffer" },
+        { "label": "Fast retransmit resends at", "value": "220 ms", "note": "the third duplicate ACK, drawn by frame 8, reaches the sender" },
+        { "label": "Timeout resends at", "value": "300 ms", "note": "200 ms after frame 5 was sent" }
+      ]
+    }
+  },
+  {
+    "name": "a loss one frame from the end: fast retransmit cannot fire, so both TCP rows are the timer",
+    "input": { "frame": "20", "delay": 30, "buffer": 40, "lost": 19, "rto": 200, "frames": 20 },
+    "match": "subset",
+    "why": "Only frame 20 follows the loss, one duplicate ACK where three are needed. The timer resends at 380 + 200 = 580, the copy arrives at 610, and frames 19 and 20 had to play by 450 and 470, so both miss.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        { "label": "UDP", "value": "20 ms concealed", "note": "1 frame: 19, never delivered", "tone": "normal" },
+        { "label": "TCP, fast retransmit", "value": "40 ms concealed", "note": "2 frames: 19 and 20, released at 610 ms", "tone": "warn" },
+        { "label": "TCP, 200 ms timeout", "value": "40 ms concealed", "note": "2 frames: 19 and 20, released at 610 ms", "tone": "warn" },
+        { "label": "Frame 19 plays at", "value": "450 ms", "note": "sent at 380, arrives at 410, then 40 ms of buffer" },
+        { "label": "Fast retransmit resends at", "value": "580 ms", "note": "cannot fire: only 1 frame follows the loss and 3 are needed, so the timer resends" },
+        { "label": "Timeout resends at", "value": "580 ms", "note": "200 ms after frame 19 was sent" }
+      ]
+    }
+  },
+  {
+    "name": "the RFC 6298 one-second timer loses the rest of the run",
+    "input": { "frame": "20", "delay": 30, "buffer": 40, "lost": 5, "rto": 1000, "frames": 20 },
+    "match": "subset",
+    "why": "Resend at 100 + 1000 = 1100, arriving at 1130. 1130 > 20n + 70 for every n below 53, so every frame from 5 to the last, 20, misses: 16 frames, 320 ms. Fast retransmit is unchanged from the defaults because it never waits for the timer.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        { "label": "UDP", "value": "20 ms concealed", "note": "1 frame: 5, never delivered", "tone": "normal" },
+        { "label": "TCP, fast retransmit", "value": "80 ms concealed", "note": "4 frames: 5 to 8, released at 250 ms", "tone": "warn" },
+        { "label": "TCP, 1000 ms timeout", "value": "320 ms concealed", "note": "16 frames: 5 to 20, released at 1130 ms", "tone": "warn" },
+        { "label": "Frame 5 plays at", "value": "170 ms", "note": "sent at 100, arrives at 130, then 40 ms of buffer" },
+        { "label": "Fast retransmit resends at", "value": "220 ms", "note": "the third duplicate ACK, drawn by frame 8, reaches the sender" },
+        { "label": "Timeout resends at", "value": "1100 ms", "note": "1000 ms after frame 5 was sent" }
+      ]
+    }
+  },
+  {
+    "name": "60 ms frames: the 200 ms timer fires before the third duplicate ACK",
+    "input": { "frame": "60", "delay": 30, "buffer": 40, "lost": 5, "rto": 200, "frames": 20 },
+    "match": "subset",
+    "why": "Frame 8 is sent at 480, so its duplicate ACK is back at 480 + 60 = 540. The timer, started at 300, fires at 500 first, so both TCP rows resend at 500 and repair at 530. Frame n plays by 60n + 70, and 530 > 60n + 70 for n < 7.67, so frames 5 to 7 miss: 3 frames of 60 ms.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        { "label": "UDP", "value": "60 ms concealed", "note": "1 frame: 5, never delivered", "tone": "normal" },
+        { "label": "TCP, fast retransmit", "value": "180 ms concealed", "note": "3 frames: 5 to 7, released at 530 ms", "tone": "warn" },
+        { "label": "TCP, 200 ms timeout", "value": "180 ms concealed", "note": "3 frames: 5 to 7, released at 530 ms", "tone": "warn" },
+        { "label": "Frame 5 plays at", "value": "370 ms", "note": "sent at 300, arrives at 330, then 40 ms of buffer" },
+        { "label": "Fast retransmit resends at", "value": "500 ms", "note": "the timer fires first: the third duplicate ACK would reach the sender at 540 ms" },
+        { "label": "Timeout resends at", "value": "500 ms", "note": "200 ms after frame 5 was sent" }
+      ]
+    }
+  },
+  {
+    "name": "the chart frame: delivery time against frame number, with the loss marked",
+    "input": { "frame": "20", "delay": 30, "buffer": 40, "lost": 5, "rto": 200, "frames": 20 },
+    "match": "subset",
+    "why": "A subset chart asserts its axes and annotation, not its points; the per-frame numbers are pinned exactly by the table case below and by the tests.",
+    "expect": {
+      "kind": "series",
+      "chart": {
+        "xLabel": "Frame",
+        "yLabel": "Time",
+        "yUnit": "ms",
+        "x": [],
+        "series": [],
+        "annotations": [{ "x": 5, "label": "frame 5 lost" }]
+      }
+    }
+  },
+  {
+    "name": "every frame of a short run, frame 2 lost of 6",
+    "input": { "frame": "20", "delay": 30, "buffer": 40, "lost": 2, "rto": 200, "frames": 6 },
+    "match": "subset",
+    "why": "The table is matched exactly, row by row. Frame n: sent 20n, arrives 20n + 30, plays by 20n + 70. Fast retransmit: frame 5 is sent at 100 and arrives at 130, its duplicate ACK is back at 160 (the timer would be 40 + 200 = 240), so the repair arrives at 190 and frames 2 to 6 are released then: 2 to 5 late, 6 exactly on its 190 deadline. Timeout: repair at 240 + 30 = 270, later than every deadline from frame 2 (110) to frame 6 (190).",
+    "expect": {
+      "kind": "table",
+      "caption": "Every frame: when the application gets it, against when it has to play",
+      "columns": [
+        { "label": "Frame", "align": "end", "mono": true },
+        { "label": "Sent (ms)", "align": "end", "mono": true },
+        { "label": "Play by (ms)", "align": "end", "mono": true },
+        { "label": "UDP", "align": "end", "mono": true },
+        { "label": "TCP, fast retransmit", "align": "end", "mono": true },
+        { "label": "TCP, 200 ms timeout", "align": "end", "mono": true }
+      ],
+      "rows": [
+        [1, 20, 90, { "text": "50 ms, on time", "mono": true }, { "text": "50 ms, on time", "mono": true }, { "text": "50 ms, on time", "mono": true }],
+        [2, 40, 110, { "text": "lost", "mono": true, "tone": "bad" }, { "text": "190 ms, late", "mono": true, "tone": "warn" }, { "text": "270 ms, late", "mono": true, "tone": "warn" }],
+        [3, 60, 130, { "text": "90 ms, on time", "mono": true }, { "text": "190 ms, late", "mono": true, "tone": "warn" }, { "text": "270 ms, late", "mono": true, "tone": "warn" }],
+        [4, 80, 150, { "text": "110 ms, on time", "mono": true }, { "text": "190 ms, late", "mono": true, "tone": "warn" }, { "text": "270 ms, late", "mono": true, "tone": "warn" }],
+        [5, 100, 170, { "text": "130 ms, on time", "mono": true }, { "text": "190 ms, late", "mono": true, "tone": "warn" }, { "text": "270 ms, late", "mono": true, "tone": "warn" }],
+        [6, 120, 190, { "text": "150 ms, on time", "mono": true }, { "text": "190 ms, on time", "mono": true }, { "text": "270 ms, late", "mono": true, "tone": "warn" }]
+      ],
+      "link": { "chart": "playout", "keys": [1, 2, 3, 4, 5, 6] }
+    }
+  },
+  {
+    "name": "a lost frame past the end of the run was never sent",
+    "input": { "frame": "20", "delay": 30, "buffer": 40, "lost": 21, "rto": 200, "frames": 20 },
+    "expect": { "kind": "error", "message": "Frame 21 is never sent: the run has 20 frames.", "input": "lost" }
+  },
+  {
+    "name": "a timer shorter than the round trip would resend frames that were never lost",
+    "input": { "frame": "20", "delay": 150, "buffer": 40, "lost": 5, "rto": 200, "frames": 20 },
+    "expect": {
+      "kind": "error",
+      "message": "A retransmission timer shorter than the round trip fires before any ACK could return: at 150 ms each way it must be at least 300 ms.",
+      "input": "rto"
+    }
+  },
+  {
+    "name": "half a frame cannot be lost",
+    "input": { "frame": "20", "delay": 30, "buffer": 40, "lost": 2.5, "rto": 200, "frames": 20 },
+    "expect": { "kind": "error", "message": "The lost frame must be a whole frame number, at least 1.", "input": "lost" }
+  },
+  {
+    "name": "a frame size no codec here uses",
+    "input": { "frame": "30", "delay": 30, "buffer": 40, "lost": 5, "rto": 200, "frames": 20 },
+    "expect": { "kind": "error", "message": "Frame size must be one of 10, 20, 40, 60 ms.", "input": "frame" }
+  }
+]

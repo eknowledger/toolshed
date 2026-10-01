@@ -1,0 +1,107 @@
+{
+  "sdk": 4,
+  "id": "loss-playout",
+  "name": "Loss and playout simulator",
+  "blurb": "One voice frame is lost. UDP conceals that one frame; TCP recovers it and holds every frame behind it, and each one whose playout time passes while it waits is lost to the listener anyway.",
+  "version": "1.0.0",
+  "capabilities": ["pure"],
+  "runtime": { "entry": "index.ts", "thread": "main" },
+  "kinds": ["fields", "series", "table", "group", "error"],
+  "card": "live",
+  "cardFields": 3,
+  "inputs": [
+    {
+      "id": "frame",
+      "type": "select",
+      "label": "Frame size",
+      "description": "Audio per packet. 20 ms is the usual choice for Opus and for G.711 over RTP.",
+      "default": "20",
+      "options": [
+        { "value": "10", "label": "10 ms" },
+        { "value": "20", "label": "20 ms" },
+        { "value": "40", "label": "40 ms" },
+        { "value": "60", "label": "60 ms" }
+      ]
+    },
+    {
+      "id": "delay",
+      "type": "number",
+      "label": "One-way delay",
+      "description": "Milliseconds from sender to receiver, the same for every frame. Acknowledgements take the same time back.",
+      "unit": "ms",
+      "primary": true,
+      "default": 30,
+      "min": 0,
+      "max": 1000,
+      "step": 5
+    },
+    {
+      "id": "buffer",
+      "type": "number",
+      "label": "Jitter buffer",
+      "description": "How long the receiver waits past a frame's expected arrival before playing it. More buffer absorbs a late repair and adds that much delay to the whole call.",
+      "unit": "ms",
+      "primary": true,
+      "default": 40,
+      "min": 0,
+      "max": 1000,
+      "step": 10
+    },
+    {
+      "id": "lost",
+      "type": "number",
+      "label": "Lost frame",
+      "description": "Which frame the network drops, once.",
+      "primary": true,
+      "default": 5,
+      "min": 1,
+      "max": 50,
+      "step": 1
+    },
+    {
+      "id": "rto",
+      "type": "number",
+      "label": "Retransmission timeout",
+      "description": "How long TCP waits before resending when no duplicate ACKs arrive. 200 ms is Linux's default minimum; RFC 6298 recommends 1000.",
+      "unit": "ms",
+      "default": 200,
+      "min": 10,
+      "max": 5000,
+      "step": 10
+    },
+    {
+      "id": "frames",
+      "type": "number",
+      "label": "Frames",
+      "description": "How many frames the run sends. Fast retransmit needs three after the lost one.",
+      "default": 20,
+      "min": 1,
+      "max": 50,
+      "step": 1
+    }
+  ],
+  "samples": [
+    {
+      "label": "One lost frame",
+      "input": { "frame": "20", "delay": 30, "buffer": 40, "lost": 5, "rto": 200, "frames": 20 }
+    },
+    {
+      "label": "Bigger buffer",
+      "input": { "frame": "20", "delay": 30, "buffer": 120, "lost": 5, "rto": 200, "frames": 20 }
+    },
+    {
+      "label": "Loss near the end",
+      "input": { "frame": "20", "delay": 30, "buffer": 40, "lost": 19, "rto": 200, "frames": 20 }
+    },
+    {
+      "label": "One-second timeout",
+      "input": { "frame": "20", "delay": 30, "buffer": 40, "lost": 5, "rto": 1000, "frames": 20 }
+    }
+  ],
+  "help": "README.md",
+  "tags": ["voice", "udp", "tcp", "networking", "latency"],
+  "links": [
+    { "label": "RFC 5681 section 3.2: fast retransmit", "href": "https://www.rfc-editor.org/rfc/rfc5681#section-3.2" },
+    { "label": "RFC 6298: the retransmission timer", "href": "https://www.rfc-editor.org/rfc/rfc6298" }
+  ]
+}
