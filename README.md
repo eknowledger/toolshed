@@ -5,6 +5,7 @@ Small, exact tools for systems questions. Each one shows how it got its answer.
 | Tool | Answers |
 |---|---|
 | [`capacity-planner`](tools/capacity-planner) | How many servers keep the wait under a target, and what the queue does either side of that number |
+| [`loss-playout`](tools/loss-playout) | One voice frame is lost: over UDP and over TCP, which frames still play on time, and how much audio has to be concealed |
 | [`rtcp-inspector`](tools/rtcp-inspector) | What an RTP or RTCP packet actually contains, byte by byte, including the fields nobody checks by eye |
 | [`tcp-throughput`](tools/tcp-throughput) | What one TCP connection can carry over a given path, and whether the window or the loss is the limit |
 
