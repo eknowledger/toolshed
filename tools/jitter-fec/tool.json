@@ -1,0 +1,202 @@
+{
+  "sdk": 4,
+  "id": "jitter-fec",
+  "name": "Jitter and FEC simulator",
+  "blurb": "A few seconds of one voice stream over a network that delays packets unevenly and loses some. Which frames play, which are rebuilt from a copy in a later packet, and which the decoder has to make up.",
+  "version": "1.0.0",
+  "capabilities": [
+    "pure"
+  ],
+  "runtime": {
+    "entry": "index.ts",
+    "thread": "main"
+  },
+  "kinds": [
+    "fields",
+    "series",
+    "group",
+    "error"
+  ],
+  "card": "live",
+  "cardFields": 3,
+  "inputs": [
+    {
+      "id": "jitter",
+      "type": "number",
+      "label": "Jitter",
+      "description": "The average extra delay a packet picks up on top of the fixed trip, from queues along the path. Each packet draws its own.",
+      "unit": "ms",
+      "primary": true,
+      "default": 10,
+      "min": 0,
+      "max": 500,
+      "step": 1
+    },
+    {
+      "id": "buffer",
+      "type": "number",
+      "label": "Jitter buffer",
+      "description": "How long past the fixed trip the receiver waits before a frame's slot comes up. Every frame plays this much later.",
+      "unit": "ms",
+      "primary": true,
+      "default": 40,
+      "min": 0,
+      "max": 1000,
+      "step": 10
+    },
+    {
+      "id": "loss",
+      "type": "number",
+      "label": "Loss",
+      "description": "The share of packets the network drops.",
+      "unit": "%",
+      "primary": true,
+      "default": 3,
+      "min": 0,
+      "max": 99,
+      "step": 0.5
+    },
+    {
+      "id": "burst",
+      "type": "number",
+      "label": "Burst length",
+      "description": "How many packets in a row a loss takes, on average. 1 means each loss is independent of the last.",
+      "default": 1,
+      "min": 1,
+      "max": 20,
+      "step": 0.5
+    },
+    {
+      "id": "protection",
+      "type": "select",
+      "label": "Protection",
+      "description": "What a later packet carries to stand in for a missing one.",
+      "default": "fec",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "fec",
+          "label": "Opus in-band FEC"
+        },
+        {
+          "value": "red1",
+          "label": "RED, 1 copy"
+        },
+        {
+          "value": "red2",
+          "label": "RED, 2 copies"
+        }
+      ]
+    },
+    {
+      "id": "delay",
+      "type": "number",
+      "label": "One-way delay",
+      "description": "The fixed part of every packet's trip.",
+      "unit": "ms",
+      "default": 30,
+      "min": 0,
+      "max": 1000,
+      "step": 5
+    },
+    {
+      "id": "packets",
+      "type": "number",
+      "label": "Packets",
+      "description": "How many 20 ms frames the run counts. 3,000 is a minute; the arrivals chart shows the first 250.",
+      "default": 3000,
+      "min": 10,
+      "max": 6000,
+      "step": 500
+    },
+    {
+      "id": "seed",
+      "type": "number",
+      "label": "Seed",
+      "description": "Which few seconds of the network you get. The same seed always gives the same run.",
+      "default": 1,
+      "min": 0,
+      "max": 999999,
+      "step": 1
+    }
+  ],
+  "samples": [
+    {
+      "label": "Random loss",
+      "input": {
+        "jitter": 10,
+        "buffer": 40,
+        "loss": 3,
+        "burst": 1,
+        "protection": "fec",
+        "delay": 30,
+        "packets": 3000,
+        "seed": 1
+      }
+    },
+    {
+      "label": "Bursts of three",
+      "input": {
+        "jitter": 10,
+        "buffer": 40,
+        "loss": 3,
+        "burst": 3,
+        "protection": "fec",
+        "delay": 30,
+        "packets": 3000,
+        "seed": 1
+      }
+    },
+    {
+      "label": "Bursts, deeper buffer",
+      "input": {
+        "jitter": 10,
+        "buffer": 80,
+        "loss": 3,
+        "burst": 3,
+        "protection": "red2",
+        "delay": 30,
+        "packets": 3000,
+        "seed": 1
+      }
+    },
+    {
+      "label": "Jittery path",
+      "input": {
+        "jitter": 30,
+        "buffer": 40,
+        "loss": 1,
+        "burst": 1,
+        "protection": "fec",
+        "delay": 30,
+        "packets": 3000,
+        "seed": 1
+      }
+    }
+  ],
+  "help": "README.md",
+  "tags": [
+    "voice",
+    "jitter",
+    "fec",
+    "networking",
+    "latency"
+  ],
+  "links": [
+    {
+      "label": "RFC 7005 section 3: de-jitter buffers",
+      "href": "https://www.rfc-editor.org/rfc/rfc7005#section-3"
+    },
+    {
+      "label": "RFC 7587 section 3.3: Opus in-band FEC",
+      "href": "https://www.rfc-editor.org/rfc/rfc7587#section-3.3"
+    },
+    {
+      "label": "RFC 2198: redundant audio data",
+      "href": "https://www.rfc-editor.org/rfc/rfc2198"
+    }
+  ]
+}

@@ -1,0 +1,270 @@
+[
+  {
+    "name": "random loss",
+    "input": {
+      "jitter": 10,
+      "buffer": 40,
+      "loss": 3,
+      "burst": 1,
+      "protection": "fec",
+      "delay": 30,
+      "packets": 3000,
+      "seed": 1
+    },
+    "match": "subset",
+    "why": "The reference run: a minute of 3% independent loss and 10 ms of average jitter over a 40 ms buffer. FEC rebuilds most frames that miss their slot, so 0.7% are concealed and no gap is longer than one frame. Seeded, so this pins the model rather than a hand calculation; the properties in index.test.ts hold across seeds.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Played on time",
+          "value": "95.5%",
+          "note": "2865 of 3000 frames"
+        },
+        {
+          "label": "Concealed",
+          "value": "0.7%",
+          "note": "20 frames, 400 ms of made-up audio",
+          "tone": "normal"
+        },
+        {
+          "label": "Recovered by Opus FEC",
+          "value": "3.8%",
+          "note": "115 frames that would otherwise be concealed"
+        },
+        {
+          "label": "Longest gap",
+          "value": "20 ms",
+          "note": "single frames only"
+        },
+        {
+          "label": "What the network did",
+          "value": "2.8% lost, 1.7% late",
+          "note": "late means after 70 ms, the one-way delay plus the buffer"
+        },
+        {
+          "label": "Delay the buffer adds",
+          "value": "40 ms",
+          "note": "to every frame, whether it needed it or not"
+        }
+      ]
+    }
+  },
+  {
+    "name": "bursts of three",
+    "input": {
+      "jitter": 10,
+      "buffer": 40,
+      "loss": 3,
+      "burst": 3,
+      "protection": "fec",
+      "delay": 30,
+      "packets": 3000,
+      "seed": 1
+    },
+    "match": "subset",
+    "why": "The same loss rate in bursts averaging three packets. FEC reaches back one packet, so inside a burst only the last frame can be rebuilt: concealment doubles against random loss and the longest gap grows from 20 ms to 160 ms.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Played on time",
+          "value": "96.3%",
+          "note": "2888 of 3000 frames"
+        },
+        {
+          "label": "Concealed",
+          "value": "1.5%",
+          "note": "44 frames, 880 ms of made-up audio",
+          "tone": "warn"
+        },
+        {
+          "label": "Recovered by Opus FEC",
+          "value": "2.2%",
+          "note": "68 frames that would otherwise be concealed"
+        },
+        {
+          "label": "Longest gap",
+          "value": "160 ms",
+          "note": "8 frames in a row concealed"
+        },
+        {
+          "label": "What the network did",
+          "value": "2% lost, 1.8% late",
+          "note": "late means after 70 ms, the one-way delay plus the buffer"
+        },
+        {
+          "label": "Delay the buffer adds",
+          "value": "40 ms",
+          "note": "to every frame, whether it needed it or not"
+        }
+      ]
+    }
+  },
+  {
+    "name": "bursts, deeper buffer",
+    "input": {
+      "jitter": 10,
+      "buffer": 80,
+      "loss": 3,
+      "burst": 3,
+      "protection": "red2",
+      "delay": 30,
+      "packets": 3000,
+      "seed": 1
+    },
+    "match": "subset",
+    "why": "An 80 ms buffer gives the second RED copy, which leaves 40 ms after its frame, time to arrive. With RED reaching back two packets, concealment falls below the random-loss run with FEC, at the price of 40 ms more delay on every frame.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Played on time",
+          "value": "98%",
+          "note": "2941 of 3000 frames"
+        },
+        {
+          "label": "Concealed",
+          "value": "0.6%",
+          "note": "17 frames, 340 ms of made-up audio",
+          "tone": "normal"
+        },
+        {
+          "label": "Recovered by RED, 2 copies",
+          "value": "1.4%",
+          "note": "42 frames that would otherwise be concealed"
+        },
+        {
+          "label": "Longest gap",
+          "value": "140 ms",
+          "note": "7 frames in a row concealed"
+        },
+        {
+          "label": "What the network did",
+          "value": "2% lost, 0% late",
+          "note": "late means after 110 ms, the one-way delay plus the buffer"
+        },
+        {
+          "label": "Delay the buffer adds",
+          "value": "80 ms",
+          "note": "to every frame, whether it needed it or not"
+        }
+      ]
+    }
+  },
+  {
+    "name": "jittery path",
+    "input": {
+      "jitter": 30,
+      "buffer": 40,
+      "loss": 1,
+      "burst": 1,
+      "protection": "fec",
+      "delay": 30,
+      "packets": 3000,
+      "seed": 1
+    },
+    "match": "subset",
+    "why": "30 ms of average jitter over a 40 ms buffer: over a quarter of packets arrive after their slot, and the buffer, not the loss, is the problem. FEC rebuilds about half of them; the rest are concealed.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Played on time",
+          "value": "71.7%",
+          "note": "2152 of 3000 frames"
+        },
+        {
+          "label": "Concealed",
+          "value": "15.1%",
+          "note": "453 frames, 9060 ms of made-up audio",
+          "tone": "bad"
+        },
+        {
+          "label": "Recovered by Opus FEC",
+          "value": "13.2%",
+          "note": "395 frames that would otherwise be concealed"
+        },
+        {
+          "label": "Longest gap",
+          "value": "120 ms",
+          "note": "6 frames in a row concealed"
+        },
+        {
+          "label": "What the network did",
+          "value": "0.9% lost, 27.3% late",
+          "note": "late means after 70 ms, the one-way delay plus the buffer"
+        },
+        {
+          "label": "Delay the buffer adds",
+          "value": "40 ms",
+          "note": "to every frame, whether it needed it or not"
+        }
+      ]
+    }
+  },
+  {
+    "name": "loss of 100% leaves nothing to simulate",
+    "input": {
+      "jitter": 10,
+      "buffer": 40,
+      "loss": 100,
+      "burst": 1,
+      "protection": "fec",
+      "delay": 30,
+      "packets": 3000,
+      "seed": 1
+    },
+    "match": "subset",
+    "why": "Every packet lost is not a network a jitter buffer can do anything about, and the Gilbert model divides by 1 - loss.",
+    "expect": {
+      "kind": "error",
+      "message": "Loss must be at least 0% and below 100%.",
+      "input": "loss"
+    }
+  },
+  {
+    "name": "a burst shorter than one packet is not a burst",
+    "input": {
+      "jitter": 10,
+      "buffer": 40,
+      "loss": 3,
+      "burst": 0.5,
+      "protection": "fec",
+      "delay": 30,
+      "packets": 3000,
+      "seed": 1
+    },
+    "match": "subset",
+    "why": "Burst length is the average number of packets a loss takes; below 1 it has no meaning.",
+    "expect": {
+      "kind": "error",
+      "message": "Bursts average at least one packet: 1 means losses are independent.",
+      "input": "burst"
+    }
+  },
+  {
+    "name": "an unknown protection scheme is named",
+    "input": {
+      "jitter": 10,
+      "buffer": 40,
+      "loss": 3,
+      "burst": 1,
+      "protection": "ulpfec",
+      "delay": 30,
+      "packets": 3000,
+      "seed": 1
+    },
+    "match": "subset",
+    "why": "The select only offers four; a host writing another value gets told which ones exist.",
+    "expect": {
+      "kind": "error",
+      "message": "Protection must be one of none, fec, red1, red2.",
+      "input": "protection"
+    }
+  }
+]

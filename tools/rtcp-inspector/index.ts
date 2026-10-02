@@ -12,7 +12,7 @@
  *
  * References: RFC 3550 (RTP/RTCP), RFC 8285 (header extensions), RFC 3551 (payload types).
  */
-import type { ByteRange, Cell, Field, Output, Tool } from "@toolbench/sdk";
+import type { ByteRange, Cell, Field, Output, Series, Tool } from "@toolbench/sdk";
 
 type Input = { packet: string; view: string };
 
@@ -36,6 +36,12 @@ interface Span {
 	 * the field list beside it, at a fixed offset anyone can count to.
 	 */
 	mark?: boolean;
+}
+
+/** One part of the packet for the size chart: a header region, the payload, or an RTCP sub-packet. */
+interface Segment {
+	label: string;
+	len: number;
 }
 
 class ParseError extends Error {
@@ -113,7 +119,7 @@ const PAYLOAD_TYPES: Record<number, string> = {
 	26: "JPEG", 31: "H261", 32: "MPV", 33: "MP2T", 34: "H263",
 };
 
-function parseRtp(bytes: Uint8Array): { spans: Span[]; extras: Output[] } {
+function parseRtp(bytes: Uint8Array): { spans: Span[]; extras: Output[]; segments: Segment[] } {
 	need(bytes, 0, 12, "the RTP fixed header");
 	const spans: Span[] = [];
 	const extras: Output[] = [];
@@ -195,7 +201,15 @@ function parseRtp(bytes: Uint8Array): { spans: Span[]; extras: Output[] } {
 	if (payloadEnd > at) {
 		spans.push({ at, len: payloadEnd - at, label: "Payload", value: `${payloadEnd - at} bytes`, note: "not decoded; the payload type says how", mark: true });
 	}
-	return { spans, extras };
+	const extensionLen = extension ? 4 + u16(bytes, 12 + csrcCount * 4 + 2) * 4 : 0;
+	const segments: Segment[] = [
+		{ label: "Fixed header", len: 12 },
+		{ label: "CSRC list", len: csrcCount * 4 },
+		{ label: "Header extension", len: extensionLen },
+		{ label: "Payload", len: Math.max(0, payloadEnd - at) },
+		{ label: "Padding", len: bytes.length - payloadEnd },
+	].filter((g) => g.len > 0);
+	return { spans, extras, segments };
 }
 
 /** One-byte and two-byte RFC 8285 elements. ID 0 is padding; in the one-byte form ID 15 stops parsing. */
@@ -252,8 +266,9 @@ const NTP_UNIX_OFFSET = 2_208_988_800;
  * An RTCP packet, or a compound one. RFC 3550 requires compounds to begin with SR or RR, which is worth
  * saying when they do not: a receiver may drop the whole compound.
  */
-function parseRtcp(bytes: Uint8Array): { spans: Span[]; extras: Output[]; summary: Field[] } {
+function parseRtcp(bytes: Uint8Array): { spans: Span[]; extras: Output[]; summary: Field[]; segments: Segment[] } {
 	const spans: Span[] = [];
+	const segments: Segment[] = [];
 	const extras: Output[] = [];
 	const summary: Field[] = [];
 	const seen: string[] = [];
@@ -275,6 +290,7 @@ function parseRtcp(bytes: Uint8Array): { spans: Span[]; extras: Output[]; summar
 
 		const name = RTCP_TYPES[type] ?? `type ${type} (unknown)`;
 		seen.push(RTCP_TYPES[type]?.split(" ")[0] ?? String(type));
+		segments.push({ label: `#${seen.length} ${seen.at(-1)}`, len: Math.min(total, bytes.length - at) });
 		spans.push({ at, len: 1, label: `#${index + 1} V / P / count`, value: `2 / ${padding ? 1 : 0} / ${count}` });
 		spans.push({ at: at + 1, len: 1, label: `#${index + 1} Packet type`, value: `${type} ${name}` });
 		spans.push({ at: at + 2, len: 2, label: `#${index + 1} Length`, value: `${words} (${total} bytes)` });
@@ -378,7 +394,33 @@ function parseRtcp(bytes: Uint8Array): { spans: Span[]; extras: Output[]; summar
 			note: "RFC 3550 6.1: a compound packet must start with SR or RR, so a receiver may drop all of it",
 		});
 	}
-	return { spans, extras, summary };
+	return { spans, extras, summary, segments };
+}
+
+/**
+ * Where the packet's bytes go, as one stacked bar: for RTP, how much is header and how much is the sound or
+ * video it carries; for RTCP, how big each sub-packet of a compound is. Only the bytes pasted are counted.
+ * The UDP and IP headers around them are not in the input, so the chart says nothing about them rather than
+ * assuming IPv4 or IPv6.
+ *
+ * At most six parts, because the chart has six colours; a longer compound folds its tail into one segment.
+ */
+function sizeChart(segments: Segment[], total: number, isRtcp: boolean): Output {
+	const shown = segments.length > 6 ? [...segments.slice(0, 5), { label: `${segments.length - 5} more sub-packets`, len: segments.slice(5).reduce((sum, g) => sum + g.len, 0) }] : segments;
+	const share = (len: number) => `${len} bytes, ${Math.round((len / total) * 100)}%`;
+	const series: Series[] = shown.map((g) => ({ label: g.label, unit: "bytes", shape: "bar", stack: "packet", points: [g.len], notes: [share(g.len)] }));
+	return {
+		kind: "series",
+		chart: {
+			xLabel: isRtcp ? "Compound packet" : "Packet",
+			yLabel: "Size",
+			yUnit: "bytes",
+			x: [`${total} bytes`],
+			orientation: "horizontal",
+			series,
+			readout: { titles: [isRtcp ? `${total} bytes in ${segments.length} sub-packet${segments.length === 1 ? "" : "s"}` : `${total} bytes of RTP, before UDP and IP`] },
+		},
+	};
 }
 
 function reportBlocks(bytes: Uint8Array, from: number, count: number, index: number, spans: Span[]): Cell[][] {
@@ -444,7 +486,7 @@ export default {
 			 */
 			const second = bytes[1] ?? 0;
 			const isRtcp = second >= 200 && second <= 206;
-			const { spans, extras, summary = [] } = isRtcp ? parseRtcp(bytes) : { ...parseRtp(bytes), summary: [] as Field[] };
+			const { spans, extras, summary = [], segments } = isRtcp ? parseRtcp(bytes) : { ...parseRtp(bytes), summary: [] as Field[] };
 			const fields: Field[] = [
 				{ label: "Protocol", value: isRtcp ? "RTCP" : "RTP", note: `second byte is ${second}` },
 				...summary,
@@ -456,7 +498,7 @@ export default {
 			})));
 			const highlight: ByteRange[] = spans.filter((s) => s.mark).map((s) => ({ at: s.at, len: s.len, label: s.label }));
 
-			const parts: Output[] = [{ kind: "fields", fields }, ...extras];
+			const parts: Output[] = [{ kind: "fields", fields }, sizeChart(segments, bytes.length, isRtcp), ...extras];
 			if (view !== "fields") {
 				parts.push({ kind: "bytes", bytes: [...bytes], caption: "Each named range is one header field", highlight });
 			}

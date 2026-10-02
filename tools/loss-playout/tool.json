@@ -3,7 +3,7 @@
   "id": "loss-playout",
   "name": "Loss and playout simulator",
   "blurb": "One voice frame is lost. UDP conceals that one frame; TCP recovers it and holds every frame behind it, and each one whose playout time passes while it waits is lost to the listener anyway.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "capabilities": ["pure"],
   "runtime": { "entry": "index.ts", "thread": "main" },
   "kinds": ["fields", "series", "table", "group", "error"],

@@ -47,6 +47,14 @@ UDP runs parallel to the deadline with one gap. The TCP lines go flat from the l
 their own arrival times: that flat stretch is the queue being held, and every frame on it above the deadline is
 audio nobody hears.
 
+## What a frame size costs
+
+The second chart is why 20 ms is the usual choice. Every packet carries 40 bytes of headers, IPv4's 20 without
+options, UDP's 8 and RTP's 12, whatever the frame size, so a smaller frame sends more packets and more header bits:
+at 10 ms the headers cost as much as the sound itself. A bigger frame saves them and loses more audio per lost
+packet. The sound is fixed at Opus's 32 kb/s, 80 bytes per 20 ms frame, so the chart compares sizes rather than
+codecs. SRTP's authentication tag and any header extensions would add to every packet, and are left out.
+
 ## What it deliberately does not model
 
 - **Jitter.** Every frame takes the same time. Real paths vary, which is what the buffer is for, and variation
