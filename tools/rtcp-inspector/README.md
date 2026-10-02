@@ -18,6 +18,9 @@ So the byte view is the point. Every named range in it is one field, and the leg
 - **RTCP**: SR and RR with report blocks, SDES with its items, BYE with its optional reason, and compound
   packets. The length field is words **minus one**, and reading it as plain words silently loses every
   sub-packet after the first.
+- **Where the bytes go**: one stacked bar of the packet as pasted, header, CSRC list, extension, payload and
+  padding for RTP, or one segment per sub-packet for a compound RTCP packet. Only the pasted bytes count: the UDP
+  and IP headers around them are not in the input, so they are not guessed.
 - **Loss percentage**, derived from the 8-bit fraction: `fraction / 256`. Above 5% it is marked, above
   10% marked harder. That is the one number in a report block you cannot check by eye.
 
