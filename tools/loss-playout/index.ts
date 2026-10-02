@@ -45,6 +45,14 @@ class InputError extends Error {
 /** Codec frame sizes in common use: Opus runs 10 to 60, G.711 over RTP is usually 20. */
 const FRAME_SIZES = [10, 20, 40, 60];
 
+/**
+ * For the frame-size chart: Opus at 32 kb/s, which is 80 bytes per 20 ms frame, and 40 bytes of headers per
+ * packet, IPv4's 20 without options, UDP's 8 and RTP's 12 without CSRCs or extensions. Fixed sizes from the
+ * RFCs and one stated bitrate, so the chart computes what a frame size costs rather than quoting anyone.
+ */
+const OPUS_KBPS = 32;
+const HEADER_BYTES = 20 + 8 + 12;
+
 /** Duplicate ACKs that trigger a resend without waiting for the timer, per RFC 5681. */
 const DUP_ACKS = 3;
 
@@ -73,6 +81,43 @@ function frameList(frames: number[]): string {
 }
 
 const plural = (count: number, word: string): string => `${count} ${word}${count === 1 ? "" : "s"}`;
+
+/**
+ * Why 20 ms: what each frame size costs on the wire, beside how much audio one lost packet takes with it.
+ * The sound costs the same at every size; the headers are paid per packet, so a smaller frame sends more
+ * packets and more header bits. A bigger frame saves those and loses more audio per loss. Bars, stacked,
+ * one row per size, because the question is a total and the share of it that is overhead.
+ */
+function frameCost(chosen: number): Output {
+	const kbps = (n: number) => Math.round(n * 10) / 10;
+	const headers = FRAME_SIZES.map((ms) => kbps((HEADER_BYTES * 8) / ms));
+	const rows = FRAME_SIZES.map((ms) => `${ms} ms${ms === chosen ? " (this run)" : ""}`);
+	return {
+		kind: "series",
+		chart: {
+			xLabel: "Frame size",
+			yLabel: "Bits on the wire",
+			yUnit: "kb/s",
+			x: rows,
+			orientation: "horizontal",
+			series: [
+				// Named plainly: the key adds the unit, and the bitrate and header size are in each readout note.
+				{ label: "Opus", unit: "kb/s", shape: "bar", stack: "wire", points: FRAME_SIZES.map(() => OPUS_KBPS), notes: FRAME_SIZES.map((ms) => `${OPUS_KBPS} kb/s, ${(OPUS_KBPS * ms) / 8} bytes a frame`) },
+				{
+					label: "Headers",
+					unit: "kb/s",
+					shape: "bar",
+					stack: "wire",
+					points: headers,
+					notes: headers.map((h) => `${h} kb/s, ${HEADER_BYTES} bytes a packet, ${Math.round((h / (h + OPUS_KBPS)) * 100)}% of the total`),
+				},
+			],
+			readout: {
+				titles: FRAME_SIZES.map((ms) => `${ms} ms: ${kbps(1000 / ms)} packets a second, one loss erases ${ms} ms`),
+			},
+		},
+	};
+}
 
 export default {
 	run(input: Input) {
@@ -228,6 +273,11 @@ export default {
 				},
 			];
 
+			/*
+			 * The cost chart goes before the per-frame table, so a page showing the first three parts shows both
+			 * charts and leaves the 20-row table behind "show more".
+			 */
+			parts.splice(2, 0, frameCost(frameMs));
 			return { kind: "group", parts };
 		} catch (error) {
 			if (error instanceof InputError) return { kind: "error", message: error.message, input: error.input };
