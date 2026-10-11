@@ -24,7 +24,7 @@ import tool from "./index.ts";
  * interface both fixes that and is the honest thing: the runtime always passes a context, so a test
  * that could not would be testing a different call.
  */
-const impl: Tool<{ packet: string; view: string }> = tool;
+const impl: Tool<{ packet: string; view: string; arrival: string }> = tool;
 const ctx = { signal: new AbortController().signal, progress: () => {} };
 /**
  * Run the tool and narrow the result.
@@ -33,8 +33,8 @@ const ctx = { signal: new AbortController().signal, progress: () => {} };
  * is not one here narrows the type for every test below AND checks something worth checking: this tool
  * is declared `thread: "main"` with `card: "live"`, and both of those are only honest if it never awaits.
  */
-const run = (packet: string, view = "all"): Output => {
-	const out = impl.run({ packet, view }, ctx);
+const run = (packet: string, view = "all", arrival = ""): Output => {
+	const out = impl.run({ packet, view, arrival }, ctx);
 	assert.ok(!(out instanceof Promise), "the inspector must stay synchronous: it runs on the main thread as a live card");
 	return out;
 };
@@ -50,6 +50,11 @@ const PACKETS = {
 	bye: "81cb0004111111110874656172646f776e000000",
 	// RC=0: an RR with no report blocks. RC=1 would promise 24 bytes the length field denies.
 	rr: "80c9000111111111",
+	// Post 5's two packets, from rtcp_reports.py: Alice's SR + SDES, and the server's RR + SDES that answers it.
+	aliceSr:
+		"80 c8 00 06 1f 2e 3d 4c ee 69 d8 f0 40 00 00 00 00 02 ee 00 00 00 00 c8 00 00 3e 80 81 ca 00 06 1f 2e 3d 4c 01 10 4b 39 67 47 79 58 38 4f 41 4b 38 61 48 38 4d 79 00 00",
+	serverRr:
+		"81 c9 00 07 7a 3b 9c 5d 1f 2e 3d 4c 06 00 00 06 00 00 04 e1 00 00 00 82 d8 f0 40 00 00 00 fd 70 81 ca 00 06 7a 3b 9c 5d 01 10 73 2b 72 4e 4d 30 4d 37 4d 62 55 6c 49 31 45 44 00 00",
 };
 
 function bytesPart(packet: string) {
@@ -219,4 +224,116 @@ describe("hex is read the way people actually paste it", () => {
 			assert.equal(fields.fields.find((f) => f.label === "SSRC")?.value, expected, `${label} decoded a different SSRC`);
 		});
 	}
+});
+
+/** The arithmetic part: the second `fields` output, present for any RTCP packet with an SR or a report block. */
+function timing(packet: string, arrival = ""): { group?: string; label: string; value: string; note?: string; tone?: string }[] {
+	const out = run(packet, "fields", arrival);
+	assert.equal(out.kind, "group", `expected a group, got ${out.kind}`);
+	if (out.kind !== "group") return [];
+	const parts = out.parts.filter((p) => p.kind === "fields");
+	assert.equal(parts.length, 2, "the field list, then the arithmetic");
+	return parts[1]?.kind === "fields" ? parts[1].fields : [];
+}
+
+/** An RR with one report block whose LSR and DLSR are given, every other field zero or a placeholder SSRC. */
+const rrWith = (lsr: number, dlsr: number) =>
+	`81c90007 11111111 22222222 00000000 00000000 00000000 ${lsr.toString(16).padStart(8, "0")} ${dlsr.toString(16).padStart(8, "0")}`;
+const short = (x: number) => `${(x >>> 16).toString(16).padStart(4, "0")}:${(x & 0xffff).toString(16).padStart(4, "0")}`;
+
+describe("the NTP timestamp is seconds and a binary fraction", () => {
+	/*
+	 * Version 1.1 printed the 32-bit fraction as an integer after a decimal point, so a quarter of a second,
+	 * 0x40000000, read as .1073741824. These pin the fix at the fractions where a wrong reading is obvious.
+	 */
+	const sr = (frac: string) => `80c80006 11111111 e8754700 ${frac} 00000000 00000000 00000000`;
+	const cases: [string, string, string][] = [
+		["00000000", "3900000000.000000 s", "2023-08-02T21:20:00.000Z"],
+		["40000000", "3900000000.250000 s", "2023-08-02T21:20:00.250Z"],
+		["80000000", "3900000000.500000 s", "2023-08-02T21:20:00.500Z"],
+		// 1 - 2^-32 rounds to a whole second at six places, so it carries; the date truncates, as a clock reading does.
+		["ffffffff", "3900000001.000000 s", "2023-08-02T21:20:00.999Z"],
+	];
+	for (const [frac, value, date] of cases) {
+		it(`0x${frac}`, () => {
+			const out = run(sr(frac), "fields");
+			assert.equal(out.kind, "group");
+			if (out.kind !== "group") return;
+			const fields = out.parts.find((p) => p.kind === "fields");
+			assert.ok(fields?.kind === "fields");
+			const ntp = fields.fields.find((f) => f.label === "#1 NTP timestamp");
+			assert.equal(ntp?.value, value);
+			assert.equal(ntp?.note, date);
+		});
+	}
+
+	it("echoes the SR's middle 32 bits as the LSR its answer carries", () => {
+		// Alice's SR says 0xD8F04000; the server's RR, which answers it, carries the same 32 bits as LSR.
+		const middle = timing(PACKETS.aliceSr).find((f) => f.label === "Middle 32 bits");
+		assert.equal(middle?.value, "0xD8F04000");
+		const lsr = timing(PACKETS.serverRr).find((f) => f.label === "LSR");
+		assert.equal(lsr?.value, "0xD8F0:4000");
+	});
+});
+
+describe("the round trip is A - LSR - DLSR, modulo 2^32", () => {
+	it("recovers the round trip it was built from, whatever the clock reads", () => {
+		// A = LSR + DLSR + rtt by construction, so the tool must give back rtt. LSR near the top of the 32-bit range
+		// makes A wrap past zero, which the RFC's modular arithmetic has to survive.
+		for (const lsr of [0x00010000, 0xd8f04000, 0xffff8000]) {
+			for (const [dlsr, rtt, shown] of [
+				[0x0000fd70, 3932, "59.998 ms"],
+				[0x00010000, 0x8000, "500.000 ms"],
+				[0x00054000, 0x62000, "6.125 s"],
+			] as const) {
+				const arrival = (lsr + dlsr + rtt) >>> 0;
+				const field = timing(rrWith(lsr, dlsr), short(arrival)).find((f) => f.label === "Round trip");
+				assert.equal(field?.value, shown, `LSR ${short(lsr)}, DLSR ${short(dlsr)}, A ${short(arrival)}`);
+				assert.match(String(field?.note), new RegExp(`= ${rtt} / 65536 s$`));
+			}
+		}
+	});
+
+	it("calls an A earlier than LSR + DLSR negative rather than reporting 18 hours", () => {
+		// A equal to LSR leaves -DLSR, which modulo 2^32 is just under 65536 s: a clock problem, not a long trip.
+		const field = timing(PACKETS.serverRr, "d8f0:4000").find((f) => f.label === "Round trip");
+		assert.equal(field?.value, "negative");
+		assert.equal(field?.tone, "bad");
+	});
+
+	it("does not invent a round trip when no SR has been answered", () => {
+		// RFC 3550 6.4.1: "If no SR has been received yet, the field is set to zero."
+		const fields = timing(rrWith(0, 0), "d8f1:4ccc");
+		assert.equal(fields.find((f) => f.label === "LSR")?.value, "0");
+		assert.equal(fields.find((f) => f.label === "Round trip")?.value, "none");
+		assert.equal(fields.filter((f) => f.label === "Round trip").length, 1, "and does not also claim there is no report block");
+	});
+
+	it("times an SR's report blocks too, since they carry the same LSR and DLSR", () => {
+		// The default packet's block: LSR 0xAABBCCDD, DLSR 12345. A = LSR + DLSR + 3932 gives the same 59.998 ms.
+		const arrival = (0xaabbccdd + 12345 + 3932) >>> 0;
+		const field = timing(PACKETS.srSdes, short(arrival)).find((f) => f.label === "Round trip");
+		assert.equal(field?.value, "59.998 ms");
+	});
+
+	it("says so when A is given for a packet with no report block", () => {
+		const field = timing(PACKETS.aliceSr, "d8f1:4ccc").find((f) => f.label === "Round trip");
+		assert.equal(field?.value, "no report block");
+	});
+
+	it("reads A the ways RFC 3550 and a log write it", () => {
+		for (const arrival of ["d8f14ccc", "0xd8f1:4ccc", "D8F1:4CCC", "d8f1 4ccc", " 0xd8f14ccc "]) {
+			assert.equal(timing(PACKETS.serverRr, arrival).find((f) => f.label === "Round trip")?.value, "59.998 ms", arrival);
+		}
+	});
+});
+
+describe("the fraction lost is shown as the 8-bit value it is", () => {
+	it("every value from 0 to 255 reads as n/256", () => {
+		for (let n = 0; n < 256; n++) {
+			const packet = `81c90007 11111111 22222222 ${n.toString(16).padStart(2, "0")}000000 00000000 00000000 00000000 00000000`;
+			const field = timing(packet).find((f) => f.label === "Fraction lost");
+			assert.equal(field?.value, `${n}/256 = ${((n / 256) * 100).toFixed(2)}%`);
+		}
+	});
 });

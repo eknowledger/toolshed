@@ -10,11 +10,14 @@
  * that carry the information anyone actually debugs with, which is SR, RR, SDES and BYE, including
  * compound packets. APP and the feedback types (RTPFB, PSFB) are follow-ups inside this tool.
  *
+ * For a report block it also does the arithmetic RFC 3550 section 6.4.1 describes: the 8-bit fraction as n/256,
+ * LSR and DLSR as seconds, and, given the time the report arrived, the round trip A - LSR - DLSR.
+ *
  * References: RFC 3550 (RTP/RTCP), RFC 8285 (header extensions), RFC 3551 (payload types).
  */
 import type { ByteRange, Cell, Field, Output, Series, Tool } from "@toolbench/sdk";
 
-type Input = { packet: string; view: string };
+type Input = { packet: string; view: string; arrival: string };
 
 /** A parsed span, kept so the fields, the table and the byte highlights all agree on one source. */
 interface Span {
@@ -263,14 +266,44 @@ const SDES_ITEMS: Record<number, string> = {
 const NTP_UNIX_OFFSET = 2_208_988_800;
 
 /**
+ * A binary fraction as six decimal places, carrying into the whole seconds when it rounds up to one.
+ *
+ * ⚠️ The fraction is a count of 1/2^32 (or 1/2^16) of a second, not decimal digits. Printing the raw integer after
+ * a decimal point, which version 1.1 did, turns 0x40000000, a quarter of a second, into ".1073741824".
+ */
+function seconds(whole: number, fraction: number, bits: number): string {
+	const text = (fraction / 2 ** bits).toFixed(6);
+	return text.startsWith("1") ? `${whole + 1}.000000` : `${whole}${text.slice(1)}`;
+}
+
+/** NTP's short format, 16 bits of seconds and 16 of fraction, as RFC 3550 writes it: 0xD8F0:4000. */
+const short = (x: number) => `0x${hex(x >>> 16, 4).slice(2)}:${hex(x & 0xffff, 4).slice(2)}`;
+const shortSeconds = (x: number) => `${seconds(x >>> 16, x & 0xffff, 16)} s`;
+
+/**
+ * A, the time the report arrived, in NTP's short format. Optional: blank means no round trip is asked for.
+ * Accepted with or without 0x, a colon or spaces, because RFC 3550 writes it as 0xb710:8000 and a log as b7108000.
+ */
+function readArrival(text: string | undefined): number | null {
+	const trimmed = (text ?? "").trim();
+	if (trimmed === "") return null;
+	const digits = trimmed.replace(/0x/gi, "").replace(/[\s:]/g, "");
+	if (!/^[0-9a-f]{8}$/i.test(digits)) {
+		throw new ParseError(`A is 8 hex digits of NTP time, such as d8f1:4ccc: 16 bits of seconds and 16 of fraction, the middle of the 64-bit timestamp. Got "${trimmed}".`);
+	}
+	return Number.parseInt(digits, 16);
+}
+
+/**
  * An RTCP packet, or a compound one. RFC 3550 requires compounds to begin with SR or RR, which is worth
  * saying when they do not: a receiver may drop the whole compound.
  */
-function parseRtcp(bytes: Uint8Array): { spans: Span[]; extras: Output[]; summary: Field[]; segments: Segment[] } {
+function parseRtcp(bytes: Uint8Array, arrival: number | null): { spans: Span[]; extras: Output[]; summary: Field[]; segments: Segment[]; timing: Field[] } {
 	const spans: Span[] = [];
 	const segments: Segment[] = [];
 	const extras: Output[] = [];
 	const summary: Field[] = [];
+	const timing: Field[] = [];
 	const seen: string[] = [];
 	let at = 0;
 	let index = 0;
@@ -304,20 +337,24 @@ function parseRtcp(bytes: Uint8Array): { spans: Span[]; extras: Output[]; summar
 				spans.push({ at: body, len: 4, label: `#${index + 1} Sender SSRC`, value: hex(u32(bytes, body), 8), mark: true });
 				spans.push({
 					at: body + 4, len: 8, label: `#${index + 1} NTP timestamp`,
-					value: `${ntpSec}.${ntpFrac.toString().padStart(10, "0")}`,
-					note: ntpSec > NTP_UNIX_OFFSET ? new Date((ntpSec - NTP_UNIX_OFFSET) * 1000).toISOString() : "before 1970; probably not a real clock",
+					value: `${seconds(ntpSec, ntpFrac, 32)} s`,
+					// The date keeps the fraction to the millisecond, truncated as a clock reading is.
+					note: ntpSec > NTP_UNIX_OFFSET ? new Date((ntpSec - NTP_UNIX_OFFSET) * 1000 + Math.floor((ntpFrac * 1000) / 2 ** 32)).toISOString() : "before 1970; probably not a real clock",
 				});
+				// What a receiver echoes as LSR, so an SR and the RR that answers it can be matched across two pastes.
+				const middle = u32(bytes, body + 6);
+				timing.push({ group: `SR #${index + 1}`, label: "Middle 32 bits", value: hex(middle, 8), note: `${short(middle)} = ${shortSeconds(middle)}; an RR answering this SR carries it as LSR` });
 				spans.push({ at: body + 12, len: 4, label: `#${index + 1} RTP timestamp`, value: String(u32(bytes, body + 12)) });
 				spans.push({ at: body + 16, len: 4, label: `#${index + 1} Packets sent`, value: String(u32(bytes, body + 16)) });
 				spans.push({ at: body + 20, len: 4, label: `#${index + 1} Octets sent`, value: String(u32(bytes, body + 20)) });
-				const rows = reportBlocks(bytes, body + 24, count, index, spans);
+				const rows = reportBlocks(bytes, body + 24, count, index, spans, timing, arrival, "SR");
 				if (rows.length > 0) extras.push(reportTable(rows, `SR #${index + 1}: ${count} report block${count === 1 ? "" : "s"}`));
 				break;
 			}
 			case 201: { // RR
 				need(bytes, body, 4, "the reporter SSRC");
 				spans.push({ at: body, len: 4, label: `#${index + 1} Reporter SSRC`, value: hex(u32(bytes, body), 8), mark: true });
-				const rows = reportBlocks(bytes, body + 4, count, index, spans);
+				const rows = reportBlocks(bytes, body + 4, count, index, spans, timing, arrival, "RR");
 				if (rows.length > 0) extras.push(reportTable(rows, `RR #${index + 1}: ${count} report block${count === 1 ? "" : "s"}`));
 				break;
 			}
@@ -394,7 +431,10 @@ function parseRtcp(bytes: Uint8Array): { spans: Span[]; extras: Output[]; summar
 			note: "RFC 3550 6.1: a compound packet must start with SR or RR, so a receiver may drop all of it",
 		});
 	}
-	return { spans, extras, summary, segments };
+	if (arrival !== null && !timing.some((f) => f.label === "Round trip")) {
+		timing.push({ group: "Round trip", label: "Round trip", value: "no report block", note: "A is read against a report block's LSR and DLSR, and this packet has none" });
+	}
+	return { spans, extras, summary, segments, timing };
 }
 
 /**
@@ -423,7 +463,25 @@ function sizeChart(segments: Segment[], total: number, isRtcp: boolean): Output 
 	};
 }
 
-function reportBlocks(bytes: Uint8Array, from: number, count: number, index: number, spans: Span[]): Cell[][] {
+/**
+ * RFC 3550 section 6.4.1's round trip: A - LSR - DLSR, all three in 1/65536 s.
+ *
+ * Why it needs no synchronised clocks: A and LSR are both read off the SR sender's clock, and DLSR is a duration
+ * the receiver measured on its own. The subtraction is modulo 2^32, as the RFC's arithmetic is, so it survives the
+ * 16-bit seconds wrapping every 18 hours.
+ */
+function roundTrip(arrival: number, lsr: number, dlsr: number): Field {
+	const units = (arrival - lsr - dlsr) >>> 0;
+	if (units >= 0x80000000) {
+		return { label: "Round trip", value: "negative", tone: "bad", note: `A ${short(arrival)} is earlier than LSR + DLSR, so A is from another clock, or this report answers a later SR` };
+	}
+	const s = units / 65536;
+	return { label: "Round trip", value: s < 1 ? `${(s * 1000).toFixed(3)} ms` : `${s.toFixed(3)} s`, note: `A - LSR - DLSR = ${short(arrival)} - ${short(lsr)} - ${short(dlsr)} = ${units} / 65536 s` };
+}
+
+function reportBlocks(
+	bytes: Uint8Array, from: number, count: number, index: number, spans: Span[], timing: Field[], arrival: number | null, kind: string,
+): Cell[][] {
 	const rows: Cell[][] = [];
 	let at = from;
 	for (let i = 0; i < count; i++) {
@@ -444,6 +502,26 @@ function reportBlocks(bytes: Uint8Array, from: number, count: number, index: num
 			{ text: String(u32(bytes, at + 20)), mono: true },
 		]);
 		spans.push({ at, len: 24, label: `#${index + 1} Report block ${i + 1}`, value: `${hex(ssrc, 8)}, ${percent.toFixed(1)}% lost`, mark: true });
+
+		/*
+		 * The same block's numbers as arithmetic a reader can check. The fraction is truncated to 256ths, so 6 lost
+		 * of 250 reads 6/256 = 2.34%, not 2.40%; LSR and DLSR are seconds in 1/65536ths.
+		 */
+		const group = `${kind} #${index + 1}, block ${i + 1}`;
+		const lsr = u32(bytes, at + 16);
+		const dlsr = u32(bytes, at + 20);
+		timing.push({ group, label: "Fraction lost", value: `${fraction}/256 = ${percent.toFixed(2)}%`, note: "truncated to 256ths: the true share is at least this, and less than 1/256 more" });
+		timing.push(lsr === 0
+			? { group, label: "LSR", value: "0", note: "no SR received yet, so there is no round trip to measure" }
+			: { group, label: "LSR", value: short(lsr), note: `${shortSeconds(lsr)}, the middle 32 bits of the SR this answers` });
+		timing.push({ group, label: "DLSR", value: `${(dlsr / 65536).toFixed(3)} s`, note: `${dlsr} / 65536 s, ${short(dlsr)}: how long the receiver held the SR before replying` });
+		if (lsr === 0) {
+			if (arrival !== null) timing.push({ group, label: "Round trip", value: "none", note: "LSR is 0: the receiver had no SR to answer, so A has nothing to be measured against" });
+		} else {
+			timing.push(arrival === null
+				? { group, label: "Round trip", value: "needs A", note: "enter when this report arrived to get A - LSR - DLSR" }
+				: { group, ...roundTrip(arrival, lsr, dlsr) });
+		}
 		at += 24;
 	}
 	return rows;
@@ -466,14 +544,21 @@ function reportTable(rows: Cell[][], caption: string): Output {
 }
 
 export default {
-	run({ packet, view }): Output {
+	run({ packet, view, arrival: arrivalText }): Output {
 		let bytes: Uint8Array;
+		let arrival: number | null;
 		try {
 			bytes = readHex(packet);
 		} catch (error) {
 			if (error instanceof ParseError) {
 				return { kind: "error", message: error.message, input: "packet", ...(error.at !== undefined ? { at: error.at, len: error.len ?? 1 } : {}) };
 			}
+			throw error;
+		}
+		try {
+			arrival = readArrival(arrivalText);
+		} catch (error) {
+			if (error instanceof ParseError) return { kind: "error", message: error.message, input: "arrival" };
 			throw error;
 		}
 
@@ -486,7 +571,7 @@ export default {
 			 */
 			const second = bytes[1] ?? 0;
 			const isRtcp = second >= 200 && second <= 206;
-			const { spans, extras, summary = [], segments } = isRtcp ? parseRtcp(bytes) : { ...parseRtp(bytes), summary: [] as Field[] };
+			const { spans, extras, summary = [], segments, timing = [] } = isRtcp ? parseRtcp(bytes, arrival) : { ...parseRtp(bytes), summary: [] as Field[], timing: [] as Field[] };
 			const fields: Field[] = [
 				{ label: "Protocol", value: isRtcp ? "RTCP" : "RTP", note: `second byte is ${second}` },
 				...summary,
@@ -498,7 +583,16 @@ export default {
 			})));
 			const highlight: ByteRange[] = spans.filter((s) => s.mark).map((s) => ({ at: s.at, len: s.len, label: s.label }));
 
-			const parts: Output[] = [{ kind: "fields", fields }, sizeChart(segments, bytes.length, isRtcp), ...extras];
+			/*
+			 * The arithmetic is its own part, after the field list rather than inside it, so the field list stays one
+			 * entry per field of the packet and the timing reads as one calculation, grouped by the SR or block it uses.
+			 */
+			const parts: Output[] = [
+				{ kind: "fields", fields },
+				...(timing.length > 0 ? [{ kind: "fields" as const, fields: timing }] : []),
+				sizeChart(segments, bytes.length, isRtcp),
+				...extras,
+			];
 			if (view !== "fields") {
 				parts.push({ kind: "bytes", bytes: [...bytes], caption: "Each named range is one header field", highlight });
 			}

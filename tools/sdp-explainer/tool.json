@@ -1,0 +1,125 @@
+{
+  "sdk": 4,
+  "id": "sdp-explainer",
+  "name": "SDP explainer",
+  "blurb": "Paste a WebRTC offer or answer and see every line: what it sets, which phase of the call reads it, and what breaks a rule, with the RFC for each.",
+  "version": "1.0.0",
+  "capabilities": [
+    "pure"
+  ],
+  "runtime": {
+    "entry": "index.ts",
+    "thread": "main"
+  },
+  "kinds": [
+    "group",
+    "fields",
+    "series",
+    "table",
+    "error"
+  ],
+  "card": "live",
+  "cardFields": 4,
+  "inputs": [
+    {
+      "id": "sdp",
+      "type": "textarea",
+      "label": "SDP",
+      "description": "An offer or an answer, as createOffer or webrtc-internals shows it. CRLF or LF; blank lines are ignored.",
+      "primary": true,
+      "dir": "ltr",
+      "rows": 14,
+      "maxLength": 16384,
+      "default": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 192.168.1.42\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+23+chars\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates"
+    },
+    {
+      "id": "other",
+      "type": "textarea",
+      "label": "The other side's SDP (optional)",
+      "description": "Paste the matching answer or offer to see what the two settle between them: ICE roles, who sends the ClientHello, the codec.",
+      "dir": "ltr",
+      "rows": 8,
+      "maxLength": 16384,
+      "default": ""
+    },
+    {
+      "id": "show",
+      "type": "select",
+      "label": "Lines",
+      "description": "The chart and the problem list always cover every line.",
+      "default": "all",
+      "options": [
+        {
+          "value": "all",
+          "label": "Every line"
+        },
+        {
+          "value": "problems",
+          "label": "Only lines with a problem"
+        }
+      ]
+    }
+  ],
+  "samples": [
+    {
+      "label": "Alice's offer",
+      "input": {
+        "sdp": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 192.168.1.42\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+23+chars\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates",
+        "other": ""
+      }
+    },
+    {
+      "label": "Alice's offer, before gathering",
+      "input": {
+        "sdp": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 9 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 0.0.0.0\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+23+chars\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp:9 IN IP4 0.0.0.0\na=rtcp-mux\na=rtcp-rsize",
+        "other": ""
+      }
+    },
+    {
+      "label": "The assistant's answer",
+      "input": {
+        "sdp": "v=0\no=- 7208271330925374214 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=ice-lite\na=group:BUNDLE 0\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 198.51.100.20\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:assistant-voice assistant-voice-track\na=ssrc:2712847316 cname:assistant\na=ice-ufrag:srv7\na=ice-pwd:server+password+24+chars\na=fingerprint:sha-256 BE:71:5C:E2:A6:DB:52:F3:30:4E:C9:69:0C:42:33:31:9E:40:3E:39:9E:89:60:7D:3A:84:79:BD:8E:52:24:67\na=setup:active\na=tls-id:a1b2c3d4e5f60718293a4b5c6d7e8f90\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 198.51.100.20 50004 typ host\na=end-of-candidates",
+        "other": ""
+      }
+    },
+    {
+      "label": "aiortc's answer (a capture)",
+      "input": {
+        "sdp": "v=0\no=- 3999926386 3999926386 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=msid-semantic:WMS *\nm=audio 61199 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 127.0.0.1\na=recvonly\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=mid:0\na=msid:f6491d43-fe95-459c-a56b-c19c90a2b9c2 387a2078-84a9-44d5-a9d6-15b4e1c64605\na=rtcp:9 IN IP4 0.0.0.0\na=rtcp-mux\na=ssrc:492060789 cname:5793974b-9159-40c7-acba-217bdd85f9b8\na=rtpmap:111 opus/48000/2\na=candidate:16572de626da4e5384a0ce2d0d93678a 1 udp 2130706431 127.0.0.1 61199 typ host\na=end-of-candidates\na=ice-ufrag:mDSQ\na=ice-pwd:1lSUbj4sMMGIqcVUEVepxm\na=fingerprint:sha-256 D2:FE:12:71:2C:79:70:29:C9:D8:4F:AE:72:1D:EC:CA:E3:F1:EE:09:14:32:5C:2F:33:A2:01:91:A3:79:FF:B1\na=fingerprint:sha-384 8F:C9:9D:12:B1:F6:10:87:E7:C2:7D:B0:A3:E3:C4:9B:74:58:A0:21:AC:2E:1D:02:3D:95:7F:B8:BB:B6:3F:60:4E:F5:8E:D7:6A:E7:51:0B:9F:40:A1:4E:1C:8C:6A:CB\na=fingerprint:sha-512 76:C4:FF:49:B4:3E:45:CD:6B:C9:56:E9:04:04:47:C2:13:EB:CF:26:88:3A:1F:6C:9C:01:14:E3:3F:76:CE:35:BE:23:69:35:AA:4F:B2:72:B2:DD:7A:48:84:45:95:BB:07:D4:34:12:22:13:12:80:29:29:B3:77:33:1F:F8:64\na=setup:active",
+        "other": ""
+      }
+    },
+    {
+      "label": "RFC 9429's example offer, unwrapped",
+      "input": {
+        "sdp": "v=0\no=- 4962303333179871722 1 IN IP4 0.0.0.0\ns=-\nt=0 0\na=ice-options:trickle ice2\na=group:BUNDLE a1 v1\na=group:LS a1 v1\nm=audio 10100 UDP/TLS/RTP/SAVPF 96 0 8 97 98\nc=IN IP4 203.0.113.100\na=mid:a1\na=sendrecv\na=rtpmap:96 opus/48000/2\na=rtpmap:0 PCMU/8000\na=rtpmap:8 PCMA/8000\na=rtpmap:97 telephone-event/8000\na=rtpmap:98 telephone-event/48000\na=fmtp:97 0-15\na=fmtp:98 0-15\na=maxptime:120\na=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid\na=extmap:2 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=msid:47017fee-b6c1-4162-929c-a25110252400\na=ice-ufrag:ETEn\na=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl\na=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2\na=setup:actpass\na=tls-id:91bbf309c0990a6bec11e38ba2933cee\na=rtcp:10101 IN IP4 203.0.113.100\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host\na=candidate:1 2 udp 2113929470 203.0.113.100 10101 typ host\na=end-of-candidates\nm=video 10102 UDP/TLS/RTP/SAVPF 100 101 102 103\nc=IN IP4 203.0.113.100\na=mid:v1\na=sendrecv\na=rtpmap:100 VP8/90000\na=rtpmap:101 H264/90000\na=fmtp:101 packetization-mode=1;profile-level-id=42e01f\na=rtpmap:102 rtx/90000\na=fmtp:102 apt=100\na=rtpmap:103 rtx/90000\na=fmtp:103 apt=101\na=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid\na=extmap:3 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id\na=rtcp-fb:100 ccm fir\na=rtcp-fb:100 nack\na=rtcp-fb:100 nack pli\na=msid:47017fee-b6c1-4162-929c-a25110252400\na=ice-ufrag:BGKk\na=ice-pwd:mqyWsAjvtKwTGnvhPztQ9mIf\na=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2\na=setup:actpass\na=tls-id:91bbf309c0990a6bec11e38ba2933cee\na=rtcp:10103 IN IP4 203.0.113.100\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2113929471 203.0.113.100 10102 typ host\na=candidate:1 2 udp 2113929470 203.0.113.100 10103 typ host\na=end-of-candidates",
+        "other": ""
+      }
+    },
+    {
+      "label": "A broken offer",
+      "input": {
+        "sdp": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+21char\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates",
+        "other": ""
+      }
+    }
+  ],
+  "help": "README.md",
+  "tags": [
+    "webrtc",
+    "sdp",
+    "dtls",
+    "ice",
+    "networking"
+  ],
+  "links": [
+    {
+      "label": "RFC 8866: SDP",
+      "href": "https://www.rfc-editor.org/rfc/rfc8866"
+    },
+    {
+      "label": "RFC 9429: JSEP, what a browser puts in an offer and an answer",
+      "href": "https://www.rfc-editor.org/rfc/rfc9429"
+    }
+  ]
+}

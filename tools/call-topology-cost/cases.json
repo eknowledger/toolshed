@@ -1,0 +1,393 @@
+[
+  {
+    "name": "alice, bob and carol through an sfu",
+    "input": {
+      "participants": 3,
+      "pattern": "sfu",
+      "loudest": 0,
+      "bitrate": 32,
+      "frame": "20",
+      "srtp": "0",
+      "level": false
+    },
+    "match": "subset",
+    "fieldCount": 7,
+    "why": "Post 6's three-person call: the SFU takes in 3 streams and sends 6, re-encrypting each copy and decoding nothing (topology_cost.py -n 3).",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Client up",
+          "value": "48 kb/s"
+        },
+        {
+          "label": "Client down",
+          "value": "96 kb/s"
+        },
+        {
+          "label": "Server out",
+          "value": "288 kb/s"
+        },
+        {
+          "label": "Server work per frame",
+          "value": "3 decrypts, 0 decodes, 6 encrypts"
+        },
+        {
+          "label": "Grows with N",
+          "value": "N(N-1) streams out of the server"
+        },
+        {
+          "label": "Packet",
+          "value": "120 B"
+        },
+        {
+          "label": "Per stream",
+          "value": "48 kb/s",
+          "note": "50 packets/s"
+        }
+      ]
+    }
+  },
+  {
+    "name": "ten people in a mesh",
+    "input": {
+      "participants": 10,
+      "pattern": "mesh",
+      "loudest": 0,
+      "bitrate": 32,
+      "frame": "20",
+      "srtp": "0",
+      "level": false
+    },
+    "match": "subset",
+    "fieldCount": 7,
+    "why": "Mesh at N = 10: every client sends 9 copies, 432 kb/s up and down, and there is no server (-n 10).",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Client up",
+          "value": "432 kb/s"
+        },
+        {
+          "label": "Client down",
+          "value": "432 kb/s"
+        },
+        {
+          "label": "Server out",
+          "value": "no server"
+        },
+        {
+          "label": "Server work per frame",
+          "value": "none"
+        }
+      ]
+    }
+  },
+  {
+    "name": "ten people, sfu",
+    "input": {
+      "participants": 10,
+      "pattern": "sfu",
+      "loudest": 0,
+      "bitrate": 32,
+      "frame": "20",
+      "srtp": "0",
+      "level": false
+    },
+    "match": "subset",
+    "fieldCount": 7,
+    "why": "The quadratic one: 10 in, 90 out, 4,320 kb/s and 4,500 packets/s (-n 10).",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Server out",
+          "value": "4320 kb/s",
+          "note": "4500 packets/s"
+        },
+        {
+          "label": "Server work per frame",
+          "value": "10 decrypts, 0 decodes, 90 encrypts"
+        }
+      ]
+    }
+  },
+  {
+    "name": "ten people, mcu",
+    "input": {
+      "participants": 10,
+      "pattern": "mcu",
+      "loudest": 0,
+      "bitrate": 32,
+      "frame": "20",
+      "srtp": "0",
+      "level": false
+    },
+    "match": "subset",
+    "fieldCount": 7,
+    "why": "The MCU is linear but each unit is a codec cycle: 10 decodes, 10 mixes, 10 encodes (-n 10).",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Client up",
+          "value": "48 kb/s"
+        },
+        {
+          "label": "Client down",
+          "value": "48 kb/s"
+        },
+        {
+          "label": "Server out",
+          "value": "480 kb/s"
+        },
+        {
+          "label": "Server work per frame",
+          "value": "10 decrypts, 10 decodes, 10 mixes, 10 encodes, 10 encrypts"
+        }
+      ]
+    }
+  },
+  {
+    "name": "three loudest of ten",
+    "input": {
+      "participants": 10,
+      "pattern": "sfu",
+      "loudest": 3,
+      "bitrate": 32,
+      "frame": "20",
+      "srtp": "0",
+      "level": false
+    },
+    "match": "subset",
+    "fieldCount": 7,
+    "why": "Forwarding the 3 loudest by their audio level: 1,296 kb/s out instead of 4,320, 27 encrypts, still no decode (-n 10 --loudest 3).",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Client up",
+          "value": "48 kb/s"
+        },
+        {
+          "label": "Client down",
+          "value": "144 kb/s"
+        },
+        {
+          "label": "Server out",
+          "value": "1296 kb/s"
+        },
+        {
+          "label": "Server work per frame",
+          "value": "10 decrypts, 0 decodes, 27 encrypts"
+        },
+        {
+          "label": "Grows with N",
+          "value": "K(N-1) streams out of the server"
+        }
+      ]
+    }
+  },
+  {
+    "name": "srtp tag and audio level",
+    "input": {
+      "participants": 3,
+      "pattern": "sfu",
+      "loudest": 0,
+      "bitrate": 32,
+      "frame": "20",
+      "srtp": "10",
+      "level": true
+    },
+    "match": "subset",
+    "fieldCount": 7,
+    "why": "138 B packets, 55.2 kb/s a stream (-n 3 --srtp-tag 10 --audio-level).",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Client down",
+          "value": "110.4 kb/s"
+        },
+        {
+          "label": "Server out",
+          "value": "331.2 kb/s"
+        },
+        {
+          "label": "Packet",
+          "value": "138 B"
+        },
+        {
+          "label": "Per stream",
+          "value": "55.2 kb/s"
+        }
+      ]
+    }
+  },
+  {
+    "name": "half the bitrate",
+    "input": {
+      "participants": 5,
+      "pattern": "sfu",
+      "loudest": 0,
+      "bitrate": 16,
+      "frame": "20",
+      "srtp": "0",
+      "level": false
+    },
+    "match": "subset",
+    "fieldCount": 7,
+    "why": "40 B of Opus, 80 B packets, 32 kb/s: the headers are now half the packet (-n 5 --bitrate 16).",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Client down",
+          "value": "128 kb/s"
+        },
+        {
+          "label": "Server out",
+          "value": "640 kb/s",
+          "note": "1000 packets/s"
+        },
+        {
+          "label": "Packet",
+          "value": "80 B"
+        }
+      ]
+    }
+  },
+  {
+    "name": "ten millisecond frames",
+    "input": {
+      "participants": 3,
+      "pattern": "sfu",
+      "loudest": 0,
+      "bitrate": 32,
+      "frame": "10",
+      "srtp": "0",
+      "level": false
+    },
+    "match": "subset",
+    "fieldCount": 7,
+    "why": "Same bitrate, twice the packets: 40 B payload, 80 B packets, 100 a second, 64 kb/s (-n 3 --frame-ms 10).",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Server out",
+          "value": "384 kb/s",
+          "note": "600 packets/s"
+        },
+        {
+          "label": "Per stream",
+          "value": "64 kb/s",
+          "note": "100 packets/s"
+        }
+      ]
+    }
+  },
+  {
+    "name": "alice and her assistant",
+    "input": {
+      "participants": 2,
+      "pattern": "peer",
+      "loudest": 0,
+      "bitrate": 32,
+      "frame": "20",
+      "srtp": "10",
+      "level": false
+    },
+    "match": "subset",
+    "fieldCount": 7,
+    "why": "One user, one service, with SRTP: 130 B, 52 kb/s each way, one of each operation per frame (-n 2 --srtp-tag 10).",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Client up",
+          "value": "52 kb/s"
+        },
+        {
+          "label": "Client down",
+          "value": "52 kb/s"
+        },
+        {
+          "label": "Server out",
+          "value": "52 kb/s"
+        },
+        {
+          "label": "Server work per frame",
+          "value": "1 decrypt, 1 decode, 1 encode, 1 encrypt"
+        },
+        {
+          "label": "Grows with N",
+          "value": "one stream each way, per user"
+        }
+      ]
+    }
+  },
+  {
+    "name": "two people, an mcu does not mix",
+    "input": {
+      "participants": 2,
+      "pattern": "mcu",
+      "loudest": 0,
+      "bitrate": 32,
+      "frame": "20",
+      "srtp": "0",
+      "level": false
+    },
+    "match": "subset",
+    "fieldCount": 7,
+    "why": "With two people each listener's mix is one voice, so there is nothing to sum.",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Server work per frame",
+          "value": "2 decrypts, 2 decodes, 2 encodes, 2 encrypts"
+        }
+      ]
+    }
+  },
+  {
+    "name": "a bitrate that is not whole bytes",
+    "input": {
+      "participants": 3,
+      "pattern": "sfu",
+      "loudest": 0,
+      "bitrate": 33,
+      "frame": "20",
+      "srtp": "0",
+      "level": false
+    },
+    "match": "subset",
+    "why": "33 kb/s for 20 ms is 82.5 bytes; the demo refuses it with the same message.",
+    "expect": {
+      "kind": "error",
+      "message": "bitrate x frame length must be a whole number of bytes.",
+      "input": "bitrate"
+    }
+  },
+  {
+    "name": "more loudest than people",
+    "input": {
+      "participants": 10,
+      "pattern": "sfu",
+      "loudest": 11,
+      "bitrate": 32,
+      "frame": "20",
+      "srtp": "0",
+      "level": false
+    },
+    "match": "subset",
+    "why": "The SFU cannot forward more streams than there are.",
+    "expect": {
+      "kind": "error",
+      "message": "The loudest streams can be at most the number of participants.",
+      "input": "loudest"
+    }
+  }
+]

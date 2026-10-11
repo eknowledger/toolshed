@@ -1,0 +1,125 @@
+{
+  "sdk": 4,
+  "id": "stun-decoder",
+  "name": "STUN message decoder",
+  "blurb": "Paste a STUN message as hex: the header, every attribute, the addresses un-XORed, and the integrity checks a receiver runs.",
+  "version": "1.0.0",
+  "capabilities": [
+    "pure"
+  ],
+  "runtime": {
+    "entry": "index.ts",
+    "thread": "main"
+  },
+  "kinds": [
+    "group",
+    "fields",
+    "series",
+    "table",
+    "bytes",
+    "error"
+  ],
+  "card": "live",
+  "cardFields": 5,
+  "inputs": [
+    {
+      "id": "message",
+      "type": "textarea",
+      "label": "Message",
+      "description": "Hex, however you copied it. Wireshark offsets and separators are stripped.",
+      "primary": true,
+      "dir": "ltr",
+      "rows": 4,
+      "maxLength": 8192,
+      "default": "0101000c 2112a442 b7e7a701 bc5ca493 5d339347 00200008 0001f523 e112a648"
+    },
+    {
+      "id": "password",
+      "type": "text",
+      "label": "Password",
+      "description": "Optional. The ICE password or TURN key, to check MESSAGE-INTEGRITY. Never sent anywhere: the check runs in this page.",
+      "default": ""
+    },
+    {
+      "id": "view",
+      "type": "select",
+      "label": "Show",
+      "description": "The byte view marks every attribute in place.",
+      "default": "all",
+      "options": [
+        {
+          "value": "all",
+          "label": "Fields and bytes"
+        },
+        {
+          "value": "fields",
+          "label": "Fields only"
+        }
+      ]
+    }
+  ],
+  "samples": [
+    {
+      "label": "Binding request",
+      "input": {
+        "message": "00010000 2112a442 b7e7a701 bc5ca493 5d339347",
+        "password": "",
+        "view": "all"
+      }
+    },
+    {
+      "label": "Binding answer",
+      "input": {
+        "message": "0101000c 2112a442 b7e7a701 bc5ca493 5d339347 00200008 0001f523 e112a648",
+        "password": "",
+        "view": "all"
+      }
+    },
+    {
+      "label": "ICE connectivity check",
+      "input": {
+        "message": "00010048 2112a442 8f1e2d3c 4b5a6978 8796a5b4 00060009 73727637 3a616c63 65000000 00240004 6effffff 802a0008 1d2c3b4a 59687786 00250000 00080014 af2e7f7f ee8a3d03 b3149db5 176cad74 55e8d938 80280004 839f5505",
+        "password": "server+password+24+chars",
+        "view": "all"
+      }
+    },
+    {
+      "label": "Its answer",
+      "input": {
+        "message": "0101002c 2112a442 8f1e2d3c 4b5a6978 8796a5b4 00200008 0001f523 e112a648 00080014 9b1d37c1 ecaa213d 226fce8a 1d42f3f2 65a293f2 80280004 9526a91a",
+        "password": "server+password+24+chars",
+        "view": "all"
+      }
+    },
+    {
+      "label": "TURN 401",
+      "input": {
+        "message": "01130058 2112a442 01020304 05060708 090a0b0c 00090010 00000401 556e6175 74686f72 697a6564 0014000b 6578616d 706c652e 6f726700 00150027 6f624d61 744a6f73 32414141 43663439 396b3935 3464364f 4c33346f 4c394653 54767936 34734100 80280004 ebbf3214",
+        "password": "",
+        "view": "all"
+      }
+    }
+  ],
+  "help": "README.md",
+  "tags": [
+    "stun",
+    "ice",
+    "turn",
+    "webrtc",
+    "networking"
+  ],
+  "links": [
+    {
+      "label": "RFC 8489: STUN",
+      "href": "https://www.rfc-editor.org/rfc/rfc8489"
+    },
+    {
+      "label": "RFC 8445: ICE",
+      "href": "https://www.rfc-editor.org/rfc/rfc8445"
+    },
+    {
+      "label": "RFC 8656: TURN",
+      "href": "https://www.rfc-editor.org/rfc/rfc8656"
+    }
+  ]
+}

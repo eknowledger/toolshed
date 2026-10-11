@@ -1,0 +1,184 @@
+{
+  "sdk": 4,
+  "id": "bitrate-under-loss",
+  "name": "Bitrate under loss",
+  "blurb": "A voice sender runs the loss-based rule of Google Congestion Control on its receiver reports. Change how often they come: see how much is lost before it backs off, and how long it takes to come back.",
+  "version": "1.0.0",
+  "capabilities": ["pure"],
+  "runtime": {
+    "entry": "index.ts",
+    "thread": "main"
+  },
+  "kinds": ["group", "fields", "series", "table", "error"],
+  "card": "live",
+  "cardFields": 3,
+  "inputs": [
+    {
+      "id": "interval",
+      "type": "select",
+      "label": "A report every",
+      "description": "How often the receiver's RTCP report arrives. Fixed rather than randomised, so every run repeats.",
+      "primary": true,
+      "default": "5",
+      "options": [
+        {
+          "value": "5",
+          "label": "5 s, RFC 3550's minimum and libwebrtc's audio default"
+        },
+        {
+          "value": "2",
+          "label": "2 s"
+        },
+        {
+          "value": "1",
+          "label": "1 s"
+        }
+      ]
+    },
+    {
+      "id": "scenario",
+      "type": "select",
+      "label": "Network",
+      "description": "Two minutes of one of two networks.",
+      "primary": true,
+      "default": "squeeze",
+      "options": [
+        {
+          "value": "squeeze",
+          "label": "The path narrows from 30 s to 60 s"
+        },
+        {
+          "value": "radio",
+          "label": "Loss that sending less cannot fix"
+        }
+      ]
+    },
+    {
+      "id": "capacity",
+      "type": "number",
+      "label": "Squeezed capacity",
+      "unit": "kb/s",
+      "description": "What the path carries from 30 s to 60 s in the squeeze; 100 kb/s either side.",
+      "default": 30,
+      "min": 10,
+      "max": 100,
+      "step": 1
+    },
+    {
+      "id": "loss",
+      "type": "number",
+      "label": "Radio loss from 40 s",
+      "unit": "%",
+      "description": "Random loss on the radio link from 40 s to 60 s, after 5% from 20 s to 40 s.",
+      "default": 15,
+      "min": 0,
+      "max": 50,
+      "step": 1
+    },
+    {
+      "id": "frame",
+      "type": "select",
+      "label": "Frame length",
+      "description": "Audio per packet. Fewer packets carry fewer headers: 16, 8 or 5.33 kb/s at 40 B each.",
+      "default": "20",
+      "options": [
+        {
+          "value": "20",
+          "label": "20 ms"
+        },
+        {
+          "value": "40",
+          "label": "40 ms"
+        },
+        {
+          "value": "60",
+          "label": "60 ms"
+        }
+      ]
+    },
+    {
+      "id": "ceiling",
+      "type": "number",
+      "label": "Opus ceiling",
+      "unit": "kb/s",
+      "description": "The rate the sender starts at and returns to. The floor is Opus's own, 6 kb/s.",
+      "default": 32,
+      "min": 6,
+      "max": 64,
+      "step": 1
+    }
+  ],
+  "samples": [
+    {
+      "label": "Squeeze, reports every 5 s",
+      "input": {
+        "interval": "5",
+        "scenario": "squeeze",
+        "capacity": 30,
+        "loss": 15,
+        "frame": "20",
+        "ceiling": 32
+      }
+    },
+    {
+      "label": "Squeeze, every 1 s",
+      "input": {
+        "interval": "1",
+        "scenario": "squeeze",
+        "capacity": 30,
+        "loss": 15,
+        "frame": "20",
+        "ceiling": 32
+      }
+    },
+    {
+      "label": "Loss that isn't congestion, every 5 s",
+      "input": {
+        "interval": "5",
+        "scenario": "radio",
+        "capacity": 30,
+        "loss": 15,
+        "frame": "20",
+        "ceiling": 32
+      }
+    },
+    {
+      "label": "Loss that isn't congestion, every 1 s",
+      "input": {
+        "interval": "1",
+        "scenario": "radio",
+        "capacity": 30,
+        "loss": 15,
+        "frame": "20",
+        "ceiling": 32
+      }
+    },
+    {
+      "label": "Longer packets",
+      "input": {
+        "interval": "5",
+        "scenario": "squeeze",
+        "capacity": 30,
+        "loss": 15,
+        "frame": "60",
+        "ceiling": 32
+      }
+    }
+  ],
+  "help": "README.md",
+  "tags": ["webrtc", "rtcp", "congestion-control", "voice", "networking"],
+  "links": [
+    {
+      "label": "draft-ietf-rmcat-gcc-02 section 6: loss-based control",
+      "href": "https://datatracker.ietf.org/doc/html/draft-ietf-rmcat-gcc-02#section-6"
+    },
+    {
+      "label": "RFC 3550 section 6.4.1: the receiver report",
+      "href": "https://www.rfc-editor.org/rfc/rfc3550#section-6.4.1"
+    },
+    {
+      "label": "RFC 6716 section 2.1.1: Opus bitrates",
+      "href": "https://www.rfc-editor.org/rfc/rfc6716#section-2.1.1"
+    }
+  ]
+}

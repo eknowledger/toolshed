@@ -1,0 +1,486 @@
+[
+  {
+    "name": "alice's offer",
+    "input": {
+      "sdp": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 192.168.1.42\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+23+chars\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates",
+      "other": "",
+      "show": "all"
+    },
+    "match": "subset",
+    "fieldCount": 10,
+    "why": "The post's offer, values from tool_reference.py: a full agent with three candidates and actpass, 28 lines (Session 4, ICE 9, DTLS 3, RTP 7, Codec 2, RTCP 3), nothing wrong.",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Type",
+          "value": "offer (a=setup:actpass)"
+        },
+        {
+          "label": "ICE",
+          "value": "full, ufrag alce"
+        },
+        {
+          "label": "Candidates",
+          "value": "1 host, 1 relay, 1 srflx; complete (a=end-of-candidates)"
+        },
+        {
+          "label": "DTLS role",
+          "value": "either; the answerer chooses"
+        },
+        {
+          "label": "Fingerprints",
+          "value": "1: sha-256"
+        },
+        {
+          "label": "Media",
+          "value": "audio mid 0"
+        },
+        {
+          "label": "Codecs",
+          "value": "opus/48000/2 pt 111"
+        },
+        {
+          "label": "Lines",
+          "value": "28",
+          "note": "Session 4, ICE 9, DTLS 3, RTP 7, Codec 2, RTCP 3"
+        },
+        {
+          "label": "Problems",
+          "value": "0 errors, 0 warnings, 0 notes",
+          "tone": "good"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the offer before gathering",
+    "input": {
+      "sdp": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 9 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 0.0.0.0\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+23+chars\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp:9 IN IP4 0.0.0.0\na=rtcp-mux\na=rtcp-rsize",
+      "other": "",
+      "show": "all"
+    },
+    "match": "subset",
+    "fieldCount": 10,
+    "why": "Trickle ICE: no candidates yet, port 9 and IN IP4 0.0.0.0, which satisfy the no-candidate rule, so 0 problems. RTCP is 4, not 3: the extra line is a=rtcp:9 IN IP4 0.0.0.0 (tool_reference.py).",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Candidates",
+          "value": "0; none yet"
+        },
+        {
+          "label": "Lines",
+          "value": "25",
+          "note": "Session 4, ICE 5, DTLS 3, RTP 7, Codec 2, RTCP 4"
+        },
+        {
+          "label": "Problems",
+          "value": "0 errors, 0 warnings, 0 notes"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the assistant's answer",
+    "input": {
+      "sdp": "v=0\no=- 7208271330925374214 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=ice-lite\na=group:BUNDLE 0\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 198.51.100.20\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:assistant-voice assistant-voice-track\na=ssrc:2712847316 cname:assistant\na=ice-ufrag:srv7\na=ice-pwd:server+password+24+chars\na=fingerprint:sha-256 BE:71:5C:E2:A6:DB:52:F3:30:4E:C9:69:0C:42:33:31:9E:40:3E:39:9E:89:60:7D:3A:84:79:BD:8E:52:24:67\na=setup:active\na=tls-id:a1b2c3d4e5f60718293a4b5c6d7e8f90\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 198.51.100.20 50004 typ host\na=end-of-candidates",
+      "other": "",
+      "show": "all"
+    },
+    "match": "subset",
+    "fieldCount": 10,
+    "why": "ICE-lite, one host candidate, setup:active so it sends the ClientHello. Its password is now server+password+24+chars, all ice-chars, so tool_reference.py reports 0 problems where post 3's hyphenated one gave a warning.",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Type",
+          "value": "answer (a=setup:active)"
+        },
+        {
+          "label": "ICE",
+          "value": "lite, ufrag srv7"
+        },
+        {
+          "label": "Candidates",
+          "value": "1 host; complete (a=end-of-candidates)"
+        },
+        {
+          "label": "DTLS role",
+          "value": "DTLS client: sends the ClientHello"
+        },
+        {
+          "label": "Lines",
+          "value": "25",
+          "note": "Session 4, ICE 7, DTLS 3, RTP 6, Codec 2, RTCP 3"
+        },
+        {
+          "label": "Problems",
+          "value": "0 errors, 0 warnings, 0 notes",
+          "tone": "good"
+        }
+      ]
+    }
+  },
+  {
+    "name": "aiortc's answer",
+    "input": {
+      "sdp": "v=0\no=- 3999926386 3999926386 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=msid-semantic:WMS *\nm=audio 61199 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 127.0.0.1\na=recvonly\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=mid:0\na=msid:f6491d43-fe95-459c-a56b-c19c90a2b9c2 387a2078-84a9-44d5-a9d6-15b4e1c64605\na=rtcp:9 IN IP4 0.0.0.0\na=rtcp-mux\na=ssrc:492060789 cname:5793974b-9159-40c7-acba-217bdd85f9b8\na=rtpmap:111 opus/48000/2\na=candidate:16572de626da4e5384a0ce2d0d93678a 1 udp 2130706431 127.0.0.1 61199 typ host\na=end-of-candidates\na=ice-ufrag:mDSQ\na=ice-pwd:1lSUbj4sMMGIqcVUEVepxm\na=fingerprint:sha-256 D2:FE:12:71:2C:79:70:29:C9:D8:4F:AE:72:1D:EC:CA:E3:F1:EE:09:14:32:5C:2F:33:A2:01:91:A3:79:FF:B1\na=fingerprint:sha-384 8F:C9:9D:12:B1:F6:10:87:E7:C2:7D:B0:A3:E3:C4:9B:74:58:A0:21:AC:2E:1D:02:3D:95:7F:B8:BB:B6:3F:60:4E:F5:8E:D7:6A:E7:51:0B:9F:40:A1:4E:1C:8C:6A:CB\na=fingerprint:sha-512 76:C4:FF:49:B4:3E:45:CD:6B:C9:56:E9:04:04:47:C2:13:EB:CF:26:88:3A:1F:6C:9C:01:14:E3:3F:76:CE:35:BE:23:69:35:AA:4F:B2:72:B2:DD:7A:48:84:45:95:BB:07:D4:34:12:22:13:12:80:29:29:B3:77:33:1F:F8:64\na=setup:active",
+      "other": "",
+      "show": "all"
+    },
+    "match": "subset",
+    "fieldCount": 10,
+    "why": "Captured from aiortc answering Alice's offer: three fingerprints, one per hash, recvonly, and no a=tls-id, the one warning (tool_reference.py).",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Type",
+          "value": "answer (a=setup:active)"
+        },
+        {
+          "label": "ICE",
+          "value": "full, ufrag mDSQ"
+        },
+        {
+          "label": "Fingerprints",
+          "value": "3: sha-256, sha-384, sha-512"
+        },
+        {
+          "label": "Lines",
+          "value": "25",
+          "note": "Session 4, ICE 6, DTLS 4, RTP 8, Codec 1, RTCP 2"
+        },
+        {
+          "label": "Problems",
+          "value": "0 errors, 1 warning, 0 notes",
+          "tone": "warn"
+        }
+      ]
+    }
+  },
+  {
+    "name": "aiortc's answer, its one problem",
+    "input": {
+      "sdp": "v=0\no=- 3999926386 3999926386 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=msid-semantic:WMS *\nm=audio 61199 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 127.0.0.1\na=recvonly\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=mid:0\na=msid:f6491d43-fe95-459c-a56b-c19c90a2b9c2 387a2078-84a9-44d5-a9d6-15b4e1c64605\na=rtcp:9 IN IP4 0.0.0.0\na=rtcp-mux\na=ssrc:492060789 cname:5793974b-9159-40c7-acba-217bdd85f9b8\na=rtpmap:111 opus/48000/2\na=candidate:16572de626da4e5384a0ce2d0d93678a 1 udp 2130706431 127.0.0.1 61199 typ host\na=end-of-candidates\na=ice-ufrag:mDSQ\na=ice-pwd:1lSUbj4sMMGIqcVUEVepxm\na=fingerprint:sha-256 D2:FE:12:71:2C:79:70:29:C9:D8:4F:AE:72:1D:EC:CA:E3:F1:EE:09:14:32:5C:2F:33:A2:01:91:A3:79:FF:B1\na=fingerprint:sha-384 8F:C9:9D:12:B1:F6:10:87:E7:C2:7D:B0:A3:E3:C4:9B:74:58:A0:21:AC:2E:1D:02:3D:95:7F:B8:BB:B6:3F:60:4E:F5:8E:D7:6A:E7:51:0B:9F:40:A1:4E:1C:8C:6A:CB\na=fingerprint:sha-512 76:C4:FF:49:B4:3E:45:CD:6B:C9:56:E9:04:04:47:C2:13:EB:CF:26:88:3A:1F:6C:9C:01:14:E3:3F:76:CE:35:BE:23:69:35:AA:4F:B2:72:B2:DD:7A:48:84:45:95:BB:07:D4:34:12:22:13:12:80:29:29:B3:77:33:1F:F8:64\na=setup:active",
+      "other": "",
+      "show": "all"
+    },
+    "match": "subset",
+    "why": "The problem list exactly, so a second problem cannot slip in: the missing a=tls-id, attributed to the m= line on line 7, since a missing line has no line of its own.",
+    "expect": {
+      "kind": "table",
+      "caption": "Problems: an error is a MUST broken, a warning a SHOULD or a value real stacks accept anyway, a note a decoded oddity",
+      "columns": [
+        {
+          "label": "Severity"
+        },
+        {
+          "label": "Where"
+        },
+        {
+          "label": "Problem"
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "warning",
+            "tone": "warn"
+          },
+          "line 7",
+          "m= section 1: no a=tls-id (RFC 8842 sections 5.2 and 5.3)"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rfc 9429's example offer",
+    "input": {
+      "sdp": "v=0\no=- 4962303333179871722 1 IN IP4 0.0.0.0\ns=-\nt=0 0\na=ice-options:trickle ice2\na=group:BUNDLE a1 v1\na=group:LS a1 v1\nm=audio 10100 UDP/TLS/RTP/SAVPF 96 0 8 97 98\nc=IN IP4 203.0.113.100\na=mid:a1\na=sendrecv\na=rtpmap:96 opus/48000/2\na=rtpmap:0 PCMU/8000\na=rtpmap:8 PCMA/8000\na=rtpmap:97 telephone-event/8000\na=rtpmap:98 telephone-event/48000\na=fmtp:97 0-15\na=fmtp:98 0-15\na=maxptime:120\na=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid\na=extmap:2 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=msid:47017fee-b6c1-4162-929c-a25110252400\na=ice-ufrag:ETEn\na=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl\na=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2\na=setup:actpass\na=tls-id:91bbf309c0990a6bec11e38ba2933cee\na=rtcp:10101 IN IP4 203.0.113.100\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host\na=candidate:1 2 udp 2113929470 203.0.113.100 10101 typ host\na=end-of-candidates\nm=video 10102 UDP/TLS/RTP/SAVPF 100 101 102 103\nc=IN IP4 203.0.113.100\na=mid:v1\na=sendrecv\na=rtpmap:100 VP8/90000\na=rtpmap:101 H264/90000\na=fmtp:101 packetization-mode=1;profile-level-id=42e01f\na=rtpmap:102 rtx/90000\na=fmtp:102 apt=100\na=rtpmap:103 rtx/90000\na=fmtp:103 apt=101\na=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid\na=extmap:3 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id\na=rtcp-fb:100 ccm fir\na=rtcp-fb:100 nack\na=rtcp-fb:100 nack pli\na=msid:47017fee-b6c1-4162-929c-a25110252400\na=ice-ufrag:BGKk\na=ice-pwd:mqyWsAjvtKwTGnvhPztQ9mIf\na=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2\na=setup:actpass\na=tls-id:91bbf309c0990a6bec11e38ba2933cee\na=rtcp:10103 IN IP4 203.0.113.100\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2113929471 203.0.113.100 10102 typ host\na=candidate:1 2 udp 2113929470 203.0.113.100 10103 typ host\na=end-of-candidates",
+      "other": "",
+      "show": "all"
+    },
+    "match": "subset",
+    "fieldCount": 10,
+    "why": "Section 7.1's offer with its layout undone: audio and video bundled, component-2 RTCP candidates, nine payload types, 61 lines, 0 problems (tool_reference.py). Two fingerprints because each section repeats the one certificate's.",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Candidates",
+          "value": "4 host; complete (a=end-of-candidates)"
+        },
+        {
+          "label": "Fingerprints",
+          "value": "2: sha-256"
+        },
+        {
+          "label": "Media",
+          "value": "audio mid a1; video mid v1"
+        },
+        {
+          "label": "Codecs",
+          "value": "opus/48000/2 pt 96, PCMU/8000 pt 0, PCMA/8000 pt 8, telephone-event/8000 pt 97, telephone-event/48000 pt 98, VP8/90000 pt 100, H264/90000 pt 101, rtx/90000 pt 102, rtx/90000 pt 103",
+          "note": "9 payload types"
+        },
+        {
+          "label": "Lines",
+          "value": "61",
+          "note": "Session 4, ICE 15, DTLS 6, RTP 12, Codec 15, RTCP 9"
+        },
+        {
+          "label": "Problems",
+          "value": "0 errors, 0 warnings, 0 notes"
+        }
+      ]
+    }
+  },
+  {
+    "name": "a broken offer",
+    "input": {
+      "sdp": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+21char\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates",
+      "other": "",
+      "show": "all"
+    },
+    "match": "subset",
+    "fieldCount": 10,
+    "why": "Alice's offer with five things removed or changed, which tool_reference.py reports as six errors: the missing a=mid also leaves BUNDLE naming a mid nobody has.",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Media",
+          "value": "audio mid ?"
+        },
+        {
+          "label": "Lines",
+          "value": "25",
+          "note": "Session 4, ICE 8, DTLS 3, RTP 6, Codec 2, RTCP 2"
+        },
+        {
+          "label": "Problems",
+          "value": "6 errors, 0 warnings, 0 notes",
+          "tone": "bad"
+        }
+      ]
+    }
+  },
+  {
+    "name": "a broken offer, its six errors",
+    "input": {
+      "sdp": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+21char\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates",
+      "other": "",
+      "show": "all"
+    },
+    "match": "subset",
+    "why": "The six errors exactly and nothing else, in tool_reference.py's order and words. A missing line is reported on its section's m= line (line 7).",
+    "expect": {
+      "kind": "table",
+      "caption": "Problems: an error is a MUST broken, a warning a SHOULD or a value real stacks accept anyway, a note a decoded oddity",
+      "columns": [
+        {
+          "label": "Severity"
+        },
+        {
+          "label": "Where"
+        },
+        {
+          "label": "Problem"
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "error",
+            "tone": "bad"
+          },
+          "line 7",
+          "m= section 1: no c= line (RFC 8866 section 5.7)"
+        ],
+        [
+          {
+            "text": "error",
+            "tone": "bad"
+          },
+          "line 7",
+          "m= section 1: no a=mid (RFC 9429 section 5.2.1)"
+        ],
+        [
+          {
+            "text": "error",
+            "tone": "bad"
+          },
+          "line 17",
+          "m= section 1: ice-pwd is 21 characters, at least 22 (RFC 8839 section 5.4)"
+        ],
+        [
+          {
+            "text": "error",
+            "tone": "bad"
+          },
+          "line 7",
+          "m= section 1: no a=rtcp-mux (RFC 5761; RFC 8834 section 4.5)"
+        ],
+        [
+          {
+            "text": "error",
+            "tone": "bad"
+          },
+          "line 23",
+          "candidate 2 (srflx) has no raddr/rport (RFC 8839 section 5.1)"
+        ],
+        [
+          {
+            "text": "error",
+            "tone": "bad"
+          },
+          "line 5",
+          "BUNDLE names mid 0, which no m= section has (RFC 9143)"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "alice's offer with the assistant's answer",
+    "input": {
+      "sdp": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 192.168.1.42\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+23+chars\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates",
+      "other": "v=0\no=- 7208271330925374214 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=ice-lite\na=group:BUNDLE 0\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 198.51.100.20\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:assistant-voice assistant-voice-track\na=ssrc:2712847316 cname:assistant\na=ice-ufrag:srv7\na=ice-pwd:server+password+24+chars\na=fingerprint:sha-256 BE:71:5C:E2:A6:DB:52:F3:30:4E:C9:69:0C:42:33:31:9E:40:3E:39:9E:89:60:7D:3A:84:79:BD:8E:52:24:67\na=setup:active\na=tls-id:a1b2c3d4e5f60718293a4b5c6d7e8f90\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 198.51.100.20 50004 typ host\na=end-of-candidates",
+      "show": "all"
+    },
+    "match": "subset",
+    "fieldCount": 7,
+    "why": "Not in tool_reference.py; derived from the rules table. Alice is full and the server lite, so the full agent controls (RFC 8445 6.1.1). actpass against active: the active side, the server, sends the ClientHello. Both list opus/48000/2 as pt 111, both bundle mid 0, both have rtcp-mux, and the fingerprints differ (A9:5C... against BE:71...).",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "group": "Pair",
+          "label": "Offer and answer",
+          "value": "this SDP offers, the other answers"
+        },
+        {
+          "group": "Pair",
+          "label": "ICE roles",
+          "value": "this side controls",
+          "note": "full against lite: the full agent controls (RFC 8445 section 6.1.1)"
+        },
+        {
+          "group": "Pair",
+          "label": "ClientHello sent by",
+          "value": "the other side (a=setup:active)"
+        },
+        {
+          "group": "Pair",
+          "label": "Codec agreed",
+          "value": "opus/48000/2 pt 111"
+        },
+        {
+          "group": "Pair",
+          "label": "BUNDLE",
+          "value": "mid 0, on both"
+        },
+        {
+          "group": "Pair",
+          "label": "rtcp-mux",
+          "value": "on both"
+        },
+        {
+          "group": "Pair",
+          "label": "Fingerprints",
+          "value": "present on both, different certificates"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the same offer twice",
+    "input": {
+      "sdp": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 192.168.1.42\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+23+chars\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates",
+      "other": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 192.168.1.42\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+23+chars\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates",
+      "show": "all"
+    },
+    "match": "subset",
+    "fieldCount": 7,
+    "why": "Derived from the rules table: actpass on both sides means two offers, and a DTLS role only resolves when one side says active or passive, so none can be settled. Both full, so the offerer would control ICE, and there is no one offerer. The fingerprints are the same certificate.",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "group": "Pair",
+          "label": "Offer and answer",
+          "value": "both are offers (a=setup:actpass twice)",
+          "tone": "bad"
+        },
+        {
+          "group": "Pair",
+          "label": "ICE roles",
+          "value": "not settled"
+        },
+        {
+          "group": "Pair",
+          "label": "ClientHello sent by",
+          "value": "not settled: both are offers (actpass twice), so no DTLS role can be settled",
+          "tone": "bad"
+        },
+        {
+          "group": "Pair",
+          "label": "Fingerprints",
+          "value": "present on both, the same certificate"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the pair's chart",
+    "input": {
+      "sdp": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 192.168.1.42\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+23+chars\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates",
+      "other": "v=0\no=- 7208271330925374214 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=ice-lite\na=group:BUNDLE 0\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 198.51.100.20\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:assistant-voice assistant-voice-track\na=ssrc:2712847316 cname:assistant\na=ice-ufrag:srv7\na=ice-pwd:server+password+24+chars\na=fingerprint:sha-256 BE:71:5C:E2:A6:DB:52:F3:30:4E:C9:69:0C:42:33:31:9E:40:3E:39:9E:89:60:7D:3A:84:79:BD:8E:52:24:67\na=setup:active\na=tls-id:a1b2c3d4e5f60718293a4b5c6d7e8f90\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 198.51.100.20 50004 typ host\na=end-of-candidates",
+      "show": "all"
+    },
+    "match": "subset",
+    "why": "The chart frame: one horizontal bar per SDP, its lines stacked by phase, named so the line tables can link to it.",
+    "expect": {
+      "kind": "series",
+      "chart": {
+        "id": "phases",
+        "xLabel": "SDP",
+        "yLabel": "Lines",
+        "orientation": "horizontal",
+        "x": [],
+        "series": []
+      }
+    }
+  },
+  {
+    "name": "not sdp",
+    "input": {
+      "sdp": "hello",
+      "other": "",
+      "show": "all"
+    },
+    "why": "RFC 8866 section 5.1: a description starts with v=0. The whole input is refused rather than read line by line.",
+    "expect": {
+      "kind": "error",
+      "message": "Not SDP: the first line must be v=0 (RFC 8866 section 5.1)",
+      "input": "sdp"
+    }
+  },
+  {
+    "name": "the other side is not sdp",
+    "input": {
+      "sdp": "v=0\no=- 4611731400430051336 2 IN IP4 0.0.0.0\ns=-\nt=0 0\na=group:BUNDLE 0\na=ice-options:trickle ice2\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 192.168.1.42\na=mid:0\na=sendrecv\na=rtpmap:111 opus/48000/2\na=fmtp:111 minptime=10;useinbandfec=1\na=rtcp-fb:111 transport-cc\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid\na=msid:alice-mic alice-mic-track\na=ssrc:523124044 cname:alice\na=ice-ufrag:alce\na=ice-pwd:alice+password+23+chars\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=tls-id:1f2e3d4c5b6a79880a1b2c3d4e5f6071\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates",
+      "other": "hello",
+      "show": "all"
+    },
+    "why": "The same rule on the second input, which is the control the message points at.",
+    "expect": {
+      "kind": "error",
+      "message": "Not SDP: the first line must be v=0 (RFC 8866 section 5.1)",
+      "input": "other"
+    }
+  }
+]

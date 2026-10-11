@@ -1,0 +1,488 @@
+[
+  {
+    "name": "binding request",
+    "input": {
+      "message": "00010000 2112a442 b7e7a701 bc5ca493 5d339347",
+      "password": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "The 20-byte request from the post: type 0x0001, no attributes, the magic cookie and a 12-byte transaction ID.",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Binding request",
+          "note": "type 0x0001: method 0x001, class 0"
+        },
+        {
+          "label": "Length",
+          "value": "0 bytes of attributes",
+          "note": "20 bytes in all, with the 20-byte header"
+        },
+        {
+          "label": "Magic cookie",
+          "value": "0x2112A442",
+          "note": "fixed: tells STUN apart from the media sharing the port",
+          "tone": "good"
+        },
+        {
+          "label": "Transaction ID",
+          "value": "b7 e7 a7 01 bc 5c a4 93 5d 33 93 47",
+          "note": "random, so the answer can be matched to the request"
+        }
+      ]
+    },
+    "fieldCount": 4
+  },
+  {
+    "name": "binding answer",
+    "input": {
+      "message": "0101000c 2112a442 b7e7a701 bc5ca493 5d339347 00200008 0001f523 e112a648",
+      "password": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "The post's answer: XOR-MAPPED-ADDRESS f523 e112a648 un-XORs to 192.0.2.10:54321, port XOR 0x2112, address XOR 0x2112A442.",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Binding success response",
+          "note": "type 0x0101: method 0x001, class 2"
+        },
+        {
+          "label": "Length",
+          "value": "12 bytes of attributes",
+          "note": "32 bytes in all, with the 20-byte header"
+        },
+        {
+          "label": "Magic cookie",
+          "value": "0x2112A442",
+          "note": "fixed: tells STUN apart from the media sharing the port",
+          "tone": "good"
+        },
+        {
+          "label": "Transaction ID",
+          "value": "b7 e7 a7 01 bc 5c a4 93 5d 33 93 47",
+          "note": "random, so the answer can be matched to the request"
+        },
+        {
+          "label": "XOR-MAPPED-ADDRESS",
+          "value": "192.0.2.10:54321",
+          "note": "port 0xF523 XOR 0x2112, address 0xE112A648 XOR 0x2112A442"
+        }
+      ]
+    },
+    "fieldCount": 5
+  },
+  {
+    "name": "ice connectivity check",
+    "input": {
+      "message": "00010048 2112a442 8f1e2d3c 4b5a6978 8796a5b4 00060009 73727637 3a616c63 65000000 00240004 6effffff 802a0008 1d2c3b4a 59687786 00250000 00080014 af2e7f7f ee8a3d03 b3149db5 176cad74 55e8d938 80280004 839f5505",
+      "password": "server+password+24+chars",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "Made by aioice: USERNAME receiver:sender, PRIORITY with type preference 110 (peer-reflexive), ICE-CONTROLLING, USE-CANDIDATE, and MESSAGE-INTEGRITY and FINGERPRINT that both verify with the password.",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Binding request",
+          "note": "type 0x0001: method 0x001, class 0"
+        },
+        {
+          "label": "Length",
+          "value": "72 bytes of attributes",
+          "note": "92 bytes in all, with the 20-byte header"
+        },
+        {
+          "label": "Magic cookie",
+          "value": "0x2112A442",
+          "note": "fixed: tells STUN apart from the media sharing the port",
+          "tone": "good"
+        },
+        {
+          "label": "Transaction ID",
+          "value": "8f 1e 2d 3c 4b 5a 69 78 87 96 a5 b4",
+          "note": "random, so the answer can be matched to the request"
+        },
+        {
+          "label": "USERNAME",
+          "value": "srv7:alce",
+          "note": "ICE: \"srv7\" is the receiver's ufrag, \"alce\" the sender's"
+        },
+        {
+          "label": "PRIORITY",
+          "value": "1862270975",
+          "note": "type preference 110, peer-reflexive by RFC 8445's recommended values; local preference 65535; component 1"
+        },
+        {
+          "label": "ICE-CONTROLLING",
+          "value": "1d 2c 3b 4a 59 68 77 86",
+          "note": "a tiebreaker, compared only if both sides claim the same role"
+        },
+        {
+          "label": "USE-CANDIDATE",
+          "value": "present",
+          "note": "the controlling agent nominates this pair"
+        },
+        {
+          "label": "MESSAGE-INTEGRITY",
+          "value": "af 2e 7f 7f ee 8a 3d 03 b3 14 9d b5 17 6c ad 74 55 e8 d9 38",
+          "note": "matches the password given",
+          "tone": "good"
+        },
+        {
+          "label": "FINGERPRINT",
+          "value": "0x839F5505",
+          "note": "matches: CRC-32 of everything before it, XOR 0x5354554E",
+          "tone": "good"
+        }
+      ]
+    },
+    "fieldCount": 10
+  },
+  {
+    "name": "its answer",
+    "input": {
+      "message": "0101002c 2112a442 8f1e2d3c 4b5a6978 8796a5b4 00200008 0001f523 e112a648 00080014 9b1d37c1 ecaa213d 226fce8a 1d42f3f2 65a293f2 80280004 9526a91a",
+      "password": "server+password+24+chars",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "The success response to that check, made by aioice, both integrity checks verifying.",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Binding success response",
+          "note": "type 0x0101: method 0x001, class 2"
+        },
+        {
+          "label": "Length",
+          "value": "44 bytes of attributes",
+          "note": "64 bytes in all, with the 20-byte header"
+        },
+        {
+          "label": "Magic cookie",
+          "value": "0x2112A442",
+          "note": "fixed: tells STUN apart from the media sharing the port",
+          "tone": "good"
+        },
+        {
+          "label": "Transaction ID",
+          "value": "8f 1e 2d 3c 4b 5a 69 78 87 96 a5 b4",
+          "note": "random, so the answer can be matched to the request"
+        },
+        {
+          "label": "XOR-MAPPED-ADDRESS",
+          "value": "192.0.2.10:54321",
+          "note": "port 0xF523 XOR 0x2112, address 0xE112A648 XOR 0x2112A442"
+        },
+        {
+          "label": "MESSAGE-INTEGRITY",
+          "value": "9b 1d 37 c1 ec aa 21 3d 22 6f ce 8a 1d 42 f3 f2 65 a2 93 f2",
+          "note": "matches the password given",
+          "tone": "good"
+        },
+        {
+          "label": "FINGERPRINT",
+          "value": "0x9526A91A",
+          "note": "matches: CRC-32 of everything before it, XOR 0x5354554E",
+          "tone": "good"
+        }
+      ]
+    },
+    "fieldCount": 7
+  },
+  {
+    "name": "turn 401",
+    "input": {
+      "message": "01130058 2112a442 01020304 05060708 090a0b0c 00090010 00000401 556e6175 74686f72 697a6564 0014000b 6578616d 706c652e 6f726700 00150027 6f624d61 744a6f73 32414141 43663439 396b3935 3464364f 4c33346f 4c394653 54767936 34734100 80280004 ebbf3214",
+      "password": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "A TURN server's 401 to an Allocate without credentials: Allocate error response 0x0113, with REALM and NONCE for the retry. FINGERPRINT verifies; there is no MESSAGE-INTEGRITY to check.",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Allocate error response",
+          "note": "type 0x0113: method 0x003, class 3"
+        },
+        {
+          "label": "Length",
+          "value": "88 bytes of attributes",
+          "note": "108 bytes in all, with the 20-byte header"
+        },
+        {
+          "label": "Magic cookie",
+          "value": "0x2112A442",
+          "note": "fixed: tells STUN apart from the media sharing the port",
+          "tone": "good"
+        },
+        {
+          "label": "Transaction ID",
+          "value": "01 02 03 04 05 06 07 08 09 0a 0b 0c",
+          "note": "random, so the answer can be matched to the request"
+        },
+        {
+          "label": "ERROR-CODE",
+          "value": "401 Unauthorized",
+          "tone": "warn"
+        },
+        {
+          "label": "REALM",
+          "value": "example.org"
+        },
+        {
+          "label": "NONCE",
+          "value": "obMatJos2AAACf499k954d6OL34oL9FSTvy64sA"
+        },
+        {
+          "label": "FINGERPRINT",
+          "value": "0xEBBF3214",
+          "note": "matches: CRC-32 of everything before it, XOR 0x5354554E",
+          "tone": "good"
+        }
+      ]
+    },
+    "fieldCount": 8
+  },
+  {
+    "name": "a wrong magic cookie is not STUN",
+    "input": {
+      "message": "0001 0000 2112a443 b7e7a701 bc5ca493 5d339347",
+      "password": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "The cookie is fixed; anything else is another protocol or the original STUN of RFC 3489, and is refused rather than guessed at.",
+    "expect": {
+      "kind": "error",
+      "message": "The magic cookie is 0x2112A443, but STUN's is always 0x2112A442. This is probably not a STUN message, or it is the older RFC 3489 kind.",
+      "input": "message",
+      "at": 4,
+      "len": 4
+    }
+  },
+  {
+    "name": "a length the message does not have",
+    "input": {
+      "message": "0001 0008 2112a442 b7e7a701 bc5ca493 5d339347",
+      "password": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "The header promises 8 bytes of attributes and none follow.",
+    "expect": {
+      "kind": "error",
+      "message": "The header says 8 bytes of attributes follow, but only 0 do.",
+      "input": "message",
+      "at": 2,
+      "len": 2
+    }
+  },
+  {
+    "name": "a corrupted fingerprint is caught",
+    "input": {
+      "message": "0001 0008 2112a442 b7e7a701 bc5ca493 5d339347 80280004 3cb4351e",
+      "password": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "The demo's request with FINGERPRINT, last bit flipped: the CRC no longer matches.",
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "fields",
+          "fields": [
+            {
+              "label": "Message",
+              "value": "Binding request",
+              "note": "type 0x0001: method 0x001, class 0"
+            },
+            {
+              "label": "Length",
+              "value": "8 bytes of attributes",
+              "note": "28 bytes in all, with the 20-byte header"
+            },
+            {
+              "label": "Magic cookie",
+              "value": "0x2112A442",
+              "note": "fixed: tells STUN apart from the media sharing the port",
+              "tone": "good"
+            },
+            {
+              "label": "Transaction ID",
+              "value": "b7 e7 a7 01 bc 5c a4 93 5d 33 93 47",
+              "note": "random, so the answer can be matched to the request"
+            },
+            {
+              "label": "FINGERPRINT",
+              "value": "0x3CB4351E",
+              "note": "does not match: expected 0x3CB4351D",
+              "tone": "bad"
+            }
+          ]
+        },
+        {
+          "kind": "series",
+          "chart": {
+            "xLabel": "Message",
+            "yLabel": "Size",
+            "yUnit": "bytes",
+            "x": [
+              "28 bytes"
+            ],
+            "orientation": "horizontal",
+            "series": [
+              {
+                "label": "Header",
+                "unit": "bytes",
+                "shape": "bar",
+                "stack": "msg",
+                "points": [
+                  20
+                ]
+              },
+              {
+                "label": "FINGERPRINT",
+                "unit": "bytes",
+                "shape": "bar",
+                "stack": "msg",
+                "points": [
+                  8
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "table",
+          "caption": "1 attribute, each padded to 4 bytes",
+          "columns": [
+            {
+              "label": "Type",
+              "mono": true
+            },
+            {
+              "label": "Attribute"
+            },
+            {
+              "label": "Length",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "Offset",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "Value",
+              "mono": true
+            }
+          ],
+          "rows": [
+            [
+              {
+                "text": "0x8028",
+                "mono": true
+              },
+              "FINGERPRINT",
+              {
+                "text": "4",
+                "mono": true
+              },
+              {
+                "text": "20",
+                "mono": true
+              },
+              {
+                "text": "0x3CB4351E",
+                "mono": true,
+                "tone": "bad"
+              }
+            ]
+          ]
+        },
+        {
+          "kind": "bytes",
+          "bytes": [
+            0,
+            1,
+            0,
+            8,
+            33,
+            18,
+            164,
+            66,
+            183,
+            231,
+            167,
+            1,
+            188,
+            92,
+            164,
+            147,
+            93,
+            51,
+            147,
+            71,
+            128,
+            40,
+            0,
+            4,
+            60,
+            180,
+            53,
+            30
+          ],
+          "caption": "The header, then each attribute, marked in place",
+          "highlight": [
+            {
+              "at": 4,
+              "len": 4,
+              "label": "Magic cookie"
+            },
+            {
+              "at": 8,
+              "len": 12,
+              "label": "Transaction ID"
+            },
+            {
+              "at": 20,
+              "len": 8,
+              "label": "FINGERPRINT"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "not hex",
+    "input": {
+      "message": "hello there",
+      "password": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "Stray characters are named rather than filtered out.",
+    "expect": {
+      "kind": "error",
+      "message": "Not hex: found \"h\", \"l\", \"o\", \"t\", \"r\". Expected hex digits, optionally separated by spaces, colons or commas.",
+      "input": "message"
+    }
+  }
+]

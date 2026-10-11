@@ -3,7 +3,7 @@
   "id": "rtcp-inspector",
   "name": "RTP / RTCP inspector",
   "blurb": "Paste a packet as hex and see the header fields marked on the bytes themselves, not just listed beside them.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "capabilities": ["pure"],
   "runtime": { "entry": "index.ts", "thread": "main" },
   "kinds": ["group", "fields", "table", "series", "bytes", "error"],
@@ -31,6 +31,15 @@
         { "value": "all", "label": "Fields and bytes" },
         { "value": "fields", "label": "Fields only" }
       ]
+    },
+    {
+      "id": "arrival",
+      "type": "text",
+      "label": "Report arrived at (A)",
+      "description": "Optional. When the report reached you, as the middle 32 bits of your NTP clock in hex, such as d8f1:4ccc. Gives the round trip, A - LSR - DLSR.",
+      "dir": "ltr",
+      "maxLength": 32,
+      "default": ""
     }
   ],
   "samples": [
@@ -38,35 +47,56 @@
       "label": "Voice packet",
       "input": {
         "packet": "806f03f2000025801f2e3d4c4b411098fe7eb5246000b41fa06177c378b7d770cbed5ce56a269e1dc8543518d2b7f7cb6adf8b0761dceac805ce3ec4caf1a6813262eafa0b85f09400e1613c00000000000000000000000000000000",
-        "view": "all"
+        "view": "all",
+        "arrival": ""
       }
     },
     {
       "label": "RTP with CSRCs",
       "input": {
         "packet": "92e003e800015f9011223344aaaa0001aaaa0002bede0002103021aabb0000000102",
-        "view": "all"
+        "view": "all",
+        "arrival": ""
       }
     },
     {
       "label": "Padded RTP",
       "input": {
         "packet": "a008000700001f40010203041122000003",
-        "view": "all"
+        "view": "all",
+        "arrival": ""
       }
     },
     {
       "label": "BYE",
       "input": {
         "packet": "81cb0004111111110874656172646f776e000000",
-        "view": "fields"
+        "view": "fields",
+        "arrival": ""
+      }
+    },
+    {
+      "label": "Alice's sender report",
+      "input": {
+        "packet": "80 c8 00 06 1f 2e 3d 4c ee 69 d8 f0 40 00 00 00 00 02 ee 00 00 00 00 c8 00 00 3e 80 81 ca 00 06 1f 2e 3d 4c 01 10 4b 39 67 47 79 58 38 4f 41 4b 38 61 48 38 4d 79 00 00",
+        "view": "all",
+        "arrival": ""
+      }
+    },
+    {
+      "label": "Server's receiver report",
+      "input": {
+        "packet": "81 c9 00 07 7a 3b 9c 5d 1f 2e 3d 4c 06 00 00 06 00 00 04 e1 00 00 00 82 d8 f0 40 00 00 00 fd 70 81 ca 00 06 7a 3b 9c 5d 01 10 73 2b 72 4e 4d 30 4d 37 4d 62 55 6c 49 31 45 44 00 00",
+        "view": "all",
+        "arrival": "d8f1:4ccc"
       }
     },
     {
       "label": "Truncated",
       "input": {
         "packet": "8000002a0000",
-        "view": "all"
+        "view": "all",
+        "arrival": ""
       }
     }
   ],
@@ -74,6 +104,7 @@
   "tags": ["rtp", "rtcp", "webrtc", "networking"],
   "links": [
     { "label": "RFC 3550: RTP", "href": "https://www.rfc-editor.org/rfc/rfc3550" },
+    { "label": "RFC 3550 section 6.4.1: the sender report, and the round trip", "href": "https://www.rfc-editor.org/rfc/rfc3550#section-6.4.1" },
     { "label": "RFC 8285: header extensions", "href": "https://www.rfc-editor.org/rfc/rfc8285" }
   ]
 }

@@ -1,0 +1,227 @@
+{
+  "sdk": 4,
+  "id": "call-topology-cost",
+  "name": "Call topology cost",
+  "blurb": "Pick a call size and see where the cost lands for mesh, an SFU, an MCU and a server that is the other peer: each client's upload and download, the server's traffic, and its work every frame.",
+  "version": "1.0.0",
+  "capabilities": [
+    "pure"
+  ],
+  "runtime": {
+    "entry": "index.ts",
+    "thread": "main"
+  },
+  "kinds": [
+    "group",
+    "fields",
+    "series",
+    "table",
+    "error"
+  ],
+  "card": "live",
+  "cardFields": 4,
+  "inputs": [
+    {
+      "id": "participants",
+      "type": "number",
+      "label": "Participants",
+      "description": "Everyone on the call, each talking all the time.",
+      "primary": true,
+      "default": 3,
+      "min": 2,
+      "max": 50,
+      "step": 1
+    },
+    {
+      "id": "pattern",
+      "type": "select",
+      "label": "Show the fields for",
+      "description": "The chart and the table always show all four.",
+      "primary": true,
+      "default": "sfu",
+      "options": [
+        {
+          "value": "mesh",
+          "label": "Mesh"
+        },
+        {
+          "value": "sfu",
+          "label": "SFU"
+        },
+        {
+          "value": "mcu",
+          "label": "MCU"
+        },
+        {
+          "value": "peer",
+          "label": "Server is the peer"
+        }
+      ]
+    },
+    {
+      "id": "loudest",
+      "type": "number",
+      "label": "SFU forwards the loudest",
+      "description": "0 forwards everyone. Otherwise the SFU picks this many by the audio level in each header, without decoding.",
+      "default": 0,
+      "min": 0,
+      "max": 50,
+      "step": 1
+    },
+    {
+      "id": "bitrate",
+      "type": "number",
+      "label": "Opus bitrate",
+      "unit": "kb/s",
+      "description": "Constant bitrate. 32 kb/s in 20 ms frames is post 1's 80-byte payload.",
+      "default": 32,
+      "min": 6,
+      "max": 510,
+      "step": 2
+    },
+    {
+      "id": "frame",
+      "type": "select",
+      "label": "Frame length",
+      "description": "How much sound each packet carries.",
+      "default": "20",
+      "options": [
+        {
+          "value": "10",
+          "label": "10 ms"
+        },
+        {
+          "value": "20",
+          "label": "20 ms"
+        },
+        {
+          "value": "40",
+          "label": "40 ms"
+        },
+        {
+          "value": "60",
+          "label": "60 ms"
+        }
+      ]
+    },
+    {
+      "id": "srtp",
+      "type": "select",
+      "label": "SRTP tag",
+      "description": "The authentication tag encryption adds to every packet.",
+      "default": "0",
+      "options": [
+        {
+          "value": "0",
+          "label": "None, as post 1 counts"
+        },
+        {
+          "value": "10",
+          "label": "AES_CM_128_HMAC_SHA1_80, 10 B"
+        },
+        {
+          "value": "16",
+          "label": "AEAD_AES_128_GCM, 16 B"
+        }
+      ]
+    },
+    {
+      "id": "level",
+      "type": "toggle",
+      "label": "Audio-level extension",
+      "description": "RFC 6464's one byte of loudness, 8 B on the wire with its extension header.",
+      "default": false
+    }
+  ],
+  "samples": [
+    {
+      "label": "Alice, Bob and Carol",
+      "input": {
+        "participants": 3,
+        "pattern": "sfu",
+        "loudest": 0,
+        "bitrate": 32,
+        "frame": "20",
+        "srtp": "0",
+        "level": false
+      }
+    },
+    {
+      "label": "A ten-person stand-up",
+      "input": {
+        "participants": 10,
+        "pattern": "sfu",
+        "loudest": 0,
+        "bitrate": 32,
+        "frame": "20",
+        "srtp": "0",
+        "level": false
+      }
+    },
+    {
+      "label": "Ten people, three loudest forwarded",
+      "input": {
+        "participants": 10,
+        "pattern": "sfu",
+        "loudest": 3,
+        "bitrate": 32,
+        "frame": "20",
+        "srtp": "0",
+        "level": false
+      }
+    },
+    {
+      "label": "With SRTP and the level byte",
+      "input": {
+        "participants": 3,
+        "pattern": "sfu",
+        "loudest": 0,
+        "bitrate": 32,
+        "frame": "20",
+        "srtp": "10",
+        "level": true
+      }
+    },
+    {
+      "label": "Half the bitrate",
+      "input": {
+        "participants": 5,
+        "pattern": "sfu",
+        "loudest": 0,
+        "bitrate": 16,
+        "frame": "20",
+        "srtp": "0",
+        "level": false
+      }
+    },
+    {
+      "label": "Alice and her assistant",
+      "input": {
+        "participants": 2,
+        "pattern": "peer",
+        "loudest": 0,
+        "bitrate": 32,
+        "frame": "20",
+        "srtp": "10",
+        "level": false
+      }
+    }
+  ],
+  "help": "README.md",
+  "tags": [
+    "webrtc",
+    "sfu",
+    "architecture",
+    "networking"
+  ],
+  "links": [
+    {
+      "label": "RFC 7667: RTP topologies",
+      "href": "https://www.rfc-editor.org/rfc/rfc7667"
+    },
+    {
+      "label": "RFC 6464: client-to-mixer audio level",
+      "href": "https://www.rfc-editor.org/rfc/rfc6464"
+    }
+  ]
+}

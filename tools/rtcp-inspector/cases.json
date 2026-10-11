@@ -373,5 +373,272 @@
       "at": 0,
       "len": 1
     }
+  },
+  {
+    "name": "Alice's sender report: the NTP timestamp as seconds and a fraction",
+    "input": {
+      "packet": "80 c8 00 06 1f 2e 3d 4c ee 69 d8 f0 40 00 00 00 00 02 ee 00 00 00 00 c8 00 00 3e 80 81 ca 00 06 1f 2e 3d 4c 01 10 4b 39 67 47 79 58 38 4f 41 4b 38 61 48 38 4d 79 00 00",
+      "view": "fields",
+      "arrival": ""
+    },
+    "match": "subset",
+    "fieldCount": 15,
+    "why": "Post 5's SR, from rtcp_reports.py: \"NTP 0xee69d8f040000000 = 3999914224 s + 0.25 s since 1900\", sent at 07:17:04.250 UTC. The fraction is 0x40000000 / 2^32 = 0.25 s. Version 1.1 printed the fraction as a raw integer, 3999914224.1073741824, and dropped it from the date, 07:17:04.000Z",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Sub-packets",
+          "value": "2",
+          "note": "SR + SDES"
+        },
+        {
+          "label": "#1 Sender SSRC",
+          "value": "0x1F2E3D4C"
+        },
+        {
+          "label": "#1 NTP timestamp",
+          "value": "3999914224.250000 s",
+          "note": "2026-10-02T07:17:04.250Z"
+        },
+        {
+          "label": "#1 RTP timestamp",
+          "value": "192000"
+        },
+        {
+          "label": "#1 Packets sent",
+          "value": "200"
+        },
+        {
+          "label": "#1 Octets sent",
+          "value": "16000"
+        },
+        {
+          "label": "#2 CNAME",
+          "value": "K9gGyX8OAK8aH8My"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Alice's sender report: the middle 32 bits an RR will echo as LSR",
+    "input": {
+      "packet": "80 c8 00 06 1f 2e 3d 4c ee 69 d8 f0 40 00 00 00 00 02 ee 00 00 00 00 c8 00 00 3e 80 81 ca 00 06 1f 2e 3d 4c 01 10 4b 39 67 47 79 58 38 4f 41 4b 38 61 48 38 4d 79 00 00",
+      "view": "fields",
+      "arrival": ""
+    },
+    "match": "subset",
+    "fieldCount": 1,
+    "why": "rtcp_reports.py: \"its middle 32 bits, which the server will echo as LSR: 0xd8f04000 = 0xd8f0:4000 (55536.250000 s)\". 0xd8f0 is 55536 s and 0x4000 / 65536 = 0.25 s",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "group": "SR #1",
+          "label": "Middle 32 bits",
+          "value": "0xD8F04000",
+          "note": "0xD8F0:4000 = 55536.250000 s; an RR answering this SR carries it as LSR"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the default packet's NTP fraction is 0.287 s, not .1234567890",
+    "input": {
+      "packet": "81c8000c11111111e8754700499602d20036ee8000001388000c3500222222221a000005000005dc00000028aabbccdd0000303981ca0006111111110111616c696365406578616d706c652e636f6d00",
+      "view": "fields"
+    },
+    "match": "subset",
+    "fieldCount": 16,
+    "why": "By hand: 0xe8754700 = 3900000000 s and 0x499602d2 = 1234567890, which is 1234567890 / 2^32 = 0.2874452 s; 3900000000 - 2208988800 = 1691011200 s after 1970, 2023-08-02T21:20:00Z. Version 1.1 printed 3900000000.1234567890, which reads as 0.123 s",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "#1 NTP timestamp",
+          "value": "3900000000.287445 s",
+          "note": "2023-08-02T21:20:00.287Z"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the server's receiver report, with the time it arrived: the round trip",
+    "input": {
+      "packet": "81 c9 00 07 7a 3b 9c 5d 1f 2e 3d 4c 06 00 00 06 00 00 04 e1 00 00 00 82 d8 f0 40 00 00 00 fd 70 81 ca 00 06 7a 3b 9c 5d 01 10 73 2b 72 4e 4d 30 4d 37 4d 62 55 6c 49 31 45 44 00 00",
+      "view": "fields",
+      "arrival": "d8f1:4ccc"
+    },
+    "match": "subset",
+    "fieldCount": 4,
+    "why": "rtcp_reports.py: fraction lost 6 = 2.34%; LSR 0xd8f0:4000 (55536.250000 s); DLSR 0x0000:fd70, 64880 units, 0.990 s; A 0xd8f1:4ccc; \"round trip = A - LSR - DLSR = 3932 / 65536 s = 59.998 ms\"",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "group": "RR #1, block 1",
+          "label": "Fraction lost",
+          "value": "6/256 = 2.34%",
+          "note": "truncated to 256ths: the true share is at least this, and less than 1/256 more"
+        },
+        {
+          "group": "RR #1, block 1",
+          "label": "LSR",
+          "value": "0xD8F0:4000",
+          "note": "55536.250000 s, the middle 32 bits of the SR this answers"
+        },
+        {
+          "group": "RR #1, block 1",
+          "label": "DLSR",
+          "value": "0.990 s",
+          "note": "64880 / 65536 s, 0x0000:FD70: how long the receiver held the SR before replying"
+        },
+        {
+          "group": "RR #1, block 1",
+          "label": "Round trip",
+          "value": "59.998 ms",
+          "note": "A - LSR - DLSR = 0xD8F1:4CCC - 0xD8F0:4000 - 0x0000:FD70 = 3932 / 65536 s"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the server's receiver report without A asks for it",
+    "input": {
+      "packet": "81 c9 00 07 7a 3b 9c 5d 1f 2e 3d 4c 06 00 00 06 00 00 04 e1 00 00 00 82 d8 f0 40 00 00 00 fd 70 81 ca 00 06 7a 3b 9c 5d 01 10 73 2b 72 4e 4d 30 4d 37 4d 62 55 6c 49 31 45 44 00 00",
+      "view": "fields",
+      "arrival": ""
+    },
+    "match": "subset",
+    "fieldCount": 4,
+    "why": "A is the one number that is not in the packet: it is when Alice received it, on her own clock",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "group": "RR #1, block 1",
+          "label": "Round trip",
+          "value": "needs A",
+          "note": "enter when this report arrived to get A - LSR - DLSR"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the server's report block, as the post reads it",
+    "input": {
+      "packet": "81 c9 00 07 7a 3b 9c 5d 1f 2e 3d 4c 06 00 00 06 00 00 04 e1 00 00 00 82 d8 f0 40 00 00 00 fd 70 81 ca 00 06 7a 3b 9c 5d 01 10 73 2b 72 4e 4d 30 4d 37 4d 62 55 6c 49 31 45 44 00 00",
+      "view": "fields",
+      "arrival": ""
+    },
+    "match": "subset",
+    "why": "rtcp_reports.py's report block 1f 2e 3d 4c 06 00 00 06 00 00 04 e1 00 00 00 82 d8 f0 40 00 00 00 fd 70: SSRC 0x1F2E3D4C, fraction 6, cumulative 6, highest 0x04e1 = 1249, jitter 0x82 = 130, LSR 0xd8f04000, DLSR 0xfd70 = 64880. A table has no subset form, so the table part is matched exactly",
+    "expect": {
+      "kind": "table",
+      "caption": "RR #1: 1 report block",
+      "columns": [
+        {
+          "label": "Source SSRC",
+          "mono": true
+        },
+        {
+          "label": "Fraction lost",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Cumulative lost",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Highest seq",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Jitter",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "LSR",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "DLSR",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "0x1F2E3D4C",
+            "mono": true
+          },
+          {
+            "text": "2.3%",
+            "mono": true
+          },
+          {
+            "text": "6",
+            "mono": true
+          },
+          {
+            "text": "1249",
+            "mono": true
+          },
+          {
+            "text": "130",
+            "mono": true
+          },
+          {
+            "text": "0xD8F04000",
+            "mono": true
+          },
+          {
+            "text": "64880",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "RFC 3550 Figure 2: the spec's own round trip",
+    "input": {
+      "packet": "81c90007 11111111 22222222 00000000 00000000 00000000 b7052000 00054000",
+      "view": "fields",
+      "arrival": "0xb710:8000"
+    },
+    "match": "subset",
+    "fieldCount": 4,
+    "why": "RFC 3550 section 6.4.1, Figure 2: A 0xb710:8000, LSR 0xb705:2000, DLSR 0x0005:4000, so the delay is 0x0006:2000 = 401408 / 65536 = 6.125 s. The packet is an RR built around those three values; its other fields are placeholders",
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "group": "RR #1, block 1",
+          "label": "Round trip",
+          "value": "6.125 s",
+          "note": "A - LSR - DLSR = 0xB710:8000 - 0xB705:2000 - 0x0005:4000 = 401408 / 65536 s"
+        }
+      ]
+    }
+  },
+  {
+    "name": "an arrival time that is not 32 bits of hex",
+    "input": {
+      "packet": "81 c9 00 07 7a 3b 9c 5d 1f 2e 3d 4c 06 00 00 06 00 00 04 e1 00 00 00 82 d8 f0 40 00 00 00 fd 70 81 ca 00 06 7a 3b 9c 5d 01 10 73 2b 72 4e 4d 30 4d 37 4d 62 55 6c 49 31 45 44 00 00",
+      "view": "fields",
+      "arrival": "d8f1:4cc"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "A is 8 hex digits of NTP time, such as d8f1:4ccc: 16 bits of seconds and 16 of fraction, the middle of the 64-bit timestamp. Got \"d8f1:4cc\".",
+      "input": "arrival"
+    }
   }
 ]

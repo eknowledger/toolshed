@@ -83,7 +83,12 @@
           "series",
           "group",
           "error",
-          "bytes"
+          "bytes",
+          "heatmap",
+          "pie",
+          "radar",
+          "treemap",
+          "venn"
         ]
       },
       "minItems": 1,

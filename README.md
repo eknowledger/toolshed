@@ -4,10 +4,15 @@ Small, exact tools for systems questions. Each one shows how it got its answer.
 
 | Tool | Answers |
 |---|---|
+| [`bitrate-under-loss`](tools/bitrate-under-loss) | How much a voice call loses before receiver reports make the sender back off, and how long it takes to come back, at 5, 2 or 1 s between reports |
+| [`call-topology-cost`](tools/call-topology-cost) | Where a voice call's cost lands for mesh, an SFU, an MCU and a server that is the other peer: upload, download, server traffic and work per frame |
 | [`capacity-planner`](tools/capacity-planner) | How many servers keep the wait under a target, and what the queue does either side of that number |
+| [`ice-pair-ranker`](tools/ice-pair-ranker) | Which ICE candidate pairs a call checks, in what order, and which are pruned because they would send the same check |
 | [`jitter-fec`](tools/jitter-fec) | Which frames of a voice stream play, which are rebuilt from a copy in a later packet, and which are made up, over a network that delays and loses packets |
 | [`loss-playout`](tools/loss-playout) | One voice frame is lost: over UDP and over TCP, which frames still play on time, and how much audio has to be concealed |
 | [`rtcp-inspector`](tools/rtcp-inspector) | What an RTP or RTCP packet actually contains, byte by byte, including the fields nobody checks by eye |
+| [`sdp-explainer`](tools/sdp-explainer) | What each line of a WebRTC offer or answer sets, which phase of the call reads it, and which rule it breaks |
+| [`stun-decoder`](tools/stun-decoder) | What a STUN message says, attribute by attribute, with the addresses un-XORed and its integrity checked |
 | [`tcp-throughput`](tools/tcp-throughput) | What one TCP connection can carry over a given path, and whether the window or the loss is the limit |
 
 They are built on [toolbench](https://github.com/eknowledger/toolbench), which turns a tool
