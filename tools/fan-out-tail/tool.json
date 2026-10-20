@@ -1,0 +1,121 @@
+{
+  "sdk": 5,
+  "id": "fan-out-tail",
+  "name": "Fan-out tail latency calculator",
+  "blurb": "A request fans out to N calls and waits for all of them. See how many requests are slow, and what percentile each call needs to meet your target.",
+  "version": "4.0.0",
+  "capabilities": [
+    "pure"
+  ],
+  "runtime": {
+    "entry": "index.ts",
+    "thread": "main"
+  },
+  "kinds": [
+    "group",
+    "fields",
+    "text",
+    "series",
+    "table",
+    "error"
+  ],
+  "card": "live",
+  "cardFields": 3,
+  "autoRun": false,
+  "help": "README.md",
+  "tags": [
+    "latency",
+    "tail latency",
+    "percentiles",
+    "fan-out",
+    "microservices",
+    "calculator"
+  ],
+  "inputs": [
+    {
+      "id": "calls",
+      "type": "number",
+      "label": "Calls per request",
+      "description": "How many calls one request makes and waits for: shards, backends, or one service called several times.",
+      "primary": true,
+      "default": 20,
+      "min": 1,
+      "max": 100000,
+      "step": 1
+    },
+    {
+      "id": "slow",
+      "type": "text",
+      "label": "Each call is slow",
+      "description": "The share of calls over your latency limit, such as 0.5%. Or the percentile at that limit: p99 means 1% of calls are over it.",
+      "primary": true,
+      "default": "0.5%",
+      "maxLength": 20,
+      "dir": "ltr"
+    },
+    {
+      "id": "target",
+      "type": "text",
+      "label": "Your target",
+      "description": "The percentile you promise for the whole request, such as p99: 99 in 100 requests within the same limit.",
+      "primary": true,
+      "default": "p99",
+      "maxLength": 20,
+      "dir": "ltr"
+    },
+    {
+      "id": "dependencies",
+      "type": "textarea",
+      "label": "Several dependencies (optional)",
+      "description": "Leave this empty unless a request calls services with different tails. One per line: name, calls, share slow, as in pricing 20 0.5% or ads 1 5%. A list here replaces the first two inputs.",
+      "default": "",
+      "rows": 4,
+      "maxLength": 4000,
+      "dir": "ltr"
+    }
+  ],
+  "samples": [
+    {
+      "label": "Start again (defaults)",
+      "input": {
+        "calls": 20,
+        "slow": "0.5%",
+        "target": "p99",
+        "dependencies": ""
+      }
+    },
+    {
+      "label": "The Tail at Scale: 100 servers at their p99",
+      "input": {
+        "calls": 100,
+        "slow": "p99",
+        "target": "p99",
+        "dependencies": ""
+      }
+    },
+    {
+      "label": "What p99 does each of 20 shards need?",
+      "input": {
+        "calls": 20,
+        "slow": "p99",
+        "target": "p99",
+        "dependencies": ""
+      }
+    },
+    {
+      "label": "A checkout service with 12 dependencies",
+      "input": {
+        "calls": 20,
+        "slow": "0.5%",
+        "target": "p99",
+        "dependencies": "cart 1 0.1%\npricing 20 0.5%\ninventory 1 1%\ntax 1 0.2%\nshipping quotes 1 2%\npayments 1 0.5%\nfraud check 1 1%\nuser profile 1 0.1%\npromotions 2 0.5%\nloyalty 1 0.3%\nrecommendations 1 1%\nsession cache 3 0.1%"
+      }
+    }
+  ],
+  "links": [
+    {
+      "label": "Dean and Barroso, The Tail at Scale (CACM, 2013)",
+      "href": "https://cacm.acm.org/research/the-tail-at-scale/"
+    }
+  ]
+}

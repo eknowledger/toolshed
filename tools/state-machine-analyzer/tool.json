@@ -1,0 +1,96 @@
+{
+	"sdk": 7,
+	"id": "state-machine-analyzer",
+	"name": "State machine analyzer",
+	"blurb": "A completeness check for a state machine. Write each state and what its events do, and see which pairs nobody decided, which states can't be reached or left, and where two rules disagree.",
+	"version": "3.1.0",
+	"capabilities": ["pure"],
+	"runtime": {
+		"entry": "index.ts",
+		"thread": "main"
+	},
+	"kinds": ["group", "fields", "graph", "table", "code", "error"],
+	"card": "live",
+	"cardFields": 3,
+	"autoRun": false,
+	"inputs": [
+		{
+			"id": "machine",
+			"type": "textarea",
+			"label": "Machine",
+			"description": "A state is a line ending in a colon, with its rules beneath it: event -> next state, or stay, defer, reject, ignore or back. Text after # is the reason. The guide below has the rest.",
+			"default": "# The dinner booking as first drawn: the happy path and its obvious branches.\ngather:\n  slots_complete -> search\n  slots_missing  -> stay\nsearch:\n  slot_free -> confirm\n  none_free -> gather\nconfirm:\n  user_yes -> book\n  user_no  -> gather\nbook:\n  committed -> stay\n  unknown   -> stay\n  refused   -> gather\n  paid      -> notify\nnotify:\n  sent        -> done\n  send_failed -> report\nreport:\n  told -> done\ndegraded:\n\n# Events the code can observe that no rule uses yet.\nevents: user_revises, slot_gone, model_unavailable, model_back",
+			"rows": 24,
+			"dir": "ltr",
+			"primary": true,
+			"lang": "states"
+		},
+		{
+			"id": "also",
+			"type": "select",
+			"label": "Also write",
+			"description": "Text to copy into your own docs or tests.",
+			"default": "none",
+			"options": [
+				{
+					"value": "none",
+					"label": "Nothing else"
+				},
+				{
+					"value": "markdown",
+					"label": "The table as markdown"
+				},
+				{
+					"value": "pytest",
+					"label": "A pytest skeleton, one test per cell"
+				}
+			]
+		}
+	],
+	"samples": [
+		{
+			"label": "Dinner booking, as first drawn",
+			"input": {
+				"machine": "# The dinner booking as first drawn: the happy path and its obvious branches.\ngather:\n  slots_complete -> search\n  slots_missing  -> stay\nsearch:\n  slot_free -> confirm\n  none_free -> gather\nconfirm:\n  user_yes -> book\n  user_no  -> gather\nbook:\n  committed -> stay\n  unknown   -> stay\n  refused   -> gather\n  paid      -> notify\nnotify:\n  sent        -> done\n  send_failed -> report\nreport:\n  told -> done\ndegraded:\n\n# Events the code can observe that no rule uses yet.\nevents: user_revises, slot_gone, model_unavailable, model_back",
+				"also": "none"
+			}
+		},
+		{
+			"label": "Dinner booking, every cell decided",
+			"input": {
+				"machine": "# The dinner booking, every cell decided. The first part is the drawing.\ngather:\n  slots_complete -> search\n  slots_missing  -> stay\nsearch:\n  slot_free -> confirm\n  none_free -> gather\nconfirm:\n  user_yes -> book\n  user_no  -> gather\nbook:\n  committed -> stay\n  unknown   -> stay\n  refused   -> gather\n  paid      -> notify\nnotify:\n  sent        -> done\n  send_failed -> report\nreport:\n  told -> done\n\n# Everything below is a decision the drawing didn't make.\ngather, search, confirm:\n  user_revises -> gather     # nothing is committed yet, so start again\nevery state except gather, search, confirm:\n  user_revises -> defer      # a booking or a text exists; finish, then revise\ngather, search:\n  slot_gone -> stay          # no slot chosen yet; the next search covers it\nconfirm:\n  slot_gone -> search        # the slot on offer is gone; search before asking\nbook, degraded:\n  slot_gone -> defer         # what the booking, or the state resumed, says decides\nnotify, report:\n  slot_gone -> report        # a booking that existed is gone; tell the user\ngather, notify:\n  model_unavailable -> degraded   # these states need the model\ndegraded:\n  model_back -> back         # return to the state it left\n  told       -> stay         # the user knows; keep waiting for the model\n\nevery state:\n  committed -> report        # a reservation this state didn't make is real; report it\n  paid      -> report        # a payment this state didn't make is real money; report it\n  sent      -> report        # a text went out; it can't be recalled\n  model_unavailable -> stay  # this state runs as code\n  model_back -> stay         # nothing was waiting for the model\n  anything else -> reject    # a result this state never asked for: log it, do nothing",
+				"also": "none"
+			}
+		},
+		{
+			"label": "Two people edited this one",
+			"input": {
+				"machine": "# Two people edited this one.\nidle:\n  start -> running\nrunning:\n  pause -> paused\n  stop  -> idle\npaused:\n  resume -> running\n  stop   -> reject    # resume first, then stop\n\n# Added later, by someone else.\npaused:\n  stop -> idle        # stopping is always allowed\nevery state:\n  archive -> archived",
+				"also": "pytest"
+			}
+		},
+		{
+			"label": "A card payment by webhook",
+			"input": {
+				"machine": "# A card payment driven by webhooks. They can arrive twice, late, or out of order.\npending:\n  payment.processing      -> processing\n  payment.action_required -> needs_action\n  payment.succeeded       -> paid\n  payment.failed          -> failed\nprocessing:\n  payment.succeeded -> paid\n  payment.failed    -> failed\nneeds_action:\n  payment.processing -> processing\n  payment.failed     -> failed\npaid:\n  payment.succeeded -> ignore   # the same webhook, delivered again\n  charge.refunded   -> refunded\nfailed:\n  payment.action_required -> needs_action   # the customer tries another card\nevery state except paid:\n  charge.refunded -> reject     # nothing was charged, so nothing to refund",
+				"also": "markdown"
+			}
+		}
+	],
+	"help": "README.md",
+	"tags": ["state-machines", "agents", "testing", "design"],
+	"links": [
+		{
+			"label": "Harel, Statecharts: a visual formalism for complex systems (1987)",
+			"href": "https://doi.org/10.1016/0167-6423(87)90035-9"
+		},
+		{
+			"label": "Anthropic, Building effective agents",
+			"href": "https://www.anthropic.com/engineering/building-effective-agents"
+		},
+		{
+			"label": "12-factor agents, factor 8: own your control flow",
+			"href": "https://github.com/humanlayer/12-factor-agents/blob/main/content/factor-08-own-your-control-flow.md"
+		}
+	]
+}

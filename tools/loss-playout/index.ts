@@ -181,45 +181,55 @@ export default {
 			const timeout = tcp(`TCP, ${rto} ms timeout`, timerAt);
 			const transports = [udp, fast, timeout];
 
-			const headline = (t: Transport): Field => {
-				const count = t.missed.length;
-				if (count === 0) {
-					return {
-						label: t.label,
-						value: "nothing concealed",
-						note: `the resend arrived at ${t.repaired} ms, in time for frame ${lost}`,
-						tone: "good",
-					};
-				}
-				const which = `${plural(count, "frame")}: ${frameList(t.missed)}`;
-				return {
-					label: t.label,
-					value: `${count * frameMs} ms concealed`,
-					note: t.repaired === undefined ? `${which}, never delivered` : `${which}, released at ${t.repaired} ms`,
-					tone: count > 1 ? "warn" : "normal",
-				};
-			};
-
 			let fastNote: string;
 			if (thirdDupAck === null) {
 				const after = frames - lost;
 				const follow = after === 0 ? "no frame follows" : `only ${plural(after, "frame")} ${after === 1 ? "follows" : "follow"}`;
-				fastNote = `cannot fire: ${follow} the loss and ${DUP_ACKS} are needed, so the timer resends`;
+				fastNote = `It cannot fire: ${follow} the loss and ${DUP_ACKS} are needed, so the timer resends.`;
 			} else if (thirdDupAck > timerAt) {
-				fastNote = `the timer fires first: the third duplicate ACK would reach the sender at ${thirdDupAck} ms`;
+				fastNote = `The timer fires first: the third duplicate ACK would reach the sender at ${thirdDupAck} ms.`;
 			} else {
-				fastNote = `the third duplicate ACK, drawn by frame ${lost + DUP_ACKS}, reaches the sender`;
+				fastNote = `The third duplicate ACK, drawn by frame ${lost + DUP_ACKS}, reaches the sender.`;
 			}
 
+			/*
+			 * The answer is a comparison, so it is a table: the three transports in one frame, what each loses, which
+			 * frames, and the buffer that would hide the loss. No tone and no "nothing to change" row: the reader is
+			 * choosing between the three, and none of them is the tool's to approve.
+			 *
+			 * The buffer that hides a resend: the repair reaches the receiver at resend + delay and the lost frame plays
+			 * at sent + delay + buffer, so the buffer that just covers it is resend - sent, and the delay cancels. Every
+			 * millisecond of it is also added to every frame of the call, which is why the answer for live voice is
+			 * usually UDP. UDP never resends, so no buffer hides its loss.
+			 */
+			const ms = (t: Transport) => t.missed.length * frameMs;
+			const comparison: Output = {
+				kind: "table",
+				role: "comparison",
+				// Short headers, because a comparison keeps its columns on a phone; the caption says what each one is.
+				caption: `Frame ${lost} lost, at a ${buffer} ms buffer: the audio each loses, the frames, and the buffer that would hide it`,
+				columns: [
+					{ label: "Transport" },
+					{ label: "Audio", align: "end", mono: true },
+					{ label: "Frames", align: "end", mono: true },
+					{ label: "Buffer", align: "end", mono: true },
+				],
+				rows: transports.map((t): Cell[] => [
+					t.label,
+					`${ms(t)} ms`,
+					t.missed.length === 0 ? "none" : t.repaired === undefined ? `${frameList(t.missed)} (lost)` : frameList(t.missed),
+					t.repaired === undefined ? "never" : `${t.repaired - oneWay - sent(lost)} ms`,
+				]),
+			};
+
 			const fields: Field[] = [
-				...transports.map(headline),
 				{
 					label: `Frame ${lost} plays at`,
 					value: `${deadline(lost)} ms`,
-					note: `sent at ${sent(lost)}, arrives at ${arrives(lost)}, then ${buffer} ms of buffer`,
+					note: `It is sent at ${sent(lost)} ms, arrives at ${arrives(lost)} ms, then waits ${buffer} ms in the buffer.`,
 				},
 				{ label: "Fast retransmit resends at", value: `${fastAt} ms`, note: fastNote },
-				{ label: "Timeout resends at", value: `${timerAt} ms`, note: `${rto} ms after frame ${lost} was sent` },
+				{ label: "Timeout resends at", value: `${timerAt} ms`, note: `That is ${rto} ms after frame ${lost} was sent.` },
 			];
 
 			/*
@@ -256,9 +266,16 @@ export default {
 			};
 			const rows: Cell[][] = numbers.map((n) => [n, sent(n), deadline(n), ...transports.map((t) => cell(n, t.delivered[n - 1]))]);
 
+			/*
+			 * The comparison, the timeline that explains it, the timings the timeline turns on, then the frame-size
+			 * chart, which answers a different question, and last the per-frame audit trail. A page showing the first
+			 * four parts shows both charts and leaves the per-frame table behind "show more".
+			 */
 			const parts: Output[] = [
-				{ kind: "fields", fields },
+				comparison,
 				{ kind: "series", chart },
+				{ kind: "fields", fields },
+				frameCost(frameMs),
 				{
 					kind: "table",
 					caption: "Every frame: when the application gets it, against when it has to play",
@@ -272,12 +289,6 @@ export default {
 					link: { chart: "playout", keys: numbers },
 				},
 			];
-
-			/*
-			 * The cost chart goes before the per-frame table, so a page showing the first three parts shows both
-			 * charts and leaves the 20-row table behind "show more".
-			 */
-			parts.splice(2, 0, frameCost(frameMs));
 			return { kind: "group", parts };
 		} catch (error) {
 			if (error instanceof InputError) return { kind: "error", message: error.message, input: error.input };

@@ -1,0 +1,246 @@
+{
+	"sdk": 6,
+	"id": "metric-cardinality",
+	"name": "Metric cardinality and cost",
+	"blurb": "List a metric's labels and how many values each takes, pick its type and client, and see how many time series it really writes, which change saves the most, and what it costs to keep.",
+	"version": "3.0.0",
+	"capabilities": ["pure"],
+	"runtime": {
+		"entry": "index.ts",
+		"thread": "main"
+	},
+	"kinds": ["group", "fields", "text", "series", "table", "error"],
+	"card": "live",
+	"cardFields": 4,
+	"inputs": [
+		{
+			"id": "labels",
+			"type": "textarea",
+			"label": "Labels and their values",
+			"description": "One label per line: its name and how many different values it takes, such as \"route 8\". Leave it empty for a metric with no labels.",
+			"primary": true,
+			"default": "route 8\nstatus 5",
+			"rows": 4,
+			"maxLength": 2000,
+			"dir": "ltr"
+		},
+		{
+			"id": "type",
+			"type": "select",
+			"label": "Metric type",
+			"description": "What one label set writes. A classic histogram is one series per bucket, plus _sum and _count.",
+			"primary": true,
+			"default": "histogram",
+			"options": [
+				{
+					"value": "histogram",
+					"label": "Histogram (classic buckets)"
+				},
+				{
+					"value": "counter",
+					"label": "Counter"
+				},
+				{
+					"value": "gauge",
+					"label": "Gauge"
+				},
+				{
+					"value": "summary",
+					"label": "Summary, no quantiles (Python's only kind)"
+				},
+				{
+					"value": "summary3",
+					"label": "Summary, 3 quantiles (0.5, 0.9, 0.99)"
+				},
+				{
+					"value": "native",
+					"label": "Native histogram"
+				}
+			]
+		},
+		{
+			"id": "client",
+			"type": "select",
+			"label": "Client library",
+			"primary": true,
+			"description": "Fills in the bucket count and _created with that library's defaults, which you can then change.",
+			"default": "python",
+			"options": [
+				{
+					"value": "python",
+					"label": "Python prometheus_client",
+					"sets": {
+						"buckets": 14,
+						"created": true
+					}
+				},
+				{
+					"value": "python-nocreated",
+					"label": "Python, with PROMETHEUS_DISABLE_CREATED_SERIES",
+					"sets": {
+						"buckets": 14,
+						"created": false
+					}
+				},
+				{
+					"value": "go",
+					"label": "Go client_golang",
+					"sets": {
+						"buckets": 11,
+						"created": false
+					}
+				},
+				{
+					"value": "custom",
+					"label": "Custom"
+				}
+			]
+		},
+		{
+			"id": "targets",
+			"type": "number",
+			"label": "Targets",
+			"description": "Processes exposing the metric: pods, instances. Each one is scraped with its own instance label, so each multiplies the count.",
+			"primary": true,
+			"default": 1,
+			"min": 1,
+			"max": 100000,
+			"step": 1
+		},
+		{
+			"id": "occur",
+			"type": "number",
+			"label": "Combinations that occur",
+			"unit": "%",
+			"description": "The product of the counts is the ceiling. If only some combinations ever happen (most routes never return most statuses), say what share.",
+			"default": 100,
+			"min": 0.01,
+			"max": 100,
+			"step": 1
+		},
+		{
+			"id": "buckets",
+			"type": "number",
+			"label": "Histogram buckets",
+			"description": "Bucket boundaries, not counting +Inf. Only a classic histogram reads it.",
+			"default": 14,
+			"min": 0,
+			"max": 1000,
+			"step": 1
+		},
+		{
+			"id": "created",
+			"type": "toggle",
+			"label": "Writes _created",
+			"description": "One more series per label set for counters, histograms and summaries. Newer Prometheus servers can store it as metadata instead; turn it off if yours does.",
+			"default": true
+		},
+		{
+			"id": "interval",
+			"type": "number",
+			"label": "Scrape interval",
+			"unit": "s",
+			"description": "How often each target is scraped. Prometheus's own default is 60 s; 15 s is common.",
+			"default": 15,
+			"min": 1,
+			"max": 3600,
+			"step": 1
+		},
+		{
+			"id": "price",
+			"type": "number",
+			"label": "Price per 1,000 series",
+			"unit": "$ a month",
+			"description": "Your vendor's price for 1,000 active series a month. 0 leaves the bill out.",
+			"default": 0,
+			"min": 0,
+			"max": 100000,
+			"step": 0.5
+		}
+	],
+	"samples": [
+		{
+			"label": "One label set, Python",
+			"input": {
+				"labels": "route 1\nstatus 1",
+				"type": "histogram",
+				"client": "python",
+				"buckets": 14,
+				"created": true,
+				"targets": 1,
+				"occur": 100
+			}
+		},
+		{
+			"label": "Add a tenant label",
+			"input": {
+				"labels": "route 1\nstatus 1\ntenant 500",
+				"type": "histogram",
+				"client": "python",
+				"buckets": 14,
+				"created": true,
+				"targets": 1,
+				"occur": 100
+			}
+		},
+		{
+			"label": "A Go service on 20 pods",
+			"input": {
+				"labels": "route 12\nmethod 3\nstatus 6",
+				"type": "histogram",
+				"client": "go",
+				"buckets": 11,
+				"created": false,
+				"targets": 20,
+				"occur": 25
+			}
+		},
+		{
+			"label": "Same, as a counter",
+			"input": {
+				"labels": "route 12\nmethod 3\nstatus 6",
+				"type": "counter",
+				"client": "go",
+				"buckets": 11,
+				"created": false,
+				"targets": 20,
+				"occur": 25
+			}
+		},
+		{
+			"label": "A user ID label",
+			"input": {
+				"labels": "route 8\nuser_id 250000",
+				"type": "counter",
+				"client": "go",
+				"buckets": 11,
+				"created": false,
+				"targets": 4,
+				"occur": 100
+			}
+		},
+		{
+			"label": "Not a count",
+			"input": {
+				"labels": "route lots"
+			}
+		}
+	],
+	"help": "README.md",
+	"tags": ["observability", "prometheus", "metrics", "cardinality"],
+	"links": [
+		{
+			"label": "Prometheus: do not overuse labels",
+			"href": "https://prometheus.io/docs/practices/instrumentation/#do-not-overuse-labels"
+		},
+		{
+			"label": "Prometheus: metric and label naming",
+			"href": "https://prometheus.io/docs/practices/naming/#labels"
+		},
+		{
+			"label": "Prometheus: storage and capacity",
+			"href": "https://prometheus.io/docs/prometheus/latest/storage/#operational-aspects"
+		}
+	],
+	"autoRun": false
+}

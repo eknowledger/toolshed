@@ -1,0 +1,644 @@
+[
+  {
+    "name": "binding request",
+    "input": {
+      "message": "00010000 2112a442 b7e7a701 bc5ca493 5d339347",
+      "password": "",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "The 20-byte request from the post: type 0x0001, no attributes. It asks for the address and says nothing else, so there is nothing to check, nothing to fix and no attribute table.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Binding request",
+          "note": "0x0001. It asks the server which address it sees, and carries nothing else."
+        },
+        {
+          "label": "Integrity",
+          "value": "none present",
+          "note": "No FINGERPRINT or MESSAGE-INTEGRITY."
+        }
+      ]
+    }
+  },
+  {
+    "name": "binding answer",
+    "input": {
+      "message": "0101000c 2112a442 b7e7a701 bc5ca493 5d339347 00200008 0001f523 e112a648",
+      "password": "",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "The post's answer: XOR-MAPPED-ADDRESS f523 e112a648 un-XORs to 192.0.2.10:54321, the port XOR 0x2112 and the address XOR 0x2112A442, worked by hand.",
+    "expect": {
+      "kind": "table",
+      "role": "decoded",
+      "caption": "1 attribute, each padded to 4 bytes",
+      "columns": [
+        {
+          "label": "Offset",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Attribute"
+        },
+        {
+          "label": "Value",
+          "mono": true
+        },
+        {
+          "label": "How it was decoded"
+        },
+        {
+          "label": "Value bytes",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "0x0014",
+            "mono": true,
+            "tone": "muted"
+          },
+          "XOR-MAPPED-ADDRESS",
+          {
+            "text": "192.0.2.10:54321",
+            "mono": true
+          },
+          "IPv4. The port is 0xF523 XOR 0x2112 and the address 0xE112A648 XOR 0x2112A442.",
+          {
+            "text": "8",
+            "mono": true,
+            "tone": "muted"
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "binding answer header",
+    "input": {
+      "message": "0101000c 2112a442 b7e7a701 bc5ca493 5d339347 00200008 0001f523 e112a648",
+      "password": "",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "0x0101 is method 1 with class 2: the class bits sit at positions 4 and 8, between the method's, which is why a success is 0x0101 and not 0x0102.",
+    "fieldCount": 4,
+    "expect": {
+      "kind": "fields",
+      "role": "method",
+      "fields": [
+        {
+          "label": "Message type",
+          "value": "0x0101",
+          "note": "Method 0x001, Binding, and class 2, success response, with their bits interleaved.",
+          "group": "Header"
+        },
+        {
+          "label": "Length",
+          "value": "12 bytes",
+          "note": "Of attributes, after the 20-byte header.",
+          "group": "Header"
+        },
+        {
+          "label": "Magic cookie",
+          "value": "0x2112A442",
+          "note": "Always the same. It tells STUN apart from the media sharing the port.",
+          "group": "Header"
+        },
+        {
+          "label": "Transaction ID",
+          "value": "b7 e7 a7 01 bc 5c a4 93 5d 33 93 47",
+          "note": "Random, so the answer can be matched to the request.",
+          "group": "Header"
+        }
+      ]
+    }
+  },
+  {
+    "name": "ice connectivity check",
+    "input": {
+      "message": "00010048 2112a442 8f1e2d3c 4b5a6978 8796a5b4 00060009 73727637 3a616c63 65000000 00240004 6effffff 802a0008 1d2c3b4a 59687786 00250000 00080014 af2e7f7f ee8a3d03 b3149db5 176cad74 55e8d938 80280004 839f5505",
+      "password": "server+password+24+chars",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "Made by aioice: USERNAME srv7:alce, receiver first, USE-CANDIDATE, and MESSAGE-INTEGRITY and FINGERPRINT that both verify with the server's password.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Binding request",
+          "note": "0x0001. An ICE connectivity check from \"alce\" to \"srv7\" that nominates this pair."
+        },
+        {
+          "label": "Integrity",
+          "value": "MESSAGE-INTEGRITY and FINGERPRINT match"
+        }
+      ]
+    }
+  },
+  {
+    "name": "its answer",
+    "input": {
+      "message": "0101002c 2112a442 8f1e2d3c 4b5a6978 8796a5b4 00200008 0001f523 e112a648 00080014 9b1d37c1 ecaa213d 226fce8a 1d42f3f2 65a293f2 80280004 9526a91a",
+      "password": "server+password+24+chars",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "The success response to that check, made by aioice: the mapped address, and both integrity checks verify with the same password, since an ICE answer is signed with the request's key.",
+    "fieldCount": 3,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Binding success response",
+          "note": "0x0101"
+        },
+        {
+          "label": "Mapped address",
+          "value": "192.0.2.10:54321",
+          "note": "Where the server saw the sender."
+        },
+        {
+          "label": "Integrity",
+          "value": "MESSAGE-INTEGRITY and FINGERPRINT match"
+        }
+      ]
+    }
+  },
+  {
+    "name": "turn 401",
+    "input": {
+      "message": "01130058 2112a442 01020304 05060708 090a0b0c 00090010 00000401 556e6175 74686f72 697a6564 0014000b 6578616d 706c652e 6f726700 00150027 6f624d61 744a6f73 32414141 43663439 396b3935 3464364f 4c33346f 4c394653 54767936 34734100 80280004 ebbf3214",
+      "password": "",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "A TURN server's 401 to an Allocate without credentials. The remedy is RFC 8656's: retry with USERNAME, the REALM and NONCE from this response, and MESSAGE-INTEGRITY. FINGERPRINT verifies, so nothing else is listed.",
+    "expect": {
+      "kind": "table",
+      "role": "findings",
+      "caption": "What to fix, most serious first",
+      "columns": [
+        {
+          "label": "Severity"
+        },
+        {
+          "label": "What is wrong"
+        },
+        {
+          "label": "What to do"
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "Warning",
+            "tone": "warn"
+          },
+          "The server answered 401 Unauthorized.",
+          "Send the request again with USERNAME, and the REALM and NONCE from this response, signed with MESSAGE-INTEGRITY keyed with MD5 of username:realm:password."
+        ]
+      ]
+    }
+  },
+  {
+    "name": "a wrong magic cookie is not STUN",
+    "input": {
+      "message": "0001 0000 2112a443 b7e7a701 bc5ca493 5d339347",
+      "password": "",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "The cookie is fixed; anything else is another protocol or the original STUN of RFC 3489, and is refused rather than guessed at. No later offset has a cookie either, so nothing is skipped.",
+    "expect": {
+      "kind": "error",
+      "message": "The magic cookie is 0x2112A443, but STUN's is always 0x2112A442. This is probably not a STUN message, or it is the older RFC 3489 kind.",
+      "input": "message",
+      "at": 4,
+      "len": 4
+    }
+  },
+  {
+    "name": "a length the message does not have",
+    "input": {
+      "message": "0001 0008 2112a442 b7e7a701 bc5ca493 5d339347",
+      "password": "",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "The header promises 8 bytes of attributes and none follow.",
+    "expect": {
+      "kind": "error",
+      "message": "The header says 8 bytes of attributes follow, but only 0 do.",
+      "input": "message",
+      "at": 2,
+      "len": 2
+    }
+  },
+  {
+    "name": "a corrupted fingerprint is caught",
+    "input": {
+      "message": "0001 0008 2112a442 b7e7a701 bc5ca493 5d339347 80280004 3cb4351e",
+      "password": "",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "The demo's request with FINGERPRINT, last bit flipped: the CRC no longer matches, and the answer's integrity line says so, in red, the only tone in it.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Binding request",
+          "note": "0x0001"
+        },
+        {
+          "label": "Integrity",
+          "value": "FINGERPRINT does not match",
+          "tone": "bad"
+        }
+      ]
+    }
+  },
+  {
+    "name": "not hex",
+    "input": {
+      "message": "hello there",
+      "password": "",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "Stray characters are named rather than filtered out.",
+    "expect": {
+      "kind": "error",
+      "message": "This is not hex: it contains \"h\", \"l\", \"o\", \"t\", \"r\". Expected hex digits, optionally separated by spaces, colons or commas.",
+      "input": "message"
+    }
+  },
+  {
+    "name": "rfc 5769 sample request",
+    "input": {
+      "message": "000100582112a442b7e7a701bc34d686fa87dfae802200105354554e207465737420636c69656e74002400046e0001ff80290008932ff9b151263b36000600096576746a3a68367659202020000800149aeaa70cbfd8cb56781ef2b5b2d3f249c1b571a280280004e57a3bcf",
+      "password": "VOkJxbRl1RmTxUk/WvJxBt",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "RFC 5769 section 2.1, an independent vector: an ICE check from h6vY to evtj whose HMAC-SHA1 and CRC-32 the RFC publishes.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Binding request",
+          "note": "0x0001. An ICE connectivity check from \"h6vY\" to \"evtj\"."
+        },
+        {
+          "label": "Integrity",
+          "value": "MESSAGE-INTEGRITY and FINGERPRINT match"
+        }
+      ]
+    }
+  },
+  {
+    "name": "rfc 5769 ipv4 response",
+    "input": {
+      "message": "0101003c2112a442b7e7a701bc34d686fa87dfae8022000b7465737420766563746f7220002000080001a147e112a643000800142b91f599fd9e90c38c7489f92af9ba53f06be7d780280004c07d4c96",
+      "password": "VOkJxbRl1RmTxUk/WvJxBt",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "RFC 5769 section 2.2: the RFC says the mapped address is 192.0.2.1 port 32853, and both checks verify with the same password.",
+    "fieldCount": 3,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Binding success response",
+          "note": "0x0101"
+        },
+        {
+          "label": "Mapped address",
+          "value": "192.0.2.1:32853",
+          "note": "Where the server saw the sender."
+        },
+        {
+          "label": "Integrity",
+          "value": "MESSAGE-INTEGRITY and FINGERPRINT match"
+        }
+      ]
+    }
+  },
+  {
+    "name": "rfc 5769 ipv6 response",
+    "input": {
+      "message": "010100482112a442b7e7a701bc34d686fa87dfae8022000b7465737420766563746f7220002000140002a1470113a9faa5d3f179bc25f4b5bed2b9d900080014a382954e4be67bf11784c97c8292c275bfe3ed4180280004c8fb0b4c",
+      "password": "VOkJxbRl1RmTxUk/WvJxBt",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "RFC 5769 section 2.3: the RFC says 2001:db8:1234:5678:11:2233:4455:6677 port 32853, un-XORed with the cookie and the transaction ID.",
+    "fieldCount": 3,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Binding success response",
+          "note": "0x0101"
+        },
+        {
+          "label": "Mapped address",
+          "value": "[2001:db8:1234:5678:11:2233:4455:6677]:32853",
+          "note": "Where the server saw the sender."
+        },
+        {
+          "label": "Integrity",
+          "value": "MESSAGE-INTEGRITY and FINGERPRINT match"
+        }
+      ]
+    }
+  },
+  {
+    "name": "rfc 5769 long-term credentials, before SASLprep",
+    "input": {
+      "message": "000100602112a44278ad3433c6ad72c029da412e00060012e3839ee38388e383aae38383e382afe382b900000015001c662f2f3439396b39353464364f4c33346f4c394653547679363473410014000b6578616d706c652e6f72670000080014f67024656dd64a3e02b8e0712e85c9a28ca89666",
+      "password": "The­MªtrⅨ",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "RFC 5769 section 2.4: the key is MD5 of username:realm:password, and the password as the RFC gives it, The<U+00AD>M<U+00AA>tr<U+2168>, only matches after SASLprep makes it TheMatrIX.",
+    "expect": {
+      "kind": "table",
+      "role": "decoded",
+      "caption": "4 attributes, each padded to 4 bytes",
+      "columns": [
+        {
+          "label": "Offset",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Attribute"
+        },
+        {
+          "label": "Value",
+          "mono": true
+        },
+        {
+          "label": "How it was decoded"
+        },
+        {
+          "label": "Value bytes",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "0x0014",
+            "mono": true,
+            "tone": "muted"
+          },
+          "USERNAME",
+          {
+            "text": "マトリックス",
+            "mono": true
+          },
+          "Who is asking.",
+          {
+            "text": "18",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "0x002C",
+            "mono": true,
+            "tone": "muted"
+          },
+          "NONCE",
+          {
+            "text": "f//499k954d6OL34oL9FSTvy64sA",
+            "mono": true
+          },
+          "A value the server chose, to be sent back with the next request.",
+          {
+            "text": "28",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "0x004C",
+            "mono": true,
+            "tone": "muted"
+          },
+          "REALM",
+          {
+            "text": "example.org",
+            "mono": true
+          },
+          "The server's name for the set of accounts the password belongs to.",
+          {
+            "text": "11",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "0x005C",
+            "mono": true,
+            "tone": "muted"
+          },
+          "MESSAGE-INTEGRITY",
+          {
+            "text": "f6 70 24 65 6d d6 4a 3e 02 b8 e0 71 2e 85 c9 a2 8c a8 96 66",
+            "mono": true
+          },
+          "It matches. The key is MD5 of \"マトリックス:example.org:password\", a long-term credential as TURN uses, after SASLprep turned the password into \"TheMatrIX\".",
+          {
+            "text": "20",
+            "mono": true,
+            "tone": "muted"
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "a wrong long-term password",
+    "input": {
+      "message": "000100602112a44278ad3433c6ad72c029da412e00060012e3839ee38388e383aae38383e382afe382b900000015001c662f2f3439396b39353464364f4c33346f4c394653547679363473410014000b6578616d706c652e6f72670000080014f67024656dd64a3e02b8e0712e85c9a28ca89666",
+      "password": "TheMatrix",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "One letter's case wrong: the HMAC fails, and the fix names all three parts of the key.",
+    "expect": {
+      "kind": "table",
+      "role": "findings",
+      "caption": "What to fix, most serious first",
+      "columns": [
+        {
+          "label": "Severity"
+        },
+        {
+          "label": "What is wrong"
+        },
+        {
+          "label": "What to do"
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "Fails",
+            "tone": "bad"
+          },
+          "MESSAGE-INTEGRITY: the key tried is MD5 of \"マトリックス:example.org:password\", a long-term credential as TURN uses.",
+          "Check the TURN password, and the username and realm. All three go into the key."
+        ]
+      ]
+    }
+  },
+  {
+    "name": "a frame copied from wireshark",
+    "input": {
+      "message": "0000   02 00 5e 10 00 02 02 00 5e 10 00 01 08 00 45 00   ..^.....^.....E.\n0010   00 3c 1c 46 40 00 39 11 39 51 c6 33 64 14 c0 a8   .<.F@.9.9Q.3d...\n0020   01 2a 0d 96 c3 54 00 28 4f 3a 01 01 00 0c 21 12   .*...T.(O:....!.\n0030   a4 42 b7 e7 a7 01 bc 5c a4 93 5d 33 93 47 00 20   .B.....\\..]3.G. \n0040   00 08 00 01 f5 23 e1 12 a6 48                     .....#...H",
+      "password": "",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "Wireshark's Copy as Hex Dump of a whole frame: the offsets and the ASCII column are dropped, and the 42 bytes of Ethernet, IPv4 and UDP headers are recognised and skipped.",
+    "fieldCount": 6,
+    "expect": {
+      "kind": "fields",
+      "role": "method",
+      "fields": [
+        {
+          "label": "Message type",
+          "value": "0x0101",
+          "note": "Method 0x001, Binding, and class 2, success response, with their bits interleaved.",
+          "group": "Header"
+        },
+        {
+          "label": "Length",
+          "value": "12 bytes",
+          "note": "Of attributes, after the 20-byte header.",
+          "group": "Header"
+        },
+        {
+          "label": "Magic cookie",
+          "value": "0x2112A442",
+          "note": "Always the same. It tells STUN apart from the media sharing the port.",
+          "group": "Header"
+        },
+        {
+          "label": "Transaction ID",
+          "value": "b7 e7 a7 01 bc 5c a4 93 5d 33 93 47",
+          "note": "Random, so the answer can be matched to the request.",
+          "group": "Header"
+        },
+        {
+          "label": "Read as",
+          "value": "a hex dump",
+          "note": "The offsets and the ASCII column were left out.",
+          "group": "Input"
+        },
+        {
+          "label": "Skipped before it",
+          "value": "42 bytes",
+          "note": "The STUN message starts after the Ethernet, IPv4 and UDP headers of a captured frame.",
+          "group": "Input"
+        }
+      ]
+    }
+  },
+  {
+    "name": "a figure pasted from an rfc",
+    "input": {
+      "message": "      00 01 00 58     Request type and message length\n      21 12 a4 42     Magic cookie\n      b7 e7 a7 01  }\n      bc 34 d6 86  }  Transaction ID\n      fa 87 df ae  }\n      80 22 00 10     SOFTWARE attribute header\n      53 54 55 4e  }\n      20 74 65 73  }  User-agent...\n      74 20 63 6c  }  ...name\n      69 65 6e 74  }\n      00 24 00 04     PRIORITY attribute header\n      6e 00 01 ff     ICE priority value\n      80 29 00 08     ICE-CONTROLLED attribute header\n      93 2f f9 b1  }  Pseudo-random tie breaker...\n      51 26 3b 36  }   ...for ICE control\n      00 06 00 09     USERNAME attribute header\n      65 76 74 6a  }\n      3a 68 36 76  }  Username (9 bytes) and padding (3 bytes)\n      59 20 20 20  }\n      00 08 00 14     MESSAGE-INTEGRITY attribute header\n      9a ea a7 0c  }\n      bf d8 cb 56  }\n      78 1e f2 b5  }  HMAC-SHA1 fingerprint\n      b2 d3 f2 49  }\n      c1 b5 71 a2  }\n      80 28 00 04     FINGERPRINT attribute header\n      e5 7a 3b cf     CRC32 fingerprint",
+      "password": "VOkJxbRl1RmTxUk/WvJxBt",
+      "username": "",
+      "realm": "",
+      "view": "all"
+    },
+    "match": "subset",
+    "why": "RFC 5769's own figure, notes and braces included: the notes after a wide gap are ignored, and the message is the 2.1 request.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "fields": [
+        {
+          "label": "Message",
+          "value": "Binding request",
+          "note": "0x0001. An ICE connectivity check from \"h6vY\" to \"evtj\"."
+        },
+        {
+          "label": "Integrity",
+          "value": "MESSAGE-INTEGRITY and FINGERPRINT match"
+        }
+      ]
+    }
+  }
+]

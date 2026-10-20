@@ -1,0 +1,200 @@
+{
+  "sdk": 5,
+  "id": "overload-queue",
+  "name": "Overload and queue simulator",
+  "blurb": "More requests than a service can answer, for a minute. Your workers, traffic, timeout, retries and queue policy: who is answered in time, who waits for nothing, and does it recover.",
+  "version": "3.0.0",
+  "capabilities": [
+    "pure"
+  ],
+  "runtime": {
+    "entry": "index.ts",
+    "thread": "worker"
+  },
+  "kinds": [
+    "group",
+    "fields",
+    "series",
+    "table",
+    "error"
+  ],
+  "card": "live",
+  "cardFields": 4,
+  "autoRun": false,
+  "timeoutMs": 30000,
+  "inputs": [
+    {
+      "id": "policy",
+      "type": "select",
+      "label": "Policy",
+      "description": "What the service does with a request that does not fit.",
+      "primary": true,
+      "default": "fifo",
+      "options": [
+        {
+          "value": "fifo",
+          "label": "Unbounded queue: wait forever, first come first served"
+        },
+        {
+          "value": "fifo_skip",
+          "label": "Unbounded, but skip requests whose client already gave up"
+        },
+        {
+          "value": "bounded",
+          "label": "Bounded queue: refuse when full"
+        },
+        {
+          "value": "priority",
+          "label": "Bounded, orders first"
+        },
+        {
+          "value": "codel",
+          "label": "Queue timeout, CoDel-style (5 ms / 100 ms)"
+        },
+        {
+          "value": "lifo",
+          "label": "Newest first: adaptive LIFO with the queue timeout"
+        }
+      ]
+    },
+    {
+      "id": "retries",
+      "type": "number",
+      "label": "Retries",
+      "description": "Attempts after the first, about 1 s apart, after a timeout or a refusal. A person stops after 10 s.",
+      "primary": true,
+      "default": 0,
+      "min": 0,
+      "max": 10,
+      "step": 1
+    },
+    {
+      "id": "spike",
+      "type": "number",
+      "label": "Spike rate",
+      "unit": "/s",
+      "description": "Requests a second for one minute, starting 60 s in. The run goes on 3 minutes after it.",
+      "primary": true,
+      "default": 150,
+      "min": 0.1,
+      "max": 5000,
+      "step": 1
+    },
+    {
+      "id": "base",
+      "type": "number",
+      "label": "Normal rate",
+      "unit": "/s",
+      "description": "Requests a second before and after the spike.",
+      "default": 70,
+      "min": 0.1,
+      "max": 5000,
+      "step": 1
+    },
+    {
+      "id": "workers",
+      "type": "number",
+      "label": "Workers",
+      "description": "Requests the service works on at once: threads, processes, connections.",
+      "default": 8,
+      "min": 1,
+      "max": 2000,
+      "step": 1
+    },
+    {
+      "id": "service",
+      "type": "number",
+      "label": "Service time",
+      "unit": "ms",
+      "description": "Mean time a worker spends on one request. Exponential, so a light tail.",
+      "default": 80,
+      "min": 0.1,
+      "max": 60000,
+      "step": 1
+    },
+    {
+      "id": "timeout",
+      "type": "number",
+      "label": "Timeout",
+      "unit": "s",
+      "description": "How long the client waits for one attempt. The bounded queue holds a quarter of this much work.",
+      "default": 2,
+      "min": 0.01,
+      "max": 600,
+      "step": 0.1
+    }
+  ],
+  "samples": [
+    {
+      "label": "The sale, unbounded queue",
+      "input": {
+        "policy": "fifo",
+        "retries": 0,
+        "spike": 150,
+        "base": 70,
+        "workers": 8,
+        "service": 80,
+        "timeout": 2
+      }
+    },
+    {
+      "label": "The sale, bounded queue",
+      "input": {
+        "policy": "bounded",
+        "retries": 0,
+        "spike": 150,
+        "base": 70,
+        "workers": 8,
+        "service": 80,
+        "timeout": 2
+      }
+    },
+    {
+      "label": "Unbounded, with 3 retries",
+      "input": {
+        "policy": "fifo",
+        "retries": 3,
+        "spike": 150,
+        "base": 70,
+        "workers": 8,
+        "service": 80,
+        "timeout": 2
+      }
+    },
+    {
+      "label": "Queue timeout, with 3 retries",
+      "input": {
+        "policy": "codel",
+        "retries": 3,
+        "spike": 150,
+        "base": 70,
+        "workers": 8,
+        "service": 80,
+        "timeout": 2
+      }
+    }
+  ],
+  "help": "README.md",
+  "tags": [
+    "queueing",
+    "overload",
+    "load-shedding",
+    "backpressure",
+    "retries",
+    "performance"
+  ],
+  "links": [
+    {
+      "label": "Fail at Scale: CoDel and adaptive LIFO (ACM Queue, 2015)",
+      "href": "https://queue.acm.org/detail.cfm?id=2839461"
+    },
+    {
+      "label": "Metastable failures in distributed systems (HotOS 2021)",
+      "href": "https://www.sigops.org/s/conferences/hotos/2021/papers/hotos21-s11-bronson.pdf"
+    },
+    {
+      "label": "Google SRE book: Addressing cascading failures",
+      "href": "https://sre.google/sre-book/addressing-cascading-failures/"
+    }
+  ]
+}

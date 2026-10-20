@@ -1,0 +1,114 @@
+{
+  "sdk": 7,
+  "id": "timeout-budget",
+  "name": "Timeout budget checker",
+  "blurb": "A call chain's per-try timeouts and retries, top first: the worst case when the bottom hangs, whether it fits the caller's deadline, and which retries can never finish in time.",
+  "version": "3.0.0",
+  "capabilities": [
+    "pure"
+  ],
+  "runtime": {
+    "entry": "index.ts",
+    "thread": "main"
+  },
+  "kinds": [
+    "group",
+    "fields",
+    "table",
+    "graph",
+    "error"
+  ],
+  "card": "live",
+  "cardFields": 3,
+  "autoRun": false,
+  "inputs": [
+    {
+      "id": "chain",
+      "type": "textarea",
+      "label": "The chain",
+      "description": "One call per line, top first: caller -> callee, the per-try timeout (ms, s, or none), and the retries. A # starts a comment. Assumes every layer retries a try that timed out.",
+      "primary": true,
+      "dir": "ltr",
+      "rows": 4,
+      "maxLength": 4096,
+      "default": "frontend -> checkout    none   2\ncheckout -> pricing     1s     2\npricing -> inventory    500ms  2",
+      "lang": "call-chain",
+      "grammar": {
+        "keywords": [
+          "none"
+        ],
+        "comment": "#",
+        "operators": [
+          "->"
+        ]
+      }
+    },
+    {
+      "id": "deadline",
+      "type": "number",
+      "label": "Top caller waits",
+      "unit": "ms",
+      "description": "How long whatever calls the top of the chain waits: the app, the browser, the gateway.",
+      "primary": true,
+      "default": 2000,
+      "min": 1,
+      "max": 3600000,
+      "step": 100
+    },
+    {
+      "id": "backoff",
+      "type": "number",
+      "label": "Backoff between tries",
+      "unit": "ms",
+      "description": "Average wait before each retry. Istio's base is 25 ms; Envoy jitters it, up to 74 ms before a second retry.",
+      "default": 25,
+      "min": 0,
+      "max": 600000,
+      "step": 5
+    }
+  ],
+  "samples": [
+    {
+      "label": "Timeouts set by hand, every timeout retried",
+      "input": {
+        "chain": "frontend -> checkout    none   2\ncheckout -> pricing     1s     2\npricing -> inventory    500ms  2",
+        "deadline": 2000,
+        "backoff": 25
+      }
+    },
+    {
+      "label": "Timeouts that shrink going down",
+      "input": {
+        "chain": "frontend -> checkout    1.8s   0\ncheckout -> pricing     800ms  1\npricing -> inventory    225ms  2",
+        "deadline": 2000,
+        "backoff": 25
+      }
+    },
+    {
+      "label": "Istio's defaults: no timeouts",
+      "input": {
+        "chain": "frontend -> checkout    none   0\ncheckout -> pricing     none   0\npricing -> inventory    none   0",
+        "deadline": 2000,
+        "backoff": 25
+      }
+    }
+  ],
+  "help": "README.md",
+  "tags": [
+    "timeouts",
+    "retries",
+    "reliability",
+    "service-mesh",
+    "microservices"
+  ],
+  "links": [
+    {
+      "label": "Google SRE book: deadlines and deadline propagation",
+      "href": "https://sre.google/sre-book/addressing-cascading-failures/"
+    },
+    {
+      "label": "Istio VirtualService: timeout and perTryTimeout",
+      "href": "https://istio.io/latest/docs/reference/config/networking/virtual-service/"
+    }
+  ]
+}

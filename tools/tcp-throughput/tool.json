@@ -1,14 +1,15 @@
 {
-  "sdk": 3,
+  "sdk": 5,
   "id": "tcp-throughput",
   "name": "TCP throughput ceiling",
   "blurb": "A fast link is not a fast transfer. One connection is capped by its window and by packet loss, and on a long path the cap is far below what was paid for.",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "capabilities": ["pure"],
   "runtime": { "entry": "index.ts", "thread": "main" },
   "kinds": ["fields", "series", "table", "group", "error"],
   "card": "live",
   "cardFields": 4,
+  "autoRun": false,
   "inputs": [
     {
       "id": "rtt",
@@ -45,6 +46,18 @@
       "min": 1,
       "max": 1048576,
       "step": 8
+    },
+    {
+      "id": "link",
+      "type": "number",
+      "label": "Link speed",
+      "description": "What the path is sold as, the speed you expected the transfer to reach. The answer is how much of it one connection can use.",
+      "unit": "Mbit/s",
+      "primary": true,
+      "default": 1000,
+      "min": 0.1,
+      "max": 400000,
+      "step": 1
     },
     {
       "id": "mss",

@@ -31,9 +31,9 @@
  * References: Mathis, Semke, Mahdavi & Ott, "The macroscopic behavior of the TCP congestion avoidance
  * algorithm" (1997), for the sqrt(p) form and the sqrt(3/2) constant; RFC 7323 for window scaling.
  */
-import type { Cell, Field, Output, Series, Tool } from "@toolbench/sdk";
+import type { Field, Output, Series, Tool } from "@toolbench/sdk";
 
-type Input = { mss: number; rtt: number; loss: number; window: number; sweep: string };
+type Input = { mss: number; rtt: number; loss: number; window: number; link: number; sweep: string };
 
 /** Named so the error path can say which input was wrong rather than "invalid input". */
 class InputError extends Error {
@@ -92,15 +92,39 @@ function bytes(value: number): string {
 /** Rounded to a fixed number of places, as a string, so a fixture pins a value rather than a float. */
 const fixed = (value: number, places: number): string => value.toFixed(places);
 
+/** A share of the link, with as many places as it takes to say something other than 0%. */
+function share(fraction: number): string {
+	const pct = fraction * 100;
+	if (pct >= 10) return `${pct.toFixed(0)}%`;
+	if (pct >= 1) return `${pct.toFixed(1)}%`;
+	return `${pct.toPrecision(2)}%`;
+}
+
+/** Loss in percent, to two significant figures and never in exponent form, which a reader cannot type back in. */
+function lossText(pct: number): string {
+	if (pct >= 1) return `${pct.toFixed(1)}%`;
+	const places = Math.min(20, 1 - Math.floor(Math.log10(pct)));
+	return `${pct.toFixed(places)}%`;
+}
+
+/** "one packet in 19,500" or "in 310 million": two significant figures, because the loss it stands for has two. */
+function oneIn(pct: number): string {
+	const n = 100 / pct;
+	if (n >= 1e9) return `${Number((n / 1e9).toPrecision(2))} billion`;
+	if (n >= 1e6) return `${Number((n / 1e6).toPrecision(2))} million`;
+	return Number(n.toPrecision(2)).toLocaleString("en-US");
+}
+
 export default {
 	run(input: Input) {
 		try {
-			const { mss, rtt, loss, window, sweep } = input;
+			const { mss, rtt, loss, window, link, sweep } = input;
 
 			if (!(mss > 0)) throw new InputError("Segment size must be greater than zero.", "mss");
 			if (!(rtt > 0)) throw new InputError("Round-trip time must be greater than zero.", "rtt");
 			if (!(loss >= 0 && loss < 100)) throw new InputError("Loss must be from 0 up to but not including 100 percent.", "loss");
 			if (!(window > 0)) throw new InputError("Receive window must be greater than zero.", "window");
+			if (!(link > 0)) throw new InputError("Link speed must be greater than zero.", "link");
 
 			const rttSeconds = rtt / 1000;
 			const windowBytes = window * 1024;
@@ -112,29 +136,53 @@ export default {
 			const binding = fromLoss < fromWindow ? "loss" : "window";
 
 			/*
-			 * The window a sender would need to reach the OTHER ceiling. When loss binds, this is what the
-			 * window would have to be for loss to stay the only limit; when the window binds, it is the answer
-			 * to "how big should I set it", which is the bandwidth-delay product.
+			 * The link is not a third ceiling of the connection: it is what the reader paid for. It sits in the same table
+			 * because the question is which of the three a transfer meets first, and the answer is read down one column.
+			 * On a tie the link goes first, since a connection that can reach the link speed fills it.
 			 */
-			const windowToMatch = (Number.isFinite(fromLoss) ? fromLoss : fromWindow) * rttSeconds / 8;
+			const linkBits = link * 1e6;
+			const fills = ceiling >= linkBits;
+			type Limit = { id: "loss" | "window" | "link"; name: string; bits: number };
+			const order = { link: 0, [binding]: 1 } as Record<string, number>;
+			const limits: Limit[] = [
+				{ id: "loss" as const, name: "Packet loss", bits: fromLoss },
+				{ id: "window" as const, name: "Receive window", bits: fromWindow },
+				{ id: "link" as const, name: "Link", bits: linkBits },
+			].sort((a, b) => a.bits - b.bits || (order[a.id] ?? 2) - (order[b.id] ?? 2));
+			/* Past the link, the limit after it is no limit at all: nothing a connection does can beat the link. */
+			const status = fills ? ["Sets the limit", "", ""] : ["Sets the limit", "Next", ""];
 
-			const fields: Field[] = [
-				{
-					label: "Throughput ceiling",
-					value: bitrate(ceiling),
-					note: `one connection, ${binding} limited`,
-					tone: binding === "loss" ? "warn" : "normal",
-				},
-				{ label: "What binds it", value: binding === "loss" ? "Packet loss" : "Receive window" },
-				{ label: "Window allows", value: bitrate(fromWindow), note: `${bytes(windowBytes)} in flight per ${fixed(rtt, 2)} ms` },
-				{
-					label: "Loss allows",
-					value: bitrate(fromLoss),
-					note: loss === 0 ? "no loss, so nothing tells the sender to stop" : `at ${fixed(loss, 4)}% loss`,
-				},
-				{ label: "Window to lift that limit", value: bytes(windowToMatch), note: "the bandwidth-delay product at the other ceiling" },
-				{ label: "Data in flight at the ceiling", value: bytes((ceiling * rttSeconds) / 8) },
-			];
+			/*
+			 * What fixing a limit buys, solved from the same formulas: the window that reaches a rate is its
+			 * bandwidth-delay product, and the loss that reaches it is Mathis solved for p, `(MSS x 8 x C / (RTT x rate))^2`.
+			 *
+			 * ⚠️ Each fix is sized to the NEXT limit, not to the link. Fixing loss on the defaults buys 6.55 Mbit/s, not a
+			 * gigabit, because the 64 KB window binds a whisker above where loss did; an earlier version listed "fix the
+			 * loss" and "raise the window" as separate rows and buried that.
+			 */
+			const lossFor = (bits: number) => ((mss * 8 * MATHIS_C) / (rttSeconds * bits)) ** 2 * 100;
+			const windowFor = (bits: number) => (bits * rttSeconds) / 8;
+			const fix = (l: Limit, bits: number) =>
+				l.id === "loss" ? `Cut loss below ${lossText(lossFor(bits))}` : `Raise the window to ${bytes(windowFor(bits))}`;
+			const changes: Field[] = [];
+			if (!fills) {
+				const [first, second] = limits as [Limit, Limit, Limit];
+				if (second.id === "link") {
+					changes.push({ label: fix(first, linkBits), value: bitrate(linkBits), note: "Then the link is the limit." });
+				} else {
+					changes.push({
+						label: fix(first, second.bits),
+						value: bitrate(second.bits),
+						note: `Then the ${second.id === "loss" ? "packet loss" : "receive window"} is the limit.`,
+					});
+					const lossForLink = lossFor(linkBits);
+					changes.push({
+						label: "To fill the link",
+						value: bitrate(linkBits),
+						note: `A window of at least ${bytes(windowFor(linkBits))}, and loss below ${lossText(lossForLink)}, about one packet in ${oneIn(lossForLink)}.`,
+					});
+				}
+			}
 
 			/*
 			 * The two ceilings across a sweep, on one axis because both are bit rates.
@@ -169,28 +217,23 @@ export default {
 				points: xs.map((x) => mbit(lossCeiling(mss, (overRtt ? x : rtt) / 1000, (overRtt ? loss : x) / 100))),
 			};
 
-			const rows: Cell[][] = xs
-				.filter((x) => Math.abs(x - (overRtt ? rtt : loss)) <= (overRtt ? rtt / 3 : 0.12))
-				.slice(0, 5)
-				.map((x) => {
-					const w = windowCeiling(windowBytes, (overRtt ? x : rtt) / 1000);
-					const l = lossCeiling(mss, (overRtt ? x : rtt) / 1000, (overRtt ? loss : x) / 100);
-					const lower = Math.min(w, l);
-					return [
-						{ text: overRtt ? `${fixed(x, 1)} ms` : `${fixed(x, 2)}%`, mono: true },
-						{ text: bitrate(w), mono: true },
-						{ text: bitrate(l), mono: true },
-						/*
-						 * ⚠️ The assertion goes on each branch, not on the conditional. `as const` on a ternary is
-						 * TS1355: it only applies to a literal, and the error names the assertion rather than the
-						 * shape, so it reads like the tone value is wrong when the placement is.
-						 */
-						{ text: bitrate(lower), mono: true, tone: l < w ? ("warn" as const) : ("good" as const) },
-					];
-				});
-
+			const method = "How this was worked out";
 			const parts: Output[] = [
-				{ kind: "fields", fields },
+				/*
+				 * ⚠️ The answer is the table's caption, so the first part is both the sentence and its evidence. A card
+				 * shows the first part, and "5.65 Mbit/s" without the 6.55 beside it hides that fixing loss alone barely
+				 * helps. No tone: a model ceiling in red reads like a measured incident.
+				 */
+				{
+					kind: "table",
+					role: "comparison",
+					caption: fills
+						? `One connection can fill the ${bitrate(linkBits)} link`
+						: `One connection tops out at ${bitrate(ceiling)}, ${share(ceiling / linkBits)} of the link`,
+					columns: [{ label: "Limit" }, { label: "Ceiling", align: "end", mono: true }, { label: "Status" }],
+					rows: limits.map((l, i) => [l.name, { text: bitrate(l.bits), mono: true }, status[i] ?? ""]),
+				},
+				...(changes.length ? [{ kind: "fields" as const, role: "answer", fields: changes }] : []),
 				{
 					kind: "series",
 					chart: {
@@ -200,6 +243,12 @@ export default {
 						yUnit: "Mbit/s",
 						x: xs,
 						series: [windowSeries, lossSeries],
+						/*
+						 * Log, because the two ceilings are often orders of magnitude apart: on a linear axis a 134 Mbit/s
+						 * window line flattened a 0.8 Mbit/s loss line onto zero, and the binding one was the invisible one.
+						 */
+						yScale: "log",
+						thresholds: [{ y: link, label: `Link, ${bitrate(linkBits)}` }],
 						annotations: [
 							{
 								x: overRtt ? rtt : loss,
@@ -209,18 +258,27 @@ export default {
 					},
 				},
 				{
-					kind: "table",
-					caption: "Either side of the current value, because the shape near it is what decides the fix",
-					columns: [
-						{ label: overRtt ? "RTT" : "Loss", mono: true },
-						{ label: "Window allows", align: "end", mono: true },
-						{ label: "Loss allows", align: "end", mono: true },
-						{ label: "Ceiling", align: "end", mono: true },
+					kind: "fields",
+					role: "method",
+					fields: [
+						{
+							group: method,
+							label: "Receive window",
+							value: `${bytes(windowBytes)} per ${rtt} ms round trip`,
+							note: "One window in flight, then a full round trip waiting for its acknowledgement: window / RTT.",
+						},
+						{
+							group: method,
+							label: "Packet loss",
+							value: `${loss}% with ${mss} B segments`,
+							note:
+								loss === 0
+									? "With no loss, nothing tells the sender to slow down, so the window is the only limit."
+									: "MSS x 1.22 / (RTT x sqrt(loss)), Mathis et al.: a Reno-style sender that halves its window on every loss. CUBIC and BBR do better on long paths.",
+						},
 					],
-					rows,
 				},
 			];
-
 			return { kind: "group", parts };
 		} catch (error) {
 			if (error instanceof InputError) return { kind: "error", message: error.message, input: error.input };

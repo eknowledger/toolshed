@@ -1,46 +1,169 @@
 [
   {
-    "name": "the defaults: 120/s of 45ms work, and no more than 5% may queue",
+    "name": "the defaults: 120/s of 45ms work, and no more than 5% may queue: 11 servers, because 10 misses",
     "input": {
       "rate": 120,
       "service": 45,
       "target": 5,
+      "limit": 0,
       "mode": "closed",
       "trials": 200000
     },
     "match": "subset",
-    "why": "Erlang C is the assertion; the chart and the table are the same numbers drawn, and pinning them again would only pin the drawing. Values derived from the closed form with exact rational arithmetic, independently of this implementation, and cross-checked against the Erlang B recursion.",
-    "fieldCount": 6,
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "fieldCount": 1,
     "expect": {
       "kind": "fields",
+      "role": "key",
       "fields": [
         {
+          "label": "Servers needed",
+          "value": "11 servers",
+          "note": "With 10, 5.66% of requests wait, over your 5% target. With 11, 2.52%."
+        }
+      ]
+    }
+  },
+  {
+    "name": "the arithmetic under the answer is the offered load",
+    "input": {
+      "rate": 120,
+      "service": 45,
+      "target": 5,
+      "limit": 0,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "expect": {
+      "kind": "text",
+      "role": "formula",
+      "mono": true,
+      "text": "120 requests/s x 45 ms = 5.40 erlangs of load"
+    }
+  },
+  {
+    "name": "the defaults, side by side: 10 misses at 5.66%, 11 meets it, and p99 waits 7.4 ms",
+    "input": {
+      "rate": 120,
+      "service": 45,
+      "target": 5,
+      "limit": 0,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Nearby server counts",
+      "columns": [
+        {
+          "label": "Servers",
+          "mono": true
+        },
+        {
+          "label": "Your 5% target"
+        },
+        {
+          "label": "Wait at all",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "p99 wait",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "Misses",
+            "tone": "bad"
+          },
+          {
+            "text": "5.66%",
+            "mono": true
+          },
+          {
+            "text": "17.0 ms",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "11",
+            "mono": true
+          },
+          "Fewest that meet it",
+          {
+            "text": "2.52%",
+            "mono": true
+          },
+          {
+            "text": "7.4 ms",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "12",
+            "mono": true
+          },
+          "Headroom",
+          {
+            "text": "1.05%",
+            "mono": true
+          },
+          {
+            "text": "352 µs",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "the defaults, how it was worked out: 5.40 erlangs, and a mean wait of 203 µs",
+    "input": {
+      "rate": 120,
+      "service": 45,
+      "target": 5,
+      "limit": 0,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "fieldCount": 3,
+    "expect": {
+      "kind": "fields",
+      "role": "method",
+      "fields": [
+        {
+          "group": "How this was worked out",
           "label": "Offered load",
           "value": "5.40 erlangs",
-          "note": "120/s x 45 ms"
+          "note": "120 requests a second, 45 ms each: the servers that would be busy if nobody ever queued."
         },
         {
-          "label": "Minimum servers",
+          "group": "How this was worked out",
+          "label": "Fewest that keep up",
           "value": "6",
-          "note": "below this the queue is unstable"
+          "note": "With fewer, the queue grows without limit."
         },
         {
-          "label": "Servers for 5.00% wait",
-          "value": "11",
-          "tone": "good"
-        },
-        {
-          "label": "Utilisation there",
-          "value": "49.09%"
-        },
-        {
-          "label": "Chance of waiting",
-          "value": "2.52%"
-        },
-        {
+          "group": "How this was worked out",
           "label": "Mean wait",
           "value": "203 µs",
-          "note": "queueing only, excluding service"
+          "note": "The average time in the queue with 11 servers, over every request, including those that never wait."
         }
       ]
     }
@@ -51,43 +174,234 @@
       "rate": 10,
       "service": 100,
       "target": 10,
+      "limit": 0,
       "mode": "closed",
       "trials": 200000
     },
     "match": "subset",
-    "why": "Erlang C is the assertion; the chart and the table are the same numbers drawn, and pinning them again would only pin the drawing. Values derived from the closed form with exact rational arithmetic, independently of this implementation, and cross-checked against the Erlang B recursion.",
-    "fieldCount": 6,
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "fieldCount": 3,
     "expect": {
       "kind": "fields",
+      "role": "method",
       "fields": [
         {
+          "group": "How this was worked out",
           "label": "Offered load",
           "value": "1.00 erlangs",
-          "note": "10/s x 100 ms"
+          "note": "10 requests a second, 100 ms each: the servers that would be busy if nobody ever queued."
         },
         {
-          "label": "Minimum servers",
+          "group": "How this was worked out",
+          "label": "Fewest that keep up",
           "value": "2",
-          "note": "below this the queue is unstable"
+          "note": "With fewer, the queue grows without limit."
         },
         {
-          "label": "Servers for 10.00% wait",
-          "value": "3",
-          "tone": "good"
-        },
-        {
-          "label": "Utilisation there",
-          "value": "33.33%"
-        },
-        {
-          "label": "Chance of waiting",
-          "value": "9.09%"
-        },
-        {
+          "group": "How this was worked out",
           "label": "Mean wait",
           "value": "4.5 ms",
-          "note": "queueing only, excluding service"
+          "note": "The average time in the queue with 3 servers, over every request, including those that never wait."
         }
+      ]
+    }
+  },
+  {
+    "name": "one erlang at a 10% target: three servers, and the 1 in 100 that waits longest waits 110 ms",
+    "input": {
+      "rate": 10,
+      "service": 100,
+      "target": 10,
+      "limit": 0,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Nearby server counts",
+      "columns": [
+        {
+          "label": "Servers",
+          "mono": true
+        },
+        {
+          "label": "Your 10% target"
+        },
+        {
+          "label": "Wait at all",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "p99 wait",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "Misses",
+            "tone": "bad"
+          },
+          {
+            "text": "33.33%",
+            "mono": true
+          },
+          {
+            "text": "350.7 ms",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "3",
+            "mono": true
+          },
+          "Fewest that meet it",
+          {
+            "text": "9.09%",
+            "mono": true
+          },
+          {
+            "text": "110.4 ms",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "4",
+            "mono": true
+          },
+          "Headroom",
+          {
+            "text": "2.04%",
+            "mono": true
+          },
+          {
+            "text": "23.8 ms",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "at the stability floor, one fewer server is not a smaller answer but no answer",
+    "input": {
+      "rate": 10,
+      "service": 100,
+      "target": 50,
+      "limit": 0,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "fieldCount": 1,
+    "expect": {
+      "kind": "fields",
+      "role": "key",
+      "fields": [
+        {
+          "label": "Servers needed",
+          "value": "2 servers",
+          "note": "With 1, the queue grows without limit. With 2, 33.33% of requests wait, within your 50% target."
+        }
+      ]
+    }
+  },
+  {
+    "name": "at the stability floor, the row below says the queue cannot keep up",
+    "input": {
+      "rate": 10,
+      "service": 100,
+      "target": 50,
+      "limit": 0,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Nearby server counts",
+      "columns": [
+        {
+          "label": "Servers",
+          "mono": true
+        },
+        {
+          "label": "Your 50% target"
+        },
+        {
+          "label": "Wait at all",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "p99 wait",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "Cannot keep up",
+            "tone": "bad"
+          },
+          {
+            "text": "all",
+            "mono": true
+          },
+          {
+            "text": "unbounded",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "2",
+            "mono": true
+          },
+          "Fewest that meet it",
+          {
+            "text": "33.33%",
+            "mono": true
+          },
+          {
+            "text": "350.7 ms",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "3",
+            "mono": true
+          },
+          "Headroom",
+          {
+            "text": "9.09%",
+            "mono": true
+          },
+          {
+            "text": "110.4 ms",
+            "mono": true
+          }
+        ]
       ]
     }
   },
@@ -97,43 +411,122 @@
       "rate": 1,
       "service": 800,
       "target": 20,
+      "limit": 0,
       "mode": "closed",
       "trials": 200000
     },
     "match": "subset",
-    "why": "Erlang C is the assertion; the chart and the table are the same numbers drawn, and pinning them again would only pin the drawing. Values derived from the closed form with exact rational arithmetic, independently of this implementation, and cross-checked against the Erlang B recursion.",
-    "fieldCount": 6,
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "fieldCount": 3,
     "expect": {
       "kind": "fields",
+      "role": "method",
       "fields": [
         {
+          "group": "How this was worked out",
           "label": "Offered load",
           "value": "0.80 erlangs",
-          "note": "1/s x 800 ms"
+          "note": "1 request a second, 800 ms each: the servers that would be busy if nobody ever queued."
         },
         {
-          "label": "Minimum servers",
+          "group": "How this was worked out",
+          "label": "Fewest that keep up",
           "value": "1",
-          "note": "below this the queue is unstable"
+          "note": "With fewer, the queue grows without limit."
         },
         {
-          "label": "Servers for 20.00% wait",
-          "value": "3",
-          "tone": "good"
-        },
-        {
-          "label": "Utilisation there",
-          "value": "26.67%"
-        },
-        {
-          "label": "Chance of waiting",
-          "value": "5.20%"
-        },
-        {
+          "group": "How this was worked out",
           "label": "Mean wait",
           "value": "18.9 ms",
-          "note": "queueing only, excluding service"
+          "note": "The average time in the queue with 3 servers, over every request, including those that never wait."
         }
+      ]
+    }
+  },
+  {
+    "name": "less than one erlang: a low mean wait hides a 600 ms p99",
+    "input": {
+      "rate": 1,
+      "service": 800,
+      "target": 20,
+      "limit": 0,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Nearby server counts",
+      "columns": [
+        {
+          "label": "Servers",
+          "mono": true
+        },
+        {
+          "label": "Your 20% target"
+        },
+        {
+          "label": "Wait at all",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "p99 wait",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "Misses",
+            "tone": "bad"
+          },
+          {
+            "text": "22.86%",
+            "mono": true
+          },
+          {
+            "text": "2086.2 ms",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "3",
+            "mono": true
+          },
+          "Fewest that meet it",
+          {
+            "text": "5.20%",
+            "mono": true
+          },
+          {
+            "text": "599.7 ms",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "4",
+            "mono": true
+          },
+          "Headroom",
+          {
+            "text": "0.96%",
+            "mono": true
+          },
+          {
+            "text": "0 ms",
+            "mono": true
+          }
+        ]
       ]
     }
   },
@@ -143,77 +536,86 @@
       "rate": 500,
       "service": 20,
       "target": 1,
+      "limit": 0,
       "mode": "closed",
       "trials": 200000
     },
     "match": "subset",
-    "why": "Erlang C is the assertion; the chart and the table are the same numbers drawn, and pinning them again would only pin the drawing. Values derived from the closed form with exact rational arithmetic, independently of this implementation, and cross-checked against the Erlang B recursion.",
-    "fieldCount": 6,
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "fieldCount": 1,
     "expect": {
       "kind": "fields",
+      "role": "key",
       "fields": [
         {
-          "label": "Offered load",
-          "value": "10.00 erlangs",
-          "note": "500/s x 20 ms"
-        },
-        {
-          "label": "Minimum servers",
-          "value": "11",
-          "note": "below this the queue is unstable"
-        },
-        {
-          "label": "Servers for 1.00% wait",
-          "value": "19",
-          "tone": "good"
-        },
-        {
-          "label": "Utilisation there",
-          "value": "52.63%"
-        },
-        {
-          "label": "Chance of waiting",
-          "value": "0.79%"
-        },
-        {
-          "label": "Mean wait",
-          "value": "17 µs",
-          "note": "queueing only, excluding service"
+          "label": "Servers needed",
+          "value": "19 servers",
+          "note": "With 18, 1.59% of requests wait, over your 1% target. With 19, 0.79%."
         }
       ]
     }
   },
   {
-    "name": "the table brackets the answer, two either side",
+    "name": "a 10 ms wait limit needs four fewer servers than no wait at all",
     "input": {
-      "rate": 120,
-      "service": 45,
-      "target": 5,
+      "rate": 500,
+      "service": 20,
+      "target": 1,
+      "limit": 10,
       "mode": "closed",
       "trials": 200000
     },
     "match": "subset",
-    "why": "Pins the rows either side of the answer, which is where the decision actually gets made: the step from 10 servers to 11 is what a reader is choosing between. Same exact-rational source as the field cases.",
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "fieldCount": 1,
+    "expect": {
+      "kind": "fields",
+      "role": "key",
+      "fields": [
+        {
+          "label": "Servers needed",
+          "value": "15 servers",
+          "note": "With 14, 2.36% of requests wait longer than 10 ms, over your 1% target. With 15, 0.84%."
+        }
+      ]
+    }
+  },
+  {
+    "name": "with a 10 ms limit a tenth of requests wait, and p99 sits just under the limit",
+    "input": {
+      "rate": 500,
+      "service": 20,
+      "target": 1,
+      "limit": 10,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "match": "subset",
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
     "expect": {
       "kind": "table",
-      "caption": "Either side of the answer, because the step between two counts is the decision",
+      "role": "comparison",
+      "caption": "Nearby server counts",
       "columns": [
         {
           "label": "Servers",
           "mono": true
         },
         {
-          "label": "Utilisation",
+          "label": "Your 1% target"
+        },
+        {
+          "label": "Waits over 10 ms",
           "align": "end",
           "mono": true
         },
         {
-          "label": "Chance of waiting",
+          "label": "Wait at all",
           "align": "end",
           "mono": true
         },
         {
-          "label": "Mean wait",
+          "label": "p99 wait",
           "align": "end",
           "mono": true
         }
@@ -221,92 +623,61 @@
       "rows": [
         [
           {
-            "text": "9",
+            "text": "14",
             "mono": true
           },
           {
-            "text": "60.00%",
+            "text": "Misses",
+            "tone": "bad"
+          },
+          {
+            "text": "2.36%",
             "mono": true
           },
           {
-            "text": "11.86%",
+            "text": "17.41%",
             "mono": true
           },
           {
-            "text": "1.5 ms",
+            "text": "14.3 ms",
             "mono": true
           }
         ],
         [
           {
-            "text": "10",
+            "text": "15",
+            "mono": true
+          },
+          "Fewest that meet it",
+          {
+            "text": "0.84%",
             "mono": true
           },
           {
-            "text": "54.00%",
+            "text": "10.20%",
             "mono": true
           },
           {
-            "text": "5.66%",
-            "mono": true
-          },
-          {
-            "text": "553 µs",
+            "text": "9.3 ms",
             "mono": true
           }
         ],
         [
           {
-            "text": "11",
+            "text": "16",
+            "mono": true
+          },
+          "Headroom",
+          {
+            "text": "0.29%",
             "mono": true
           },
           {
-            "text": "49.09%",
+            "text": "5.73%",
             "mono": true
           },
           {
-            "text": "2.52%",
-            "mono": true,
-            "tone": "good"
-          },
-          {
-            "text": "203 µs",
-            "mono": true
-          }
-        ],
-        [
-          {
-            "text": "12",
-            "mono": true
-          },
-          {
-            "text": "45.00%",
-            "mono": true
-          },
-          {
-            "text": "1.05%",
-            "mono": true
-          },
-          {
-            "text": "72 µs",
-            "mono": true
-          }
-        ],
-        [
-          {
-            "text": "13",
-            "mono": true
-          },
-          {
-            "text": "41.54%",
-            "mono": true
-          },
-          {
-            "text": "0.41%",
-            "mono": true
-          },
-          {
-            "text": "24 µs",
+            "text": "5.8 ms",
             "mono": true
           }
         ]
@@ -319,42 +690,21 @@
       "rate": 120,
       "service": 45,
       "target": 5,
+      "limit": 0,
       "mode": "simulate",
       "trials": 20000
     },
     "match": "subset",
-    "why": "Asserts the FORMULA fields are untouched by simulating. The simulated numbers are deliberately not pinned here: their exact values follow from the PRNG stream, so a fixture on them would be derived from the implementation rather than from the specification. That they converge on the closed form is a property, and index.test.ts asserts it as one.",
-    "fieldCount": 6,
+    "why": "Values derived from the closed forms with exact rational arithmetic for Erlang C (the textbook ratio, not this tool's recursion) and the M/M/c waiting-time tail P(W > t) = C exp(-(c mu - lambda) t) and its inverse for the percentiles, independently of this implementation. The chart and the table are the same numbers drawn.",
+    "fieldCount": 1,
     "expect": {
       "kind": "fields",
+      "role": "key",
       "fields": [
         {
-          "label": "Offered load",
-          "value": "5.40 erlangs",
-          "note": "120/s x 45 ms"
-        },
-        {
-          "label": "Minimum servers",
-          "value": "6",
-          "note": "below this the queue is unstable"
-        },
-        {
-          "label": "Servers for 5.00% wait",
-          "value": "11",
-          "tone": "good"
-        },
-        {
-          "label": "Utilisation there",
-          "value": "49.09%"
-        },
-        {
-          "label": "Chance of waiting",
-          "value": "2.52%"
-        },
-        {
-          "label": "Mean wait",
-          "value": "203 µs",
-          "note": "queueing only, excluding service"
+          "label": "Servers needed",
+          "value": "11 servers",
+          "note": "With 10, 5.66% of requests wait, over your 5% target. With 11, 2.52%."
         }
       ]
     }
@@ -365,6 +715,7 @@
       "rate": 0,
       "service": 45,
       "target": 5,
+      "limit": 0,
       "mode": "closed",
       "trials": 200000
     },
@@ -380,6 +731,7 @@
       "rate": 120,
       "service": 0,
       "target": 5,
+      "limit": 0,
       "mode": "closed",
       "trials": 200000
     },
@@ -395,6 +747,7 @@
       "rate": 120,
       "service": 45,
       "target": 100,
+      "limit": 0,
       "mode": "closed",
       "trials": 200000
     },
@@ -410,6 +763,7 @@
       "rate": 120,
       "service": 45,
       "target": 5,
+      "limit": 0,
       "mode": "simulate",
       "trials": 10
     },
@@ -417,6 +771,22 @@
       "kind": "error",
       "message": "Simulating needs at least 1000 trials.",
       "input": "trials"
+    }
+  },
+  {
+    "name": "a negative wait limit is refused, with what 0 means",
+    "input": {
+      "rate": 120,
+      "service": 45,
+      "target": 5,
+      "limit": -5,
+      "mode": "closed",
+      "trials": 200000
+    },
+    "expect": {
+      "kind": "error",
+      "message": "The wait limit cannot be negative. Use 0 to size for no wait at all.",
+      "input": "limit"
     }
   }
 ]

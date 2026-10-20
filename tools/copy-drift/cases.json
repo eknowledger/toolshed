@@ -1,0 +1,819 @@
+[
+	{
+		"name": "httpx's two _send_single_request: alike once names are set aside",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\nf1157db 2023-03-20T11:30:11Z Use standard logging style (#2547)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n84731c8 2019-10-16T08:31:47-05:00 Cache netrc authentication per-client (#400)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n95dad24 2019-08-13T06:44:23-05:00 Remove \"Host\" header on redirects if URL origin has changed (#199)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"historyb": "4189b7f 2025-02-27T20:38:39+04:00 fix typo (#3519)\n8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\n4b5a92e 2023-04-12T15:53:11+01:00 set logging request lines to INFO level for async method also (#2656)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\n0f280af 2021-02-17T11:32:43Z map_exceptions in request.aclose() (#1465)\nc4d2e6f 2020-11-24T10:35:51Z Add support for Mount API (#1362)\n78afd08 2020-09-24T09:42:26+02:00 Properly close stream on async response close (#1316)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\nf5c27ec 2020-08-27T14:57:53+01:00 Use and pin black 20 (#1229)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\n6a1ee0e 2019-12-29T16:56:18Z response.elapsed now reflects entire request/response time. (#692)\ne9ebd1d 2019-12-29T15:01:20Z Drop per-request `cert`, `verify`, and `trust_env` (#617)\neb7c6b0 2019-12-04T11:54:39Z Differentiate between `timeout=None` and `timeout=UNSET`. (#592)\ne045b86 2019-11-29T11:21:40Z Clean up '_dispatcher_for_request' into 'dispatcher_for_url' (#561)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n92fbe5f 2019-08-06T08:20:48-05:00 Added base class HTTPError with request/response attribute (#162)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"since": "e107e0f",
+			"ignore": "8e36f2b"
+		},
+		"match": "subset",
+		"fieldCount": 2,
+		"why": "tool_reference.py, with Python's tokenize and difflib, on the bodies at httpx b5addb6: 125 and 126 tokens, ratio 0.99602 names set aside and 0.95618 as written.",
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Alike, names set aside",
+					"value": "99.6%"
+				},
+				{
+					"label": "Alike, as written",
+					"value": "95.6%"
+				}
+			]
+		}
+	},
+	{
+		"name": "httpx's two _send_single_request: 7 of 22 changed only one copy",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\nf1157db 2023-03-20T11:30:11Z Use standard logging style (#2547)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n84731c8 2019-10-16T08:31:47-05:00 Cache netrc authentication per-client (#400)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n95dad24 2019-08-13T06:44:23-05:00 Remove \"Host\" header on redirects if URL origin has changed (#199)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"historyb": "4189b7f 2025-02-27T20:38:39+04:00 fix typo (#3519)\n8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\n4b5a92e 2023-04-12T15:53:11+01:00 set logging request lines to INFO level for async method also (#2656)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\n0f280af 2021-02-17T11:32:43Z map_exceptions in request.aclose() (#1465)\nc4d2e6f 2020-11-24T10:35:51Z Add support for Mount API (#1362)\n78afd08 2020-09-24T09:42:26+02:00 Properly close stream on async response close (#1316)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\nf5c27ec 2020-08-27T14:57:53+01:00 Use and pin black 20 (#1229)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\n6a1ee0e 2019-12-29T16:56:18Z response.elapsed now reflects entire request/response time. (#692)\ne9ebd1d 2019-12-29T15:01:20Z Drop per-request `cert`, `verify`, and `trust_env` (#617)\neb7c6b0 2019-12-04T11:54:39Z Differentiate between `timeout=None` and `timeout=UNSET`. (#592)\ne045b86 2019-11-29T11:21:40Z Clean up '_dispatcher_for_request' into 'dispatcher_for_url' (#561)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n92fbe5f 2019-08-06T08:20:48-05:00 Added base class HTTPError with request/response attribute (#162)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"since": "e107e0f",
+			"ignore": "8e36f2b"
+		},
+		"match": "subset",
+		"fieldCount": 1,
+		"why": "tool_reference.py on the git log -L listings at b5addb6, counted after e107e0f (where the sync copy got its name, per cochange.py) with the 29-file sweep 8e36f2b ignored: the same 15 / 1 / 6 cochange.py reports. Of the 22, 7 changed one copy only, and those are the commits to read.",
+		"expect": {
+			"kind": "fields",
+			"role": "answer",
+			"fields": [
+				{
+					"label": "Since e107e0f",
+					"value": "7 of 22 commits changed only one copy. Read those first."
+				}
+			]
+		}
+	},
+	{
+		"name": "httpx's two _send_single_request: 15 together, 1 only sync, 6 only async, as bars",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\nf1157db 2023-03-20T11:30:11Z Use standard logging style (#2547)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n84731c8 2019-10-16T08:31:47-05:00 Cache netrc authentication per-client (#400)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n95dad24 2019-08-13T06:44:23-05:00 Remove \"Host\" header on redirects if URL origin has changed (#199)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"historyb": "4189b7f 2025-02-27T20:38:39+04:00 fix typo (#3519)\n8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\n4b5a92e 2023-04-12T15:53:11+01:00 set logging request lines to INFO level for async method also (#2656)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\n0f280af 2021-02-17T11:32:43Z map_exceptions in request.aclose() (#1465)\nc4d2e6f 2020-11-24T10:35:51Z Add support for Mount API (#1362)\n78afd08 2020-09-24T09:42:26+02:00 Properly close stream on async response close (#1316)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\nf5c27ec 2020-08-27T14:57:53+01:00 Use and pin black 20 (#1229)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\n6a1ee0e 2019-12-29T16:56:18Z response.elapsed now reflects entire request/response time. (#692)\ne9ebd1d 2019-12-29T15:01:20Z Drop per-request `cert`, `verify`, and `trust_env` (#617)\neb7c6b0 2019-12-04T11:54:39Z Differentiate between `timeout=None` and `timeout=UNSET`. (#592)\ne045b86 2019-11-29T11:21:40Z Clean up '_dispatcher_for_request' into 'dispatcher_for_url' (#561)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n92fbe5f 2019-08-06T08:20:48-05:00 Added base class HTTPError with request/response attribute (#162)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"since": "e107e0f",
+			"ignore": "8e36f2b"
+		},
+		"match": "subset",
+		"why": "The same 15 / 1 / 6, drawn as three bars rather than a Venn, whose one-commit region would be too thin to read.",
+		"expect": {
+			"kind": "series",
+			"chart": {
+				"xLabel": "Changed",
+				"yLabel": "Commits",
+				"orientation": "horizontal",
+				"x": ["Both", "A only", "B only"],
+				"series": [
+					{
+						"label": "Commits",
+						"shape": "bar",
+						"unit": "commits",
+						"points": [15, 1, 6]
+					}
+				]
+			}
+		}
+	},
+	{
+		"name": "httpx's two _send_single_request: the detail behind the counts",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\nf1157db 2023-03-20T11:30:11Z Use standard logging style (#2547)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n84731c8 2019-10-16T08:31:47-05:00 Cache netrc authentication per-client (#400)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n95dad24 2019-08-13T06:44:23-05:00 Remove \"Host\" header on redirects if URL origin has changed (#199)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"historyb": "4189b7f 2025-02-27T20:38:39+04:00 fix typo (#3519)\n8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\n4b5a92e 2023-04-12T15:53:11+01:00 set logging request lines to INFO level for async method also (#2656)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\n0f280af 2021-02-17T11:32:43Z map_exceptions in request.aclose() (#1465)\nc4d2e6f 2020-11-24T10:35:51Z Add support for Mount API (#1362)\n78afd08 2020-09-24T09:42:26+02:00 Properly close stream on async response close (#1316)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\nf5c27ec 2020-08-27T14:57:53+01:00 Use and pin black 20 (#1229)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\n6a1ee0e 2019-12-29T16:56:18Z response.elapsed now reflects entire request/response time. (#692)\ne9ebd1d 2019-12-29T15:01:20Z Drop per-request `cert`, `verify`, and `trust_env` (#617)\neb7c6b0 2019-12-04T11:54:39Z Differentiate between `timeout=None` and `timeout=UNSET`. (#592)\ne045b86 2019-11-29T11:21:40Z Clean up '_dispatcher_for_request' into 'dispatcher_for_url' (#561)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n92fbe5f 2019-08-06T08:20:48-05:00 Added base class HTTPError with request/response attribute (#162)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"since": "e107e0f",
+			"ignore": "8e36f2b"
+		},
+		"match": "subset",
+		"fieldCount": 5,
+		"why": "Left out is cochange.py's two cuts added up: 22 commits of other code plus e107e0f itself, and the 29-file 8e36f2b ignored.",
+		"expect": {
+			"kind": "fields",
+			"role": "method",
+			"fields": [
+				{
+					"label": "Counted from",
+					"value": "e107e0f 2020-07-17 Tighten public client methods (#997)"
+				},
+				{
+					"label": "Left out",
+					"value": "23 at or before the count starts, 1 ignored"
+				},
+				{
+					"label": "Read as",
+					"value": "Python"
+				}
+			]
+		}
+	},
+	{
+		"name": "httpx's two _send_single_request: the one-sided commits to read, newest first",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\nf1157db 2023-03-20T11:30:11Z Use standard logging style (#2547)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n84731c8 2019-10-16T08:31:47-05:00 Cache netrc authentication per-client (#400)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n95dad24 2019-08-13T06:44:23-05:00 Remove \"Host\" header on redirects if URL origin has changed (#199)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"historyb": "4189b7f 2025-02-27T20:38:39+04:00 fix typo (#3519)\n8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\n4b5a92e 2023-04-12T15:53:11+01:00 set logging request lines to INFO level for async method also (#2656)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\n0f280af 2021-02-17T11:32:43Z map_exceptions in request.aclose() (#1465)\nc4d2e6f 2020-11-24T10:35:51Z Add support for Mount API (#1362)\n78afd08 2020-09-24T09:42:26+02:00 Properly close stream on async response close (#1316)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\nf5c27ec 2020-08-27T14:57:53+01:00 Use and pin black 20 (#1229)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\n6a1ee0e 2019-12-29T16:56:18Z response.elapsed now reflects entire request/response time. (#692)\ne9ebd1d 2019-12-29T15:01:20Z Drop per-request `cert`, `verify`, and `trust_env` (#617)\neb7c6b0 2019-12-04T11:54:39Z Differentiate between `timeout=None` and `timeout=UNSET`. (#592)\ne045b86 2019-11-29T11:21:40Z Clean up '_dispatcher_for_request' into 'dispatcher_for_url' (#561)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n92fbe5f 2019-08-06T08:20:48-05:00 Added base class HTTPError with request/response attribute (#162)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"since": "e107e0f",
+			"ignore": "8e36f2b"
+		},
+		"match": "subset",
+		"why": "The seven one-sided commits from the listings, newest first: 1 in the sync copy (f1157db, #2547) and 6 in the async copy, the same seven the post's table reads.",
+		"expect": {
+			"kind": "table",
+			"role": "actions",
+			"caption": "Changed only one copy, newest first",
+			"columns": [
+				{
+					"label": "Copy"
+				},
+				{
+					"label": "Commit",
+					"mono": true
+				},
+				{
+					"label": "Date"
+				},
+				{
+					"label": "Subject"
+				}
+			],
+			"rows": [
+				[
+					"B",
+					{
+						"text": "4189b7f",
+						"mono": true
+					},
+					"2025-02-27",
+					"fix typo (#3519)"
+				],
+				[
+					"B",
+					{
+						"text": "4b5a92e",
+						"mono": true
+					},
+					"2023-04-12",
+					"set logging request lines to INFO level for async method also (#2656)"
+				],
+				[
+					"A",
+					{
+						"text": "f1157db",
+						"mono": true
+					},
+					"2023-03-20",
+					"Use standard logging style (#2547)"
+				],
+				[
+					"B",
+					{
+						"text": "0f280af",
+						"mono": true
+					},
+					"2021-02-17",
+					"map_exceptions in request.aclose() (#1465)"
+				],
+				[
+					"B",
+					{
+						"text": "c4d2e6f",
+						"mono": true
+					},
+					"2020-11-24",
+					"Add support for Mount API (#1362)"
+				],
+				[
+					"B",
+					{
+						"text": "78afd08",
+						"mono": true
+					},
+					"2020-09-24",
+					"Properly close stream on async response close (#1316)"
+				],
+				[
+					"B",
+					{
+						"text": "f5c27ec",
+						"mono": true
+					},
+					"2020-08-27",
+					"Use and pin black 20 (#1229)"
+				]
+			]
+		}
+	},
+	{
+		"name": "httpx's two _send_single_request: the current differences, above the history",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\nf1157db 2023-03-20T11:30:11Z Use standard logging style (#2547)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n84731c8 2019-10-16T08:31:47-05:00 Cache netrc authentication per-client (#400)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n95dad24 2019-08-13T06:44:23-05:00 Remove \"Host\" header on redirects if URL origin has changed (#199)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"historyb": "4189b7f 2025-02-27T20:38:39+04:00 fix typo (#3519)\n8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\n4b5a92e 2023-04-12T15:53:11+01:00 set logging request lines to INFO level for async method also (#2656)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\n0f280af 2021-02-17T11:32:43Z map_exceptions in request.aclose() (#1465)\nc4d2e6f 2020-11-24T10:35:51Z Add support for Mount API (#1362)\n78afd08 2020-09-24T09:42:26+02:00 Properly close stream on async response close (#1316)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\nf5c27ec 2020-08-27T14:57:53+01:00 Use and pin black 20 (#1229)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\n6a1ee0e 2019-12-29T16:56:18Z response.elapsed now reflects entire request/response time. (#692)\ne9ebd1d 2019-12-29T15:01:20Z Drop per-request `cert`, `verify`, and `trust_env` (#617)\neb7c6b0 2019-12-04T11:54:39Z Differentiate between `timeout=None` and `timeout=UNSET`. (#592)\ne045b86 2019-11-29T11:21:40Z Clean up '_dispatcher_for_request' into 'dispatcher_for_url' (#561)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n92fbe5f 2019-08-06T08:20:48-05:00 Added base class HTTPError with request/response attribute (#162)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"since": "e107e0f",
+			"ignore": "8e36f2b"
+		},
+		"match": "subset",
+		"why": "tool_reference.py on the bodies at b5addb6: 4 lines differ only in names or a string, and 2 in what they do, the def and the await.",
+		"expect": {
+			"kind": "table",
+			"caption": "Current differences: 6 lines, 2 in what the code does and 4 only in names, strings or numbers",
+			"columns": [
+				{
+					"label": "A",
+					"align": "end",
+					"mono": true
+				},
+				{
+					"label": "Copy A",
+					"mono": true
+				},
+				{
+					"label": "B",
+					"align": "end",
+					"mono": true
+				},
+				{
+					"label": "Copy B",
+					"mono": true
+				},
+				{
+					"label": "Differs in"
+				}
+			],
+			"rows": [
+				[
+					"1",
+					{
+						"text": "def _send_single_request(self, request: Request) -> Response:",
+						"mono": true
+					},
+					"1",
+					{
+						"text": "async def _send_single_request(self, request: Request) -> Response:",
+						"mono": true
+					},
+					"what it does"
+				],
+				[
+					"8",
+					{
+						"text": "if not isinstance(request.stream, SyncByteStream):",
+						"mono": true
+					},
+					"8",
+					{
+						"text": "if not isinstance(request.stream, AsyncByteStream):",
+						"mono": true
+					},
+					{
+						"text": "names or literals",
+						"tone": "muted"
+					}
+				],
+				[
+					"10",
+					{
+						"text": "\"Attempted to send an async request with a sync Client instance.\"",
+						"mono": true
+					},
+					"10",
+					{
+						"text": "\"Attempted to send a sync request with an AsyncClient instance.\"",
+						"mono": true
+					},
+					{
+						"text": "names or literals",
+						"tone": "muted"
+					}
+				],
+				[
+					"14",
+					{
+						"text": "response = transport.handle_request(request)",
+						"mono": true
+					},
+					"14",
+					{
+						"text": "response = await transport.handle_async_request(request)",
+						"mono": true
+					},
+					"what it does"
+				],
+				[
+					"16",
+					{
+						"text": "assert isinstance(response.stream, SyncByteStream)",
+						"mono": true
+					},
+					"16",
+					{
+						"text": "assert isinstance(response.stream, AsyncByteStream)",
+						"mono": true
+					},
+					{
+						"text": "names or literals",
+						"tone": "muted"
+					}
+				],
+				[
+					"19",
+					{
+						"text": "response.stream = BoundSyncStream(",
+						"mono": true
+					},
+					"18",
+					{
+						"text": "response.stream = BoundAsyncStream(",
+						"mono": true
+					},
+					{
+						"text": "names or literals",
+						"tone": "muted"
+					}
+				]
+			]
+		}
+	},
+	{
+		"name": "the drift chart's frame",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\nf1157db 2023-03-20T11:30:11Z Use standard logging style (#2547)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n84731c8 2019-10-16T08:31:47-05:00 Cache netrc authentication per-client (#400)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n95dad24 2019-08-13T06:44:23-05:00 Remove \"Host\" header on redirects if URL origin has changed (#199)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"historyb": "4189b7f 2025-02-27T20:38:39+04:00 fix typo (#3519)\n8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\n4b5a92e 2023-04-12T15:53:11+01:00 set logging request lines to INFO level for async method also (#2656)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\n0f280af 2021-02-17T11:32:43Z map_exceptions in request.aclose() (#1465)\nc4d2e6f 2020-11-24T10:35:51Z Add support for Mount API (#1362)\n78afd08 2020-09-24T09:42:26+02:00 Properly close stream on async response close (#1316)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\nf5c27ec 2020-08-27T14:57:53+01:00 Use and pin black 20 (#1229)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\n6a1ee0e 2019-12-29T16:56:18Z response.elapsed now reflects entire request/response time. (#692)\ne9ebd1d 2019-12-29T15:01:20Z Drop per-request `cert`, `verify`, and `trust_env` (#617)\neb7c6b0 2019-12-04T11:54:39Z Differentiate between `timeout=None` and `timeout=UNSET`. (#592)\ne045b86 2019-11-29T11:21:40Z Clean up '_dispatcher_for_request' into 'dispatcher_for_url' (#561)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n92fbe5f 2019-08-06T08:20:48-05:00 Added base class HTTPError with request/response attribute (#162)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"since": "e107e0f",
+			"ignore": "8e36f2b"
+		},
+		"match": "subset",
+		"why": "A chart fixture pins its frame; the cumulative counts are checked in index.test.ts against the field values.",
+		"expect": {
+			"kind": "series",
+			"chart": {
+				"id": "drift",
+				"xLabel": "Year",
+				"yLabel": "Commits so far",
+				"x": [],
+				"series": []
+			}
+		}
+	},
+	{
+		"name": "httpx.get and Client.get: alike in body, not in signature",
+		"input": {
+			"a": "def get(\n    url: URL | str,\n    *,\n    params: QueryParamTypes | None = None,\n    headers: HeaderTypes | None = None,\n    cookies: CookieTypes | None = None,\n    auth: AuthTypes | None = None,\n    proxy: ProxyTypes | None = None,\n    follow_redirects: bool = False,\n    verify: ssl.SSLContext | str | bool = True,\n    timeout: TimeoutTypes = DEFAULT_TIMEOUT_CONFIG,\n    trust_env: bool = True,\n) -> Response:\n    \"\"\"\n    Sends a `GET` request.\n\n    **Parameters**: See `httpx.request`.\n\n    Note that the `data`, `files`, `json` and `content` parameters are not available\n    on this function, as `GET` requests should not include a request body.\n    \"\"\"\n    return request(\n        \"GET\",\n        url,\n        params=params,\n        headers=headers,\n        cookies=cookies,\n        auth=auth,\n        proxy=proxy,\n        follow_redirects=follow_redirects,\n        verify=verify,\n        timeout=timeout,\n        trust_env=trust_env,\n    )\n",
+			"b": "    def get(\n        self,\n        url: URL | str,\n        *,\n        params: QueryParamTypes | None = None,\n        headers: HeaderTypes | None = None,\n        cookies: CookieTypes | None = None,\n        auth: AuthTypes | UseClientDefault | None = USE_CLIENT_DEFAULT,\n        follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,\n        timeout: TimeoutTypes | UseClientDefault = USE_CLIENT_DEFAULT,\n        extensions: RequestExtensions | None = None,\n    ) -> Response:\n        \"\"\"\n        Send a `GET` request.\n\n        **Parameters**: See `httpx.request`.\n        \"\"\"\n        return self.request(\n            \"GET\",\n            url,\n            params=params,\n            headers=headers,\n            cookies=cookies,\n            auth=auth,\n            follow_redirects=follow_redirects,\n            timeout=timeout,\n            extensions=extensions,\n        )\n",
+			"historya": "80960fa 2024-11-28T14:50:04Z Version 0.28.0. (#3419)\n1805ee0 2024-11-12T11:31:42Z Graceful upgrade path for 0.28. (#3394)\n8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\n359f77d 2024-07-23T15:46:47+01:00 Clean up URL signature. (#3245)\n371b6e9 2024-01-24T14:30:22Z Use `__future__.annotations` (#3068)\nf8981f3 2023-12-11T17:55:52+04:00 Add the 'proxy' parameter and deprecate 'proxies'. (#2879)\n14a1704 2022-05-20T11:12:25+01:00 Switch to explicit `typing.Optional` throughout (#2096)\n7b6af4d 2022-01-27T11:58:33Z make docs accurate that `content=` is also excluded in some requests (#1922)\n47266d7 2021-09-13T13:21:22+01:00 Switch follow redirects default (#1808)\n84ca201 2020-08-20T15:55:35+08:00 Add `proxies` parameter to top-level API functions (#1198)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\nc5037f0 2020-01-07T12:24:26Z Drop per-request 'cert'/'verify'/'trust_env', and 'stream=bool' arguments (#730)\n206c537 2019-11-27T10:43:42Z Drop sync (#544)\n1ce3cc3 2019-10-30T16:21:39+01:00 First pass at autodoc support (#464)\n09db6ec 2019-10-19T14:51:27+02:00 Drop proxies parameter from the high level API (#485)\nb0fa085 2019-09-20T12:33:06-05:00 Configure Proxy from Client (#353)\n04d5ffb 2019-08-17T10:09:49-05:00 Add trust_env property to BaseClient (#187)\n919e8d3 2019-08-01T09:32:00+01:00 added netrc support (#177)\n77c3725 2019-06-10T18:45:15+01:00 Add params keyword argument throughout (#85)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\n9574041 2019-05-23T16:21:00+01:00 Work on bringing API into parity with `requests`. (#76)\nfc627f3 2019-05-20T14:30:52+01:00 Add top-level API (#75)\n",
+			"historyb": "359f77d 2024-07-23T15:46:47+01:00 Clean up URL signature. (#3245)\nf3eb3c9 2024-02-29T13:40:07Z Keep clients in sync (#3120)\n371b6e9 2024-01-24T14:30:22Z Use `__future__.annotations` (#3068)\n8152c4f 2022-09-13T09:24:01-05:00 add basic type annotation for RequestExtensions and RequestData (#2367)\n14a1704 2022-05-20T11:12:25+01:00 Switch to explicit `typing.Optional` throughout (#2096)\n61188fe 2021-11-15T14:30:54Z Version 0.21 (#1935)\n47266d7 2021-09-13T13:21:22+01:00 Switch follow redirects default (#1808)\n541a0af 2021-08-10T13:30:55+01:00 Add Client(allow_redirect=<...>) (#1790)\n69409bb 2021-05-11T10:25:01+01:00 Switch to `USE_CLIENT_DEFAULT` instead of `UNSET`. (#1634)\na4463d0 2020-08-11T15:18:27+02:00 Allow disabling auth per-request using `auth=None` (#1115)\nf540bd0 2020-08-11T10:08:53+01:00 Expand client docstrings (#1152)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n84731c8 2019-10-16T08:31:47-05:00 Cache netrc authentication per-client (#400)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n95dad24 2019-08-13T06:44:23-05:00 Remove \"Host\" header on redirects if URL origin has changed (#199)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"since": "ee37a76",
+			"ignore": "371b6e9, 8e36f2b"
+		},
+		"match": "subset",
+		"fieldCount": 2,
+		"why": "tool_reference.py: bodies 44 and 38 tokens, ratio 0.87805 names set aside, 0.82927 as written; cochange.py reports the same pair at 0.88.",
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Alike, names set aside",
+					"value": "87.8%"
+				},
+				{
+					"label": "Alike, as written",
+					"value": "82.9%"
+				}
+			]
+		}
+	},
+	{
+		"name": "httpx.get and Client.get: 12 of 15 changed only one copy",
+		"input": {
+			"a": "def get(\n    url: URL | str,\n    *,\n    params: QueryParamTypes | None = None,\n    headers: HeaderTypes | None = None,\n    cookies: CookieTypes | None = None,\n    auth: AuthTypes | None = None,\n    proxy: ProxyTypes | None = None,\n    follow_redirects: bool = False,\n    verify: ssl.SSLContext | str | bool = True,\n    timeout: TimeoutTypes = DEFAULT_TIMEOUT_CONFIG,\n    trust_env: bool = True,\n) -> Response:\n    \"\"\"\n    Sends a `GET` request.\n\n    **Parameters**: See `httpx.request`.\n\n    Note that the `data`, `files`, `json` and `content` parameters are not available\n    on this function, as `GET` requests should not include a request body.\n    \"\"\"\n    return request(\n        \"GET\",\n        url,\n        params=params,\n        headers=headers,\n        cookies=cookies,\n        auth=auth,\n        proxy=proxy,\n        follow_redirects=follow_redirects,\n        verify=verify,\n        timeout=timeout,\n        trust_env=trust_env,\n    )\n",
+			"b": "    def get(\n        self,\n        url: URL | str,\n        *,\n        params: QueryParamTypes | None = None,\n        headers: HeaderTypes | None = None,\n        cookies: CookieTypes | None = None,\n        auth: AuthTypes | UseClientDefault | None = USE_CLIENT_DEFAULT,\n        follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,\n        timeout: TimeoutTypes | UseClientDefault = USE_CLIENT_DEFAULT,\n        extensions: RequestExtensions | None = None,\n    ) -> Response:\n        \"\"\"\n        Send a `GET` request.\n\n        **Parameters**: See `httpx.request`.\n        \"\"\"\n        return self.request(\n            \"GET\",\n            url,\n            params=params,\n            headers=headers,\n            cookies=cookies,\n            auth=auth,\n            follow_redirects=follow_redirects,\n            timeout=timeout,\n            extensions=extensions,\n        )\n",
+			"historya": "80960fa 2024-11-28T14:50:04Z Version 0.28.0. (#3419)\n1805ee0 2024-11-12T11:31:42Z Graceful upgrade path for 0.28. (#3394)\n8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\n359f77d 2024-07-23T15:46:47+01:00 Clean up URL signature. (#3245)\n371b6e9 2024-01-24T14:30:22Z Use `__future__.annotations` (#3068)\nf8981f3 2023-12-11T17:55:52+04:00 Add the 'proxy' parameter and deprecate 'proxies'. (#2879)\n14a1704 2022-05-20T11:12:25+01:00 Switch to explicit `typing.Optional` throughout (#2096)\n7b6af4d 2022-01-27T11:58:33Z make docs accurate that `content=` is also excluded in some requests (#1922)\n47266d7 2021-09-13T13:21:22+01:00 Switch follow redirects default (#1808)\n84ca201 2020-08-20T15:55:35+08:00 Add `proxies` parameter to top-level API functions (#1198)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\nc5037f0 2020-01-07T12:24:26Z Drop per-request 'cert'/'verify'/'trust_env', and 'stream=bool' arguments (#730)\n206c537 2019-11-27T10:43:42Z Drop sync (#544)\n1ce3cc3 2019-10-30T16:21:39+01:00 First pass at autodoc support (#464)\n09db6ec 2019-10-19T14:51:27+02:00 Drop proxies parameter from the high level API (#485)\nb0fa085 2019-09-20T12:33:06-05:00 Configure Proxy from Client (#353)\n04d5ffb 2019-08-17T10:09:49-05:00 Add trust_env property to BaseClient (#187)\n919e8d3 2019-08-01T09:32:00+01:00 added netrc support (#177)\n77c3725 2019-06-10T18:45:15+01:00 Add params keyword argument throughout (#85)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\n9574041 2019-05-23T16:21:00+01:00 Work on bringing API into parity with `requests`. (#76)\nfc627f3 2019-05-20T14:30:52+01:00 Add top-level API (#75)\n",
+			"historyb": "359f77d 2024-07-23T15:46:47+01:00 Clean up URL signature. (#3245)\nf3eb3c9 2024-02-29T13:40:07Z Keep clients in sync (#3120)\n371b6e9 2024-01-24T14:30:22Z Use `__future__.annotations` (#3068)\n8152c4f 2022-09-13T09:24:01-05:00 add basic type annotation for RequestExtensions and RequestData (#2367)\n14a1704 2022-05-20T11:12:25+01:00 Switch to explicit `typing.Optional` throughout (#2096)\n61188fe 2021-11-15T14:30:54Z Version 0.21 (#1935)\n47266d7 2021-09-13T13:21:22+01:00 Switch follow redirects default (#1808)\n541a0af 2021-08-10T13:30:55+01:00 Add Client(allow_redirect=<...>) (#1790)\n69409bb 2021-05-11T10:25:01+01:00 Switch to `USE_CLIENT_DEFAULT` instead of `UNSET`. (#1634)\na4463d0 2020-08-11T15:18:27+02:00 Allow disabling auth per-request using `auth=None` (#1115)\nf540bd0 2020-08-11T10:08:53+01:00 Expand client docstrings (#1152)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n84731c8 2019-10-16T08:31:47-05:00 Cache netrc authentication per-client (#400)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n95dad24 2019-08-13T06:44:23-05:00 Remove \"Host\" header on redirects if URL origin has changed (#199)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"since": "ee37a76",
+			"ignore": "371b6e9, 8e36f2b"
+		},
+		"match": "subset",
+		"fieldCount": 1,
+		"why": "tool_reference.py, counted after ee37a76 with the two sweeps cochange.py sets aside ignored: 3 / 5 / 7, as cochange.py reports.",
+		"expect": {
+			"kind": "fields",
+			"role": "answer",
+			"fields": [
+				{
+					"label": "Since ee37a76",
+					"value": "12 of 15 commits changed only one copy. Read those first."
+				}
+			]
+		}
+	},
+	{
+		"name": "the language is read from the code: a Go function is lexed as the C family",
+		"input": {
+			"a": "func retry(n int) error {\n\tfor i := 0; i < n; i++ {\n\t\tif err := call(); err == nil {\n\t\t\treturn nil\n\t\t}\n\t}\n\treturn errFailed\n}\n",
+			"b": "func again(tries int) error {\n\tfor k := 0; k < tries; k++ {\n\t\tif e := call(); e == nil {\n\t\t\treturn nil\n\t\t}\n\t}\n\treturn errGaveUp\n}\n",
+			"historya": "",
+			"historyb": "",
+			"since": "",
+			"ignore": ""
+		},
+		"match": "subset",
+		"fieldCount": 3,
+		"why": "func marks Go, so the C-family lexer reads it: := is one operator and the two bodies differ only in names, 100% alike names set aside. The answer with no history is about likeness alone.",
+		"expect": {
+			"kind": "fields",
+			"fields": [
+				{
+					"label": "Read as",
+					"value": "the C family (C, C++, C#, Java, Go, Rust, Kotlin, Swift)"
+				},
+				{
+					"label": "Near-duplicate at",
+					"value": "85% alike, names set aside"
+				}
+			],
+			"role": "method"
+		}
+	},
+	{
+		"name": "with no history, the answer says how alike, and what to paste next",
+		"input": {
+			"a": "func retry(n int) error {\n\tfor i := 0; i < n; i++ {\n\t\tif err := call(); err == nil {\n\t\t\treturn nil\n\t\t}\n\t}\n\treturn errFailed\n}\n",
+			"b": "func again(tries int) error {\n\tfor k := 0; k < tries; k++ {\n\t\tif e := call(); e == nil {\n\t\t\treturn nil\n\t\t}\n\t}\n\treturn errGaveUp\n}\n",
+			"historya": "",
+			"historyb": "",
+			"since": "",
+			"ignore": ""
+		},
+		"match": "subset",
+		"fieldCount": 1,
+		"why": "Every line differs only in names, so the bodies are 100% alike names set aside, over 85%.",
+		"expect": {
+			"kind": "fields",
+			"role": "answer",
+			"fields": [
+				{
+					"label": "Near-duplicates",
+					"value": "100% alike once names, strings and numbers are set aside, at or over the 85% line."
+				}
+			]
+		}
+	},
+	{
+		"name": "two retry helpers: the same loop, one with a jitter and a 4xx rule",
+		"input": {
+			"a": "export async function fetchWithRetry(url: string, attempts = 3): Promise<Response> {\n\tlet delay = 200;\n\tfor (let i = 0; i < attempts; i++) {\n\t\tconst res = await fetch(url);\n\t\tif (res.ok || res.status < 500) return res;\n\t\tawait sleep(delay + Math.random() * delay);\n\t\tdelay *= 2;\n\t}\n\tthrow new Error(`gave up on ${url} after ${attempts} attempts`);\n}\n",
+			"b": "export async function getWithRetry(endpoint: string, tries = 3): Promise<Response> {\n\tlet wait = 200;\n\tfor (let n = 0; n < tries; n++) {\n\t\tconst response = await fetch(endpoint);\n\t\tif (response.ok) return response;\n\t\tawait sleep(wait);\n\t\twait *= 2;\n\t}\n\tthrow new Error(`gave up on ${endpoint} after ${tries} attempts`);\n}\n",
+			"historya": "",
+			"historyb": "",
+			"since": "",
+			"ignore": ""
+		},
+		"match": "subset",
+		"fieldCount": 2,
+		"why": "The lexer's token streams for the two bodies, checked by eye, run through Python's difflib: 0.88889 names set aside and 0.69841 as written, floored to a tenth of a percent.",
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Alike, names set aside",
+					"value": "88.8%"
+				},
+				{
+					"label": "Alike, as written",
+					"value": "69.8%"
+				}
+			]
+		}
+	},
+	{
+		"name": "two retry helpers: where they differ, line by line",
+		"input": {
+			"a": "export async function fetchWithRetry(url: string, attempts = 3): Promise<Response> {\n\tlet delay = 200;\n\tfor (let i = 0; i < attempts; i++) {\n\t\tconst res = await fetch(url);\n\t\tif (res.ok || res.status < 500) return res;\n\t\tawait sleep(delay + Math.random() * delay);\n\t\tdelay *= 2;\n\t}\n\tthrow new Error(`gave up on ${url} after ${attempts} attempts`);\n}\n",
+			"b": "export async function getWithRetry(endpoint: string, tries = 3): Promise<Response> {\n\tlet wait = 200;\n\tfor (let n = 0; n < tries; n++) {\n\t\tconst response = await fetch(endpoint);\n\t\tif (response.ok) return response;\n\t\tawait sleep(wait);\n\t\twait *= 2;\n\t}\n\tthrow new Error(`gave up on ${endpoint} after ${tries} attempts`);\n}\n",
+			"historya": "",
+			"historyb": "",
+			"since": "",
+			"ignore": ""
+		},
+		"why": "Read line by line: six lines differ only in names, and the two that matter are the 4xx test and the jitter.",
+		"expect": {
+			"kind": "table",
+			"caption": "Current differences: 8 lines, 2 in what the code does and 6 only in names, strings or numbers",
+			"columns": [
+				{
+					"label": "A",
+					"align": "end",
+					"mono": true
+				},
+				{
+					"label": "Copy A",
+					"mono": true
+				},
+				{
+					"label": "B",
+					"align": "end",
+					"mono": true
+				},
+				{
+					"label": "Copy B",
+					"mono": true
+				},
+				{
+					"label": "Differs in"
+				}
+			],
+			"rows": [
+				[
+					"1",
+					{
+						"text": "export async function fetchWithRetry(url: string, attempts = 3): Promise<Response> {",
+						"mono": true
+					},
+					"1",
+					{
+						"text": "export async function getWithRetry(endpoint: string, tries = 3): Promise<Response> {",
+						"mono": true
+					},
+					{
+						"text": "names or literals",
+						"tone": "muted"
+					}
+				],
+				[
+					"2",
+					{
+						"text": "let delay = 200;",
+						"mono": true
+					},
+					"2",
+					{
+						"text": "let wait = 200;",
+						"mono": true
+					},
+					{
+						"text": "names or literals",
+						"tone": "muted"
+					}
+				],
+				[
+					"3",
+					{
+						"text": "for (let i = 0; i < attempts; i++) {",
+						"mono": true
+					},
+					"3",
+					{
+						"text": "for (let n = 0; n < tries; n++) {",
+						"mono": true
+					},
+					{
+						"text": "names or literals",
+						"tone": "muted"
+					}
+				],
+				[
+					"4",
+					{
+						"text": "const res = await fetch(url);",
+						"mono": true
+					},
+					"4",
+					{
+						"text": "const response = await fetch(endpoint);",
+						"mono": true
+					},
+					{
+						"text": "names or literals",
+						"tone": "muted"
+					}
+				],
+				[
+					"5",
+					{
+						"text": "if (res.ok || res.status < 500) return res;",
+						"mono": true
+					},
+					"5",
+					{
+						"text": "if (response.ok) return response;",
+						"mono": true
+					},
+					"what it does"
+				],
+				[
+					"6",
+					{
+						"text": "await sleep(delay + Math.random() * delay);",
+						"mono": true
+					},
+					"6",
+					{
+						"text": "await sleep(wait);",
+						"mono": true
+					},
+					"what it does"
+				],
+				[
+					"7",
+					{
+						"text": "delay *= 2;",
+						"mono": true
+					},
+					"7",
+					{
+						"text": "wait *= 2;",
+						"mono": true
+					},
+					{
+						"text": "names or literals",
+						"tone": "muted"
+					}
+				],
+				[
+					"9",
+					{
+						"text": "throw new Error(`gave up on ${url} after ${attempts} attempts`);",
+						"mono": true
+					},
+					"9",
+					{
+						"text": "throw new Error(`gave up on ${endpoint} after ${tries} attempts`);",
+						"mono": true
+					},
+					{
+						"text": "names or literals",
+						"tone": "muted"
+					}
+				]
+			]
+		},
+		"match": "subset"
+	},
+	{
+		"name": "too few shared changes to call",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "aaaaaaa 2024-01-02T10:00:00Z create copy A\nbbbbbbb 2024-02-02T10:00:00Z change A\n",
+			"historyb": "ccccccc 2024-01-05T10:00:00Z create copy B\nbbbbbbb 2024-02-02T10:00:00Z change A\nddddddd 2024-03-02T10:00:00Z change B\n",
+			"since": "",
+			"ignore": ""
+		},
+		"match": "subset",
+		"fieldCount": 1,
+		"why": "By hand: B is younger (2024-01-05), so A's creation is before; bbbbbbb is in both, ddddddd only in B. 2 changes, under the 5 the rule needs.",
+		"expect": {
+			"kind": "fields",
+			"role": "answer",
+			"fields": [
+				{
+					"label": "Since both copies existed",
+					"value": "Too early to tell: 1 of 2 commits changed only one copy."
+				}
+			]
+		}
+	},
+	{
+		"name": "too few shared changes: what was counted",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "aaaaaaa 2024-01-02T10:00:00Z create copy A\nbbbbbbb 2024-02-02T10:00:00Z change A\n",
+			"historyb": "ccccccc 2024-01-05T10:00:00Z create copy B\nbbbbbbb 2024-02-02T10:00:00Z change A\nddddddd 2024-03-02T10:00:00Z change B\n",
+			"since": "",
+			"ignore": ""
+		},
+		"match": "subset",
+		"why": "By hand: B is younger (2024-01-05), so A's creation is before; bbbbbbb is in both, ddddddd only in B. 2 changes, under the 5 the rule needs.",
+		"expect": {
+			"kind": "series",
+			"chart": {
+				"xLabel": "Changed",
+				"yLabel": "Commits",
+				"orientation": "horizontal",
+				"x": ["Both", "A only", "B only"],
+				"series": [
+					{
+						"label": "Commits",
+						"shape": "bar",
+						"unit": "commits",
+						"points": [1, 0, 1]
+					}
+				]
+			}
+		}
+	},
+	{
+		"name": "too few shared changes: where the count starts",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "aaaaaaa 2024-01-02T10:00:00Z create copy A\nbbbbbbb 2024-02-02T10:00:00Z change A\n",
+			"historyb": "ccccccc 2024-01-05T10:00:00Z create copy B\nbbbbbbb 2024-02-02T10:00:00Z change A\nddddddd 2024-03-02T10:00:00Z change B\n",
+			"since": "",
+			"ignore": ""
+		},
+		"match": "subset",
+		"fieldCount": 5,
+		"why": "By hand: B is younger (2024-01-05), so A's creation is before; bbbbbbb is in both, ddddddd only in B. 2 changes, under the 5 the rule needs.",
+		"expect": {
+			"kind": "fields",
+			"fields": [
+				{
+					"label": "Counted from",
+					"value": "ccccccc 2024-01-05 create copy B"
+				},
+				{
+					"label": "Left out",
+					"value": "2 at or before the count starts, 0 ignored"
+				}
+			],
+			"role": "method"
+		}
+	},
+	{
+		"name": "a log without dates is refused, and says what to run",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "f1157db Use standard logging style (#2547)\n1c33a28 Make charset auto-detection optional. (#2165)\nfa03b48 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\n",
+			"historyb": "4189b7f 2025-02-27T20:38:39+04:00 fix typo (#3519)\n8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\n4b5a92e 2023-04-12T15:53:11+01:00 set logging request lines to INFO level for async method also (#2656)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\n0f280af 2021-02-17T11:32:43Z map_exceptions in request.aclose() (#1465)\nc4d2e6f 2020-11-24T10:35:51Z Add support for Mount API (#1362)\n78afd08 2020-09-24T09:42:26+02:00 Properly close stream on async response close (#1316)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\nf5c27ec 2020-08-27T14:57:53+01:00 Use and pin black 20 (#1229)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\n6a1ee0e 2019-12-29T16:56:18Z response.elapsed now reflects entire request/response time. (#692)\ne9ebd1d 2019-12-29T15:01:20Z Drop per-request `cert`, `verify`, and `trust_env` (#617)\neb7c6b0 2019-12-04T11:54:39Z Differentiate between `timeout=None` and `timeout=UNSET`. (#592)\ne045b86 2019-11-29T11:21:40Z Clean up '_dispatcher_for_request' into 'dispatcher_for_url' (#561)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n92fbe5f 2019-08-06T08:20:48-05:00 Added base class HTTPError with request/response attribute (#162)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"since": "",
+			"ignore": ""
+		},
+		"match": "subset",
+		"why": "git log --oneline has no dates, and the before-both-existed rule needs them.",
+		"expect": {
+			"kind": "error",
+			"message": "These commits have no dates",
+			"input": "historya"
+		}
+	},
+	{
+		"name": "one history without the other",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\nf1157db 2023-03-20T11:30:11Z Use standard logging style (#2547)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n84731c8 2019-10-16T08:31:47-05:00 Cache netrc authentication per-client (#400)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n95dad24 2019-08-13T06:44:23-05:00 Remove \"Host\" header on redirects if URL origin has changed (#199)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"historyb": "",
+			"since": "",
+			"ignore": ""
+		},
+		"match": "subset",
+		"why": "A pair needs both listings.",
+		"expect": {
+			"kind": "error",
+			"message": "Paste the second copy's history too",
+			"input": "historyb"
+		}
+	},
+	{
+		"name": "a count-from that is neither a commit nor a date",
+		"input": {
+			"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
+			"historya": "8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\nf1157db 2023-03-20T11:30:11Z Use standard logging style (#2547)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\nee37a76 2020-01-08T12:31:50Z Reintroduce sync API. (#735)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n84731c8 2019-10-16T08:31:47-05:00 Cache netrc authentication per-client (#400)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n95dad24 2019-08-13T06:44:23-05:00 Remove \"Host\" header on redirects if URL origin has changed (#199)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"historyb": "4189b7f 2025-02-27T20:38:39+04:00 fix typo (#3519)\n8e36f2b 2024-10-28T14:30:08Z Introduce new `SSLContext` API & escalate deprecations. (#3319)\n4b5a92e 2023-04-12T15:53:11+01:00 set logging request lines to INFO level for async method also (#2656)\n1c33a28 2022-05-23T16:27:32+01:00 Make charset auto-detection optional. (#2165)\nfa03b48 2021-10-15T12:03:53+02:00 Bump flake8-pie from 0.5.0 to 0.15.0 (#1879)\nff9813e 2021-09-13T13:34:46+01:00 Transport API as plain `request -> response` method. (#1840)\n073a328 2021-04-16T10:03:37+01:00 Drop 'Response(on_close=...)' from API (#1572)\n110ce85 2021-04-13T13:14:04+01:00 Stream interface (#1550)\n1a6e254 2021-03-24T12:36:34Z Transport API (#1522)\n0f280af 2021-02-17T11:32:43Z map_exceptions in request.aclose() (#1465)\nc4d2e6f 2020-11-24T10:35:51Z Add support for Mount API (#1362)\n78afd08 2020-09-24T09:42:26+02:00 Properly close stream on async response close (#1316)\nbefa57c 2020-09-23T11:26:12+01:00 Fix response.elapsed (#1313)\nf932af9 2020-09-22T11:44:28+01:00 Version 0.15.0 (#1301)\nfbb21fb 2020-09-18T08:41:09+01:00 Drop ContentStream (#1295)\na783fe5 2020-09-07T09:06:14+01:00 Drop `request.timer` attribute. (#1249)\nf5c27ec 2020-08-27T14:57:53+01:00 Use and pin black 20 (#1229)\n876e722 2020-08-07T14:14:11+01:00 Update to httpcore 0.10 (#1126)\n9409900 2020-07-31T12:57:49+01:00 Exception hierarchy (#1095)\n7e6e351 2020-07-23T10:16:51+01:00 Drop `URL(allow_relative=bool)` (#1073)\n01287ba 2020-07-23T09:55:07+01:00 Refactor map_exceptions (#1076)\na89d4ad 2020-07-17T11:19:24+01:00 More public API tightening (#1065)\ne107e0f 2020-07-17T10:20:52+01:00 Tighten public client methods (#997)\nbacc2d1 2020-07-03T15:56:10+02:00 Map HTTPCore exceptions (#1044)\nd2816c9 2020-05-21T12:22:17+01:00 Transport API (#963)\n3046e92 2020-04-08T13:32:10+01:00 Httpcore interface (#804)\n1c9b852 2020-03-29T13:12:05+02:00 Improve type hinting for `HTTPError.request` (#886)\n6a1ee0e 2019-12-29T16:56:18Z response.elapsed now reflects entire request/response time. (#692)\ne9ebd1d 2019-12-29T15:01:20Z Drop per-request `cert`, `verify`, and `trust_env` (#617)\neb7c6b0 2019-12-04T11:54:39Z Differentiate between `timeout=None` and `timeout=UNSET`. (#592)\ne045b86 2019-11-29T11:21:40Z Clean up '_dispatcher_for_request' into 'dispatcher_for_url' (#561)\n00e150f 2019-11-27T12:10:10Z Client handles redirect + auth (#552)\n40e6e8c 2019-09-01T23:01:14+02:00 Refactor client functionality into middleware (#268)\n92fbe5f 2019-08-06T08:20:48-05:00 Added base class HTTPError with request/response attribute (#162)\n0cbf3c7 2019-06-10T12:26:03+01:00 Sync or Async dispatch (#83)\nd6628ca 2019-05-13T11:54:51+01:00 Drop 'adapters'\n19542f2 2019-05-08T14:45:06+01:00 Request(content=...) -> Request(data=...)\nfaededa 2019-05-08T12:43:06+01:00 Add query_params support\n4255d41 2019-04-30T15:08:24+01:00 Prefer 'content' over 'body'\nd7619a9 2019-04-30T11:26:11+01:00 Finessing interface\n8a29a0a 2019-04-26T17:00:47+01:00 Rollin'\nfab6fcd 2019-04-26T15:34:04+01:00 Adapters\n",
+			"since": "not-a-commit",
+			"ignore": "8e36f2b"
+		},
+		"match": "subset",
+		"why": "Named rather than silently ignored.",
+		"expect": {
+			"kind": "error",
+			"message": "is neither a commit in either history nor a date",
+			"input": "since"
+		}
+	},
+	{
+		"name": "an empty copy",
+		"input": {
+			"a": "",
+			"b": "x = 1",
+			"historya": "",
+			"historyb": "",
+			"since": "",
+			"ignore": ""
+		},
+		"match": "subset",
+		"why": "Nothing to compare.",
+		"expect": {
+			"kind": "error",
+			"message": "Paste the first copy",
+			"input": "a"
+		}
+	}
+]

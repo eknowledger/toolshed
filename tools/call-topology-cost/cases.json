@@ -1,0 +1,1696 @@
+[
+  {
+    "name": "alice, bob and carol: all four patterns side by side",
+    "input": {
+      "participants": 3,
+      "pattern": "sfu",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "Post 6's three-person call (topology_cost.py -n 3): 48 kb/s up, two streams of 48 down, and six streams of 48 out of the server.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "3 people, everyone talking. In kb/s: the client columns are one device, the server columns the whole call",
+      "columns": [
+        {
+          "label": "Pattern"
+        },
+        {
+          "label": "Client up",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Client down",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Server in",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Server out",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "Mesh",
+          {
+            "text": "96",
+            "mono": true
+          },
+          {
+            "text": "96",
+            "mono": true
+          },
+          {
+            "text": "none",
+            "tone": "muted"
+          },
+          {
+            "text": "none",
+            "tone": "muted"
+          }
+        ],
+        [
+          "SFU (picked)",
+          {
+            "text": "48",
+            "mono": true
+          },
+          {
+            "text": "96",
+            "mono": true
+          },
+          {
+            "text": "144",
+            "mono": true
+          },
+          {
+            "text": "288",
+            "mono": true
+          }
+        ],
+        [
+          "MCU",
+          {
+            "text": "48",
+            "mono": true
+          },
+          {
+            "text": "48",
+            "mono": true
+          },
+          {
+            "text": "144",
+            "mono": true
+          },
+          {
+            "text": "144",
+            "mono": true
+          }
+        ],
+        [
+          "Peer, per user",
+          {
+            "text": "48",
+            "mono": true
+          },
+          {
+            "text": "48",
+            "mono": true
+          },
+          {
+            "text": "48",
+            "mono": true
+          },
+          {
+            "text": "48",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "alice, bob and carol through an sfu",
+    "input": {
+      "participants": 3,
+      "pattern": "sfu",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "Post 6's three-person call: the SFU takes in 3 streams and sends 6, re-encrypting each copy and decoding nothing (topology_cost.py -n 3).",
+    "expect": {
+      "kind": "graph",
+      "graph": {
+        "label": "SFU, 3 people: every stream in and out of the server",
+        "spacing": "compact",
+        "nodes": [
+          {
+            "id": "talk",
+            "label": "3 clients",
+            "note": "talking"
+          },
+          {
+            "id": "server",
+            "label": "SFU",
+            "note": "forwards without decoding"
+          },
+          {
+            "id": "hear",
+            "label": "3 clients",
+            "note": "each hears 2 voices"
+          }
+        ],
+        "edges": [
+          {
+            "from": "talk",
+            "to": "server",
+            "label": "3 x 48 kb/s"
+          },
+          {
+            "from": "server",
+            "to": "hear",
+            "label": "6 x 48 kb/s"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "alice, bob and carol through an sfu: the server's work",
+    "input": {
+      "participants": 3,
+      "pattern": "sfu",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "Post 6's three-person call: the SFU takes in 3 streams and sends 6, re-encrypting each copy and decoding nothing (topology_cost.py -n 3).",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Server operations every 20 ms frame. Decrypts and encrypts assume SRTP, which WebRTC always uses, though the packet size here leaves out its tag",
+      "columns": [
+        {
+          "label": "Pattern"
+        },
+        {
+          "label": "Decrypt",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Decode",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Mix",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Encode",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Encrypt",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "SFU",
+          {
+            "text": "3",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "6",
+            "mono": true
+          }
+        ],
+        [
+          "MCU",
+          {
+            "text": "3",
+            "mono": true
+          },
+          {
+            "text": "3",
+            "mono": true
+          },
+          {
+            "text": "3",
+            "mono": true
+          },
+          {
+            "text": "3",
+            "mono": true
+          },
+          {
+            "text": "3",
+            "mono": true
+          }
+        ],
+        [
+          "Peer, per user",
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "ten people in a mesh",
+    "input": {
+      "participants": 10,
+      "pattern": "mesh",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "Mesh at N = 10: every client sends 9 copies, 432 kb/s up and down, and there is no server (-n 10).",
+    "expect": {
+      "kind": "graph",
+      "graph": {
+        "label": "Mesh, 10 people: every device sends to every other",
+        "spacing": "compact",
+        "nodes": [
+          {
+            "id": "talk",
+            "label": "10 clients",
+            "note": "each sends 9 streams"
+          },
+          {
+            "id": "hear",
+            "label": "10 clients",
+            "note": "each receives 9"
+          }
+        ],
+        "edges": [
+          {
+            "from": "talk",
+            "to": "hear",
+            "label": "90 x 48 kb/s"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ten people in a mesh: the server's work",
+    "input": {
+      "participants": 10,
+      "pattern": "mesh",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "Mesh at N = 10: every client sends 9 copies, 432 kb/s up and down, and there is no server (-n 10).",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "10 people, everyone talking. In kb/s: the client columns are one device, the server columns the whole call",
+      "columns": [
+        {
+          "label": "Pattern"
+        },
+        {
+          "label": "Client up",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Client down",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Server in",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Server out",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "Mesh (picked)",
+          {
+            "text": "432",
+            "mono": true
+          },
+          {
+            "text": "432",
+            "mono": true
+          },
+          {
+            "text": "none",
+            "tone": "muted"
+          },
+          {
+            "text": "none",
+            "tone": "muted"
+          }
+        ],
+        [
+          "SFU",
+          {
+            "text": "48",
+            "mono": true
+          },
+          {
+            "text": "432",
+            "mono": true
+          },
+          {
+            "text": "480",
+            "mono": true
+          },
+          {
+            "text": "4320",
+            "mono": true
+          }
+        ],
+        [
+          "MCU",
+          {
+            "text": "48",
+            "mono": true
+          },
+          {
+            "text": "48",
+            "mono": true
+          },
+          {
+            "text": "480",
+            "mono": true
+          },
+          {
+            "text": "480",
+            "mono": true
+          }
+        ],
+        [
+          "Peer, per user",
+          {
+            "text": "48",
+            "mono": true
+          },
+          {
+            "text": "48",
+            "mono": true
+          },
+          {
+            "text": "48",
+            "mono": true
+          },
+          {
+            "text": "48",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "ten people, sfu",
+    "input": {
+      "participants": 10,
+      "pattern": "sfu",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "The quadratic one: 10 in, 90 out, 4,320 kb/s and 4,500 packets/s (-n 10).",
+    "expect": {
+      "kind": "graph",
+      "graph": {
+        "label": "SFU, 10 people: every stream in and out of the server",
+        "spacing": "compact",
+        "nodes": [
+          {
+            "id": "talk",
+            "label": "10 clients",
+            "note": "talking"
+          },
+          {
+            "id": "server",
+            "label": "SFU",
+            "note": "forwards without decoding"
+          },
+          {
+            "id": "hear",
+            "label": "10 clients",
+            "note": "each hears 9 voices"
+          }
+        ],
+        "edges": [
+          {
+            "from": "talk",
+            "to": "server",
+            "label": "10 x 48 kb/s"
+          },
+          {
+            "from": "server",
+            "to": "hear",
+            "label": "90 x 48 kb/s"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ten people, sfu: the server's work",
+    "input": {
+      "participants": 10,
+      "pattern": "sfu",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "The quadratic one: 10 in, 90 out, 4,320 kb/s and 4,500 packets/s (-n 10).",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Server operations every 20 ms frame. Decrypts and encrypts assume SRTP, which WebRTC always uses, though the packet size here leaves out its tag",
+      "columns": [
+        {
+          "label": "Pattern"
+        },
+        {
+          "label": "Decrypt",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Decode",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Mix",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Encode",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Encrypt",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "SFU",
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "90",
+            "mono": true
+          }
+        ],
+        [
+          "MCU",
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "10",
+            "mono": true
+          }
+        ],
+        [
+          "Peer, per user",
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "ten people, mcu",
+    "input": {
+      "participants": 10,
+      "pattern": "mcu",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "The MCU is linear but each unit is a codec cycle: 10 decodes, 10 mixes, 10 encodes (-n 10).",
+    "expect": {
+      "kind": "graph",
+      "graph": {
+        "label": "MCU, 10 people: every stream in and out of the server",
+        "spacing": "compact",
+        "nodes": [
+          {
+            "id": "talk",
+            "label": "10 clients",
+            "note": "talking"
+          },
+          {
+            "id": "server",
+            "label": "MCU",
+            "note": "one mix per listener"
+          },
+          {
+            "id": "hear",
+            "label": "10 clients",
+            "note": "each hears one mix"
+          }
+        ],
+        "edges": [
+          {
+            "from": "talk",
+            "to": "server",
+            "label": "10 x 48 kb/s"
+          },
+          {
+            "from": "server",
+            "to": "hear",
+            "label": "10 mixes x 48 kb/s"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ten people, mcu: the server's work",
+    "input": {
+      "participants": 10,
+      "pattern": "mcu",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "The MCU is linear but each unit is a codec cycle: 10 decodes, 10 mixes, 10 encodes (-n 10).",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Server operations every 20 ms frame. Decrypts and encrypts assume SRTP, which WebRTC always uses, though the packet size here leaves out its tag",
+      "columns": [
+        {
+          "label": "Pattern"
+        },
+        {
+          "label": "Decrypt",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Decode",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Mix",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Encode",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Encrypt",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "SFU",
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "90",
+            "mono": true
+          }
+        ],
+        [
+          "MCU",
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "10",
+            "mono": true
+          }
+        ],
+        [
+          "Peer, per user",
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "three loudest of ten",
+    "input": {
+      "participants": 10,
+      "pattern": "sfu",
+      "loudest": 3,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "Forwarding the 3 loudest by their audio level: 1,296 kb/s out instead of 4,320, 27 encrypts, still no decode (-n 10 --loudest 3).",
+    "expect": {
+      "kind": "graph",
+      "graph": {
+        "label": "SFU, 3 loudest, 10 people: every stream in and out of the server",
+        "spacing": "compact",
+        "nodes": [
+          {
+            "id": "talk",
+            "label": "10 clients",
+            "note": "talking"
+          },
+          {
+            "id": "server",
+            "label": "SFU",
+            "note": "forwards without decoding"
+          },
+          {
+            "id": "hear",
+            "label": "10 clients",
+            "note": "each hears 3 voices"
+          }
+        ],
+        "edges": [
+          {
+            "from": "talk",
+            "to": "server",
+            "label": "10 x 48 kb/s"
+          },
+          {
+            "from": "server",
+            "to": "hear",
+            "label": "27 x 48 kb/s"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "three loudest of ten: the server's work",
+    "input": {
+      "participants": 10,
+      "pattern": "sfu",
+      "loudest": 3,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "Forwarding the 3 loudest by their audio level: 1,296 kb/s out instead of 4,320, 27 encrypts, still no decode (-n 10 --loudest 3).",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Server operations every 20 ms frame. Decrypts and encrypts assume SRTP, which WebRTC always uses, though the packet size here leaves out its tag",
+      "columns": [
+        {
+          "label": "Pattern"
+        },
+        {
+          "label": "Decrypt",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Decode",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Mix",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Encode",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Encrypt",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "SFU, 3 loudest",
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "27",
+            "mono": true
+          }
+        ],
+        [
+          "MCU",
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "10",
+            "mono": true
+          },
+          {
+            "text": "10",
+            "mono": true
+          }
+        ],
+        [
+          "Peer, per user",
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "srtp tag and audio level",
+    "input": {
+      "participants": 3,
+      "pattern": "sfu",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "custom",
+      "ip": "4",
+      "srtp": "10",
+      "ext": "level"
+    },
+    "match": "subset",
+    "why": "138 B packets, 55.2 kb/s a stream (-n 3 --srtp-tag 10 --audio-level).",
+    "fieldCount": 3,
+    "expect": {
+      "kind": "fields",
+      "role": "method",
+      "fields": [
+        {
+          "label": "One packet",
+          "value": "138 B",
+          "note": "80 B of sound, 12 B RTP, 8 B UDP, 20 B IPv4, 10 B SRTP tag, 8 B of header extensions, for the audio level."
+        },
+        {
+          "label": "One stream",
+          "value": "55.2 kb/s",
+          "note": "50 packets a second, so the server sends 300 a second for the SFU."
+        },
+        {
+          "label": "Assumes",
+          "value": "Everyone talks all the time, with no silence suppression, so these are the busiest case."
+        }
+      ]
+    }
+  },
+  {
+    "name": "half the bitrate",
+    "input": {
+      "participants": 5,
+      "pattern": "sfu",
+      "loudest": 0,
+      "codec": "custom",
+      "bitrate": 16,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "40 B of Opus, 80 B packets, 32 kb/s: the headers are now half the packet (-n 5 --bitrate 16).",
+    "fieldCount": 3,
+    "expect": {
+      "kind": "fields",
+      "role": "method",
+      "fields": [
+        {
+          "label": "One packet",
+          "value": "80 B",
+          "note": "40 B of sound, 12 B RTP, 8 B UDP, 20 B IPv4."
+        },
+        {
+          "label": "One stream",
+          "value": "32 kb/s",
+          "note": "50 packets a second, so the server sends 1000 a second for the SFU."
+        },
+        {
+          "label": "Assumes",
+          "value": "Everyone talks all the time, with no silence suppression, so these are the busiest case."
+        }
+      ]
+    }
+  },
+  {
+    "name": "ten millisecond frames",
+    "input": {
+      "participants": 3,
+      "pattern": "sfu",
+      "loudest": 0,
+      "codec": "custom",
+      "bitrate": 32,
+      "frame": "10",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "Same bitrate, twice the packets: 40 B payload, 80 B packets, 100 a second, 64 kb/s (-n 3 --frame-ms 10).",
+    "fieldCount": 3,
+    "expect": {
+      "kind": "fields",
+      "role": "method",
+      "fields": [
+        {
+          "label": "One packet",
+          "value": "80 B",
+          "note": "40 B of sound, 12 B RTP, 8 B UDP, 20 B IPv4."
+        },
+        {
+          "label": "One stream",
+          "value": "64 kb/s",
+          "note": "100 packets a second, so the server sends 600 a second for the SFU."
+        },
+        {
+          "label": "Assumes",
+          "value": "Everyone talks all the time, with no silence suppression, so these are the busiest case."
+        }
+      ]
+    }
+  },
+  {
+    "name": "alice and her assistant",
+    "input": {
+      "participants": 2,
+      "pattern": "peer",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "custom",
+      "ip": "4",
+      "srtp": "10",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "One user, one service, with SRTP: 130 B, 52 kb/s each way, one of each operation per frame (-n 2 --srtp-tag 10).",
+    "expect": {
+      "kind": "graph",
+      "graph": {
+        "label": "The server is the other end: one stream each way, per user",
+        "spacing": "compact",
+        "nodes": [
+          {
+            "id": "user",
+            "label": "1 user"
+          },
+          {
+            "id": "server",
+            "label": "Server",
+            "note": "decodes, then encodes its reply"
+          }
+        ],
+        "edges": [
+          {
+            "from": "user",
+            "to": "server",
+            "label": "1 x 52 kb/s"
+          },
+          {
+            "from": "server",
+            "to": "user",
+            "label": "1 x 52 kb/s"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "alice and her assistant: the server's work",
+    "input": {
+      "participants": 2,
+      "pattern": "peer",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "custom",
+      "ip": "4",
+      "srtp": "10",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "One user, one service, with SRTP: 130 B, 52 kb/s each way, one of each operation per frame (-n 2 --srtp-tag 10).",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Server operations every 20 ms frame",
+      "columns": [
+        {
+          "label": "Pattern"
+        },
+        {
+          "label": "Decrypt",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Decode",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Mix",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Encode",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Encrypt",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "SFU",
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "2",
+            "mono": true
+          }
+        ],
+        [
+          "MCU",
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "2",
+            "mono": true
+          }
+        ],
+        [
+          "Peer, per user",
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "two people, an mcu does not mix: the server's work",
+    "input": {
+      "participants": 2,
+      "pattern": "mcu",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "With two people each listener's mix is one voice, so there is nothing to sum.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Server operations every 20 ms frame. Decrypts and encrypts assume SRTP, which WebRTC always uses, though the packet size here leaves out its tag",
+      "columns": [
+        {
+          "label": "Pattern"
+        },
+        {
+          "label": "Decrypt",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Decode",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Mix",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Encode",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Encrypt",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "SFU",
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "2",
+            "mono": true
+          }
+        ],
+        [
+          "MCU",
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "2",
+            "mono": true
+          }
+        ],
+        [
+          "Peer, per user",
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "0",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "a bitrate that is not whole bytes",
+    "input": {
+      "participants": 3,
+      "pattern": "sfu",
+      "loudest": 0,
+      "codec": "custom",
+      "bitrate": 33,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "33 kb/s for 20 ms is 82.5 bytes; the demo refuses it with the same message.",
+    "expect": {
+      "kind": "error",
+      "message": "bitrate x frame length must be a whole number of bytes.",
+      "input": "bitrate"
+    }
+  },
+  {
+    "name": "more loudest than people",
+    "input": {
+      "participants": 10,
+      "pattern": "sfu",
+      "loudest": 11,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "The SFU cannot forward more streams than there are.",
+    "expect": {
+      "kind": "error",
+      "message": "The loudest streams can be at most the number of participants.",
+      "input": "loudest"
+    }
+  },
+  {
+    "name": "real packets: aes-gcm over ipv6 with four extensions",
+    "input": {
+      "participants": 10,
+      "pattern": "sfu",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "gcm4ext",
+      "ip": "6",
+      "srtp": "16",
+      "ext": "level-mid-twcc-abs"
+    },
+    "match": "subset",
+    "why": "By hand: 80 B of sound, 12 RTP, 8 UDP, 40 IPv6 (RFC 8200), a 16 B GCM tag (RFC 7714), and 16 B of extensions: RFC 8285's 4-byte header, then audio level 1+1, MID 1+1, transport-wide sequence number 1+2 and abs-send-time 1+3, which is 15 bytes padded to 16. 172 B x 8 x 50 = 68.8 kb/s, and 90 copies out of the server is 6192 kb/s.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "10 people, everyone talking. In kb/s: the client columns are one device, the server columns the whole call",
+      "columns": [
+        {
+          "label": "Pattern"
+        },
+        {
+          "label": "Client up",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Client down",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Server in",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Server out",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "Mesh",
+          {
+            "text": "619.2",
+            "mono": true
+          },
+          {
+            "text": "619.2",
+            "mono": true
+          },
+          {
+            "text": "none",
+            "tone": "muted"
+          },
+          {
+            "text": "none",
+            "tone": "muted"
+          }
+        ],
+        [
+          "SFU (picked)",
+          {
+            "text": "68.8",
+            "mono": true
+          },
+          {
+            "text": "619.2",
+            "mono": true
+          },
+          {
+            "text": "688",
+            "mono": true
+          },
+          {
+            "text": "6192",
+            "mono": true
+          }
+        ],
+        [
+          "MCU",
+          {
+            "text": "68.8",
+            "mono": true
+          },
+          {
+            "text": "68.8",
+            "mono": true
+          },
+          {
+            "text": "688",
+            "mono": true
+          },
+          {
+            "text": "688",
+            "mono": true
+          }
+        ],
+        [
+          "Peer, per user",
+          {
+            "text": "68.8",
+            "mono": true
+          },
+          {
+            "text": "68.8",
+            "mono": true
+          },
+          {
+            "text": "68.8",
+            "mono": true
+          },
+          {
+            "text": "68.8",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "real packets: what one packet carries",
+    "input": {
+      "participants": 10,
+      "pattern": "sfu",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "gcm4ext",
+      "ip": "6",
+      "srtp": "16",
+      "ext": "level-mid-twcc-abs"
+    },
+    "match": "subset",
+    "fieldCount": 3,
+    "why": "The same packet, itemised, so the reader can check each byte against its RFC.",
+    "expect": {
+      "kind": "fields",
+      "role": "method",
+      "fields": [
+        {
+          "label": "One packet",
+          "value": "172 B",
+          "note": "80 B of sound, 12 B RTP, 8 B UDP, 40 B IPv6, 16 B SRTP tag, 16 B of header extensions, for the audio level, the MID, a transport-wide sequence number and abs-send-time."
+        },
+        {
+          "label": "One stream",
+          "value": "68.8 kb/s",
+          "note": "50 packets a second, so the server sends 4500 a second for the SFU."
+        },
+        {
+          "label": "Assumes",
+          "value": "Everyone talks all the time, with no silence suppression, so these are the busiest case."
+        }
+      ]
+    }
+  },
+  {
+    "name": "g.711 is 80 kb/s a stream before the link layer",
+    "input": {
+      "participants": 2,
+      "pattern": "peer",
+      "loudest": 0,
+      "codec": "g711",
+      "bitrate": 64,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "fieldCount": 3,
+    "why": "By hand: 64 kb/s for 20 ms is 160 B, plus 40 B of RTP, UDP and IPv4 is 200 B, 50 a second, 80 kb/s: the usual figure for G.711 before Ethernet's own headers.",
+    "expect": {
+      "kind": "fields",
+      "role": "method",
+      "fields": [
+        {
+          "label": "One packet",
+          "value": "200 B",
+          "note": "160 B of sound, 12 B RTP, 8 B UDP, 20 B IPv4."
+        },
+        {
+          "label": "One stream",
+          "value": "80 kb/s",
+          "note": "50 packets a second, so the server sends 50 a second for the peer server, per user."
+        },
+        {
+          "label": "Assumes",
+          "value": "Everyone talks all the time, with no silence suppression, so these are the busiest case."
+        }
+      ]
+    }
+  },
+  {
+    "name": "ten in an sfu: forwarding the three loudest saves the most",
+    "input": {
+      "participants": 10,
+      "pattern": "sfu",
+      "loudest": 0,
+      "codec": "opus32",
+      "bitrate": 32,
+      "frame": "20",
+      "packet": "bare",
+      "ip": "4",
+      "srtp": "0",
+      "ext": "none"
+    },
+    "match": "subset",
+    "why": "The server's output from topology_cost.py -n 10, 4320 kb/s, against -n 10 -k 3, 1296; 40 ms frames halve the 40 B of headers per 20 ms, 48 to 40 kb/s a stream, which is 720 kb/s off 90 streams and so second.",
+    "expect": {
+      "kind": "table",
+      "role": "actions",
+      "caption": "What would make the SFU cheaper, largest saving first",
+      "columns": [
+        {
+          "label": "Change"
+        },
+        {
+          "label": "What it saves"
+        },
+        {
+          "label": "What it costs"
+        }
+      ],
+      "rows": [
+        [
+          "Forward only the 3 loudest",
+          "The server's output falls from 4320 to 1296 kb/s, each listener's from 432 to 144.",
+          "Quieter voices are not heard while three others are louder. Senders must write the audio level."
+        ],
+        [
+          "Send 40 ms frames",
+          "Each stream falls from 48 to 40 kb/s, because the headers are sent half as often.",
+          "20 ms more delay, and each lost packet takes 40 ms of sound."
+        ]
+      ]
+    }
+  }
+]
