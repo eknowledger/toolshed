@@ -28,10 +28,11 @@ function run(values: Partial<Values>): Output[] {
 	return out.kind === "group" ? out.parts : [];
 }
 
-/** The schemes chart's numbers, which are the whole run's outcomes per scheme, in the order none, fec, red1, red2. */
+/** The protection table's concealed column, the whole run's outcome per scheme, in the order none, fec, red1, red2. */
 function concealedBySchemes(values: Partial<Values>): number[] {
-	const part = chartOf(run(values), "Protection");
-	return part.chart.series[1]?.points as number[];
+	const part = run(values).find((p) => p.kind === "table" && p.caption?.startsWith("Protection"));
+	assert.ok(part?.kind === "table", "no protection table");
+	return part.rows.map((row) => Number.parseFloat(String(row[2])));
 }
 
 const field = (parts: Output[], label: string) => {

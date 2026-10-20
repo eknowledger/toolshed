@@ -83,7 +83,7 @@ did most of the copies.
    gets.
 4. **The protections**, all four at this run's buffer, with what each costs on the wire.
 5. **Where the frames went**: played, rebuilt, lost by the network, and arrived too late.
-6. **The charts of single frames and packets**, then the protections as bars.
+6. **The charts of single frames and packets.**
 
 ## The model
 
@@ -106,9 +106,6 @@ did most of the copies.
    played as sent. When nothing went wrong in those five seconds, the chart is left out.
 3. **Arrivals.** Each packet's trip, for the first five seconds, against the time it had. Points above the line
    arrived too late to play.
-4. **What each scheme buys.** Only the frames that missed their slot, split into rebuilt and concealed, for each
-   scheme on the same network. Opus FEC and one RED copy reach the same packet and rebuild the same frames; they
-   differ in quality and cost, which the readout says.
 
 ## What it deliberately does not model
 

@@ -60,7 +60,7 @@ const SCHEMES: { id: string; label: string; reach: number; cost: string }[] = [
 	{ id: "none", label: "None", reach: 0, cost: "nothing extra sent" },
 	/*
 	 * Opus FEC and one RED copy reach back the same one packet, so they recover the same frames here. They
-	 * differ in what the copy is and what it costs, which the readout says rather than the bars.
+	 * differ in what the copy is and what it costs, which the protection table says in words.
 	 */
 	{ id: "fec", label: "Opus FEC", reach: 1, cost: "a lower-bitrate copy, paid for inside the Opus bitrate" },
 	{ id: "red1", label: "RED, 1 copy", reach: 1, cost: "a full copy, so about twice the audio bitrate" },
@@ -402,30 +402,12 @@ export default {
 			};
 
 			/*
-			 * E: what each scheme buys on this run's network, at this buffer. Only the frames that did not arrive in
-			 * time, split into recovered and concealed, so the bars are the size of the problem and not 95% "played".
-			 */
-			const byScheme = SCHEMES.map((s) => outcomes(packets, delay, buffer, s.reach));
-			const schemes: Output = {
-				kind: "series",
-				chart: {
-					xLabel: "Protection",
-					yLabel: "Frames that missed their slot",
-					yUnit: "%",
-					x: SCHEMES.map((s) => (s.id === scheme.id ? `${s.label} (this run)` : s.label)),
-					series: [
-						{ label: "Recovered from a copy", unit: "%", shape: "bar", stack: "missed", points: byScheme.map((o) => shares(o).recovered) },
-						{ label: "Concealed", unit: "%", shape: "bar", stack: "missed", points: byScheme.map((o) => shares(o).concealed) },
-					] satisfies Series[],
-					readout: { titles: SCHEMES.map((s, i) => `${s.label}: ${s.cost}; longest gap ${longestGap(byScheme[i] ?? []) * FRAME_MS} ms`) },
-				},
-			};
-
-			/*
-			 * The same four schemes as a table, which is what a reader compares digit by digit: what each recovers, what it
+			 * E: what each scheme buys on this run's network, at this buffer. A table rather than bars, because it is what a
+			 * reader compares digit by digit, and bars of the same two columns only repeated it: what each recovers, what it
 			 * still leaves made up, its longest gap, and what it costs on the wire. The run's own scheme is named in words
 			 * rather than coloured, since being the current choice is not a judgement on it.
 			 */
+			const byScheme = SCHEMES.map((s) => outcomes(packets, delay, buffer, s.reach));
 			const protection: Output = {
 				kind: "table",
 				role: "comparison",
@@ -459,7 +441,6 @@ export default {
 					{ kind: "fields", role: "metrics", fields: metrics },
 					...(strip ? [strip] : []),
 					arrivals,
-					schemes,
 				],
 			};
 		} catch (error) {
