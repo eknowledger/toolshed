@@ -9,14 +9,18 @@
  *  - a classic histogram is always buckets + 3 per label set (+Inf, _sum, _count), one more with _created;
  *  - dropping a label never leaves more series than keeping it, and the chart's bars are the table's numbers;
  *  - the answer comes first: the number and its multiplication, then the changes, fewest series first, then the
- *    quiet numbers and the method.
+ *    quiet numbers and the method;
+ *  - on every backend the labels multiply the same way, and only what one label set writes, the targets factor,
+ *    the limits and the billing unit change: a CloudWatch or Azure custom metric is one series whatever its type, and
+ *    a provider's limit is flagged only when this metric breaks it.
  */
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { Output } from "@toolbench/sdk";
-import tool, { count, parseLabels, perLabelSet } from "./index.ts";
+import tool, { BACKENDS, count, parseLabels, perLabelSet } from "./index.ts";
 
 const base = {
+	backend: "prometheus",
 	labels: "route 8\nstatus 5",
 	type: "histogram",
 	client: "python",
@@ -33,7 +37,7 @@ function parts(values: Partial<typeof base>): Output[] {
 	assert.equal(out.kind, "group");
 	return out.kind === "group" ? out.parts : [];
 }
-const n = (s: string) => Number(s.replace(/,/g, "").replace(/ series$/, ""));
+const n = (s: string) => Number(s.replace(/,/g, "").replace(/ (series|custom metrics?)$/, ""));
 /** The answer: the key number, "720 series". */
 function seriesOf(values: Partial<typeof base>): number {
 	const key = parts(values)[0];
@@ -144,5 +148,70 @@ describe("metric-cardinality", () => {
 		assert.equal(seriesOf({ labels: "", buckets: 14, created: true }), 18, "Python");
 		assert.equal(seriesOf({ labels: "", buckets: 14, created: false }), 17, "Python without _created");
 		assert.equal(seriesOf({ labels: "", buckets: 11, created: false }), 14, "Go");
+	});
+
+	it("multiplies the labels the same way on every backend, and only the targets factor differs", () => {
+		for (const backend of Object.keys(BACKENDS)) {
+			const counts = [3, 4, 5];
+			const text = counts.map((c, i) => `l${i} ${c}`).join("\n");
+			const t = BACKENDS[backend]!.targetsMultiply ? 7 : 1;
+			assert.equal(seriesOf({ backend, labels: text, type: "gauge", targets: 7 }), combinations(counts) * t, backend);
+		}
+	});
+
+	it("counts a CloudWatch or Azure custom metric once per label set, whatever its type and however many write it", () => {
+		for (const backend of ["cloudwatch", "azure-custom"]) {
+			for (const type of ["histogram", "counter", "gauge", "summary3", "native"]) {
+				assert.equal(seriesOf({ backend, type, targets: 1 }), 40, `${backend} ${type}`);
+				assert.equal(seriesOf({ backend, type, targets: 50 }), 40, `${backend} ${type} on 50 targets`);
+			}
+		}
+	});
+
+	it("stores a histogram as one distribution on Google, but bills it up to its buckets + 3 samples", () => {
+		const ps = parts({ backend: "gmp", created: false, interval: 30 });
+		assert.equal(seriesOf({ backend: "gmp", created: false }), 40);
+		const m = ps.find((p) => p.role === "metrics");
+		assert.ok(m?.kind === "fields");
+		const samples = m.fields.find((f) => f.label === "Samples ingested")!;
+		// 40 label sets x (14 buckets + 1 overflow + 2) samples x 86,400 scrapes in 30 days at 30 s.
+		assert.equal(40 * 17 * 86_400, 58_752_000);
+		assert.equal(samples.value, "Up to 58.75 million a month");
+	});
+
+	it("flags a provider's limit only when this metric alone breaks it", () => {
+		const over = (values: Partial<typeof base>) => {
+			const m = parts(values).find((p) => p.role === "metrics");
+			return m?.kind === "fields" ? m.fields.some((f) => f.label.endsWith(" limit") && f.tone === "bad") : false;
+		};
+		assert.equal(over({ backend: "azure-custom", labels: "user 50000", type: "gauge" }), false);
+		assert.equal(over({ backend: "azure-custom", labels: "user 50001", type: "gauge" }), true);
+		assert.equal(over({ backend: "azure-custom", labels: "a 1\nb 1\nc 1\nd 1\ne 1\nf 1\ng 1\nh 1\ni 1\nj 1" }), false);
+		assert.equal(
+			over({ backend: "azure-custom", labels: "a 1\nb 1\nc 1\nd 1\ne 1\nf 1\ng 1\nh 1\ni 1\nj 1\nk 1" }),
+			true,
+		);
+		// Google's limit is per monitored resource, so spreading a metric over more targets does not break it.
+		assert.equal(over({ backend: "gcm-custom", labels: "user 200000", type: "gauge", targets: 9 }), false);
+		assert.equal(over({ backend: "gcm-custom", labels: "user 200001", type: "gauge", targets: 1 }), true);
+		assert.equal(over({ backend: "prometheus", labels: "user 9000000", type: "gauge" }), false);
+	});
+
+	it("refuses an interval shorter than Google accepts", () => {
+		for (const backend of ["gmp", "gcm-custom"]) {
+			const out = tool.run({ ...base, backend, interval: 4 });
+			assert.equal(out.kind, "error", backend);
+			assert.equal(tool.run({ ...base, backend, interval: 5 }).kind, "group", backend);
+		}
+	});
+
+	it("keeps the same order of parts on every backend", () => {
+		for (const backend of Object.keys(BACKENDS)) {
+			assert.deepEqual(
+				parts({ backend }).map((p) => p.role ?? p.kind),
+				["key", "formula", "series", "comparison", "metrics", "method"],
+				backend,
+			);
+		}
 	});
 });
