@@ -3,7 +3,7 @@
   "id": "jitter-fec",
   "name": "Jitter and FEC simulator",
   "blurb": "A minute of voice over a network that delays and loses packets: how much audio the decoder makes up, and which buffer and protection fix it, at what cost in delay and bitrate.",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "capabilities": [
     "pure"
   ],
