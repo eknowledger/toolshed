@@ -43,6 +43,8 @@ type Input = {
 	timeout: number;
 	retries: number;
 	policy: string;
+	/** The bounded policies' limit, in requests. 0, or absent, derives it from the timeout. */
+	queue?: number;
 };
 
 /**
@@ -56,9 +58,10 @@ const PATIENCE = 10;
 const BACKOFF = 1;
 const ORDER_SHARE = 20;
 /**
- * The bound is derived, from the rule the backpressure post teaches: a bound sheds only if the work it holds is
- * shorter than the caller's timeout. A quarter of the timeout's worth leaves room for the service time and for
- * bursts, and it is 50 at the post's numbers (2 s x 100/s / 4).
+ * When the reader leaves the queue size at 0, the bound is derived, from the rule the backpressure post teaches: a
+ * bound sheds only if the work it holds is shorter than the caller's timeout. A quarter of the timeout's worth leaves
+ * room for the service time and for bursts, and it is 50 at the post's numbers (2 s x 100/s / 4). A size the reader
+ * types is used as it is, which is what shed_sim.py's `--queue-bound` does, so 1,024 runs the same draws there.
  */
 const BOUND_SHARE = 0.25;
 
@@ -467,6 +470,10 @@ export default {
 				throw new InputError("Retries must be a whole number, zero or more.", "retries");
 			}
 			if (!(input.policy in POLICIES)) throw new InputError("Unknown policy.", "policy");
+			const queue = input.queue ?? 0;
+			if (!(Number.isInteger(queue) && queue >= 0)) {
+				throw new InputError("Queue size must be a whole number, zero or more.", "queue");
+			}
 			const capacity = input.workers / (input.service / 1000);
 			const p: Params = {
 				...input,
@@ -474,7 +481,7 @@ export default {
 				patience: PATIENCE,
 				backoff: BACKOFF,
 				checkout: ORDER_SHARE,
-				bound: Math.max(1, Math.round(BOUND_SHARE * input.timeout * capacity)),
+				bound: queue > 0 ? queue : Math.max(1, Math.round(BOUND_SHARE * input.timeout * capacity)),
 			};
 			const expected = (BEFORE + AFTER) * p.base + p.duration * p.spike;
 			if (expected * (1 + p.retries) > MAX_ARRIVALS) {
@@ -530,7 +537,11 @@ export default {
 					label: "Once everyone times out",
 					value: `${rate(stuckLoad)} of tries against ${rate(capacity)}`,
 					...(ratio >= 1 && !borderline ? { tone: "bad" as const } : {}),
-					note: `${p.base}/s times ${tries} ${tries === 1 ? "try" : "tries"} within ${PATIENCE} s. ${
+					note: `${
+						bounded
+							? `The bound, ${p.bound.toLocaleString("en-US")}, is ${Number((p.bound / capacity).toFixed(1))} s of work, so it holds people past the ${p.timeout} s timeout. `
+							: ""
+					}${p.base}/s times ${tries} ${tries === 1 ? "try" : "tries"} within ${PATIENCE} s. ${
 						borderline
 							? "Within 15% of capacity, so chance decides whether a spike leaves it stuck."
 							: ratio >= 1
