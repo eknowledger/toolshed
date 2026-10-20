@@ -180,5 +180,6 @@ same.
 - [RFC 8285](https://www.rfc-editor.org/rfc/rfc8285): RTP header extensions
 - [RFC 4585](https://www.rfc-editor.org/rfc/rfc4585): RTCP feedback
 - [RFC 8445](https://www.rfc-editor.org/rfc/rfc8445): ICE, for candidate priorities and roles
-- [RFC 8853](https://www.rfc-editor.org/rfc/rfc8853): simulcast, and [RFC 8851](https://www.rfc-editor.org/rfc/rfc8851): `a=rid`
+- [RFC 8853](https://www.rfc-editor.org/rfc/rfc8853): simulcast
+- [RFC 8851](https://www.rfc-editor.org/rfc/rfc8851): `a=rid`
 - [RFC 8841](https://www.rfc-editor.org/rfc/rfc8841): data channels in SDP
