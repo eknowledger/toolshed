@@ -5,7 +5,7 @@
  * that the model has the right shape. These are the claims that make that checkable:
  *
  *  - every person ends in exactly one outcome, so the three shares add up;
- *  - the derived bound never makes anybody wait for nothing;
+ *  - the derived bound never makes anybody wait for nothing, and a typed one is used as typed;
  *  - whether a spike can leave it stuck, and "This run", agree with what the simulation does, including near the
  *    boundary and when the service is overloaded without a spike;
  *  - orders first changes who is answered, not how many;
@@ -16,7 +16,7 @@ import { describe, it } from "node:test";
 import type { Output } from "@toolbench/sdk";
 import tool from "./index.ts";
 
-type Values = { workers: number; service: number; base: number; spike: number; timeout: number; retries: number; policy: string };
+type Values = { workers: number; service: number; base: number; spike: number; timeout: number; retries: number; policy: string; queue?: number };
 const shop: Values = { workers: 8, service: 80, base: 70, spike: 150, timeout: 2, retries: 0, policy: "fifo" };
 const ctx = { signal: new AbortController().signal, progress: () => {} };
 
@@ -87,6 +87,46 @@ describe("the derived bound", () => {
 			for (const timeout of [1, 2, 4]) {
 				assert.equal(yours(run({ policy: "bounded", spike, timeout })).waited, 0, `${spike}/s, ${timeout} s`);
 			}
+		}
+	});
+
+	it("is what a queue size of 0 means, and what an older input without one gets", () => {
+		assert.deepEqual(run({ policy: "bounded", queue: 0 }), run({ policy: "bounded" }));
+		// 2 s x 100/s / 4: typing the derived size changes nothing.
+		assert.deepEqual(run({ policy: "bounded", queue: 50 }), run({ policy: "bounded" }));
+	});
+});
+
+describe("a queue size the reader types", () => {
+	it("pins shed_sim.py's bound sweep at the sale", () => {
+		// From backpressure/shed_sim.py, `--queue-bound`: answered, refused at once, waited for nothing, and the run's recovery.
+		const want: [number, number, [number, number, number], string][] = [
+			[50, 2, [68.4, 31.6, 0], "recovered at once"],
+			[150, 2, [68.9, 31, 0.2], "recovered at once"],
+			[300, 2, [8.4, 71.2, 20.3], "stuck to the end"],
+			[1024, 2, [8.4, 70.7, 20.9], "stuck to the end"],
+			[1024, 0, [8.4, 22, 69.6], "recovered 30 s after the spike"],
+		];
+		for (const [queue, retries, [answered, refused, waited], recovery] of want) {
+			const parts = run({ policy: "bounded", queue, retries });
+			assert.deepEqual(yours(parts), { answered, refused, waited }, `${queue}, ${retries} retries`);
+			assert.equal(value(parts, "This run"), recovery, `${queue}, ${retries} retries`);
+		}
+	});
+
+	it("says when the bound holds more work than the timeout, and only then", () => {
+		const note = (parts: Output[]) => {
+			const part = parts.find((p) => p.kind === "fields" && p.fields.some((f) => f.label === "This run"));
+			return part?.kind === "fields" ? (part.fields[0]?.note ?? "") : "";
+		};
+		assert.match(note(run({ policy: "bounded", queue: 1024 })), /^The bound, 1,024, is 10\.2 s of work, so it holds people past the 2 s timeout\./);
+		assert.doesNotMatch(note(run({ policy: "bounded", queue: 150 })), /holds people past/);
+		assert.doesNotMatch(note(run({ policy: "fifo", queue: 1024 })), /The bound/);
+	});
+
+	it("leaves the unbounded and queue-timeout policies alone", () => {
+		for (const policy of ["fifo", "fifo_skip", "codel", "lifo"]) {
+			assert.deepEqual(yours(run({ policy, queue: 1024 })), yours(run({ policy })), policy);
 		}
 	});
 });

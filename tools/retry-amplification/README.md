@@ -5,7 +5,7 @@ A layer that retries wraps everything below it, so code that makes 3 attempts th
 9, and the next call down sees all 9 of them, each making its own.
 
 Give it how deep the chain is and how many retries each layer makes, then press Run. **Mesh** fills the proxy
-retries with a mesh's default: Istio 2, Linkerd 1 (once retries are turned on for a route; it makes none until then),
+retries with a mesh's default: Istio over gRPC 2, Linkerd 1 (once retries are turned on for a route; it makes none until then),
 None 0. Change the number and the select shows Custom. It answers in this order:
 
 1. **Calls at the bottom**: for one user request, when the bottom service is failing every call.
@@ -25,10 +25,9 @@ None 0. Change the number and the select shows Custom. It answers in this order:
 
 ## How to use it: an example
 
-Three calls in a row, frontend to checkout to pricing to inventory, on a mesh with Istio's default of 2 retries per
-call, and inventory is down. Enter **Calls deep** 3, **Mesh** Istio, which fills **Proxy retries per call** with 2,
-everything else 0, **Bottom fails**
-100%, **Retry budget** None, and press Run (or press the sample *Istio's default over gRPC, bottom down*).
+Three gRPC calls in a row, frontend to checkout to pricing to inventory, on a mesh with Istio's default of 2 retries
+per call, and inventory is down. Enter **Calls deep** 3, **Mesh** *Istio over gRPC*, which fills **Proxy retries per
+call** with 2, everything else 0, **Bottom fails** 100%, **Retry budget** None, and press Run (or press the sample *Istio's default over gRPC, bottom down*).
 
 The answer:
 
@@ -55,7 +54,8 @@ calls reach the bottom instead of 27.
 ## Retry layers that are easy to miss
 
 - **The mesh.** Istio retries twice by default, on connection failures, refused streams and gRPC `UNAVAILABLE`.
-  Not on an HTTP 503, unless you add it. Linkerd retries nothing until a route is configured to, and then once,
+  Not on an HTTP 503, unless you add it. So over plain HTTP only the proxy in front of a down service retries, and its
+  callers get a 503 they pass up: 3 calls reach the bottom, not 27, and a 503 from the bottom reaches it once. Linkerd retries nothing until a route is configured to, and then once,
   unless the configuration gives a count.
 - **A client library** with its own retry policy, inside a service's code.
 - **The app or browser** at the top, retrying the whole request.

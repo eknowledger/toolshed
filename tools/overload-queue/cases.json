@@ -369,6 +369,125 @@
     }
   },
   {
+    "name": "the sale with Envoy's default bound of 1,024: no more answered than no bound: can a spike leave it stuck, and did it",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "bounded",
+      "queue": 1024
+    },
+    "match": "subset",
+    "why": "A bound sheds only if the work it holds is shorter than the timeout, and 1,024 at 100/s is 10.2 s against 2 s. The same run as shed_sim.py --policy bounded --queue-bound 1024, draw for draw.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Once everyone times out",
+          "value": "70/s of tries against 100/s",
+          "note": "The bound, 1,024, is 10.2 s of work, so it holds people past the 2 s timeout. 70/s times 1 try within 10 s. It drains, so a spike cannot leave it stuck."
+        },
+        {
+          "label": "This run",
+          "value": "recovered 30 s after the spike"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the sale with Envoy's default bound of 1,024: no more answered than no bound: every policy at the same numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "bounded",
+      "queue": 1024
+    },
+    "match": "subset",
+    "why": "The bounded rows answer the unbounded queue's 8.4%, refuse 22% at once and recover in 30 s instead of 90; the policies without a bound are unchanged. Printed first by shed_sim.py with --queue-bound 1024.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
+      "columns": [
+        {
+          "label": "Policy"
+        },
+        {
+          "label": "Answered",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "p50",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Recovery",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Wasted",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "Bounded queue (yours)",
+          "8.4%",
+          "1125 ms",
+          "30 s",
+          "8,097"
+        ],
+        [
+          "Unbounded queue",
+          "8.4%",
+          "1125 ms",
+          "90 s",
+          "14,309"
+        ],
+        [
+          "Skip the abandoned",
+          "19.5%",
+          "1961 ms",
+          "at once",
+          "4,466"
+        ],
+        [
+          "Bounded, orders first",
+          "8.4%",
+          "1125 ms",
+          "30 s",
+          "8,097"
+        ],
+        [
+          "Queue timeout (CoDel)",
+          "64.4%",
+          "98 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Newest first (LIFO + CoDel)",
+          "64.3%",
+          "81 ms",
+          "at once",
+          "0"
+        ]
+      ]
+    }
+  },
+  {
     "name": "orders first: the same total, every order answered: can a spike leave it stuck, and did it",
     "input": {
       "workers": 8,
@@ -1196,6 +1315,24 @@
       "kind": "error",
       "message": "Workers must be greater than zero.",
       "input": "workers"
+    }
+  },
+  {
+    "name": "a fractional queue size is an error that names the input",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "bounded",
+      "queue": 10.5
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Queue size must be a whole number, zero or more.",
+      "input": "queue"
     }
   },
   {

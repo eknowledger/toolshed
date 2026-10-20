@@ -179,7 +179,7 @@ describe("the Mesh presets", () => {
 	const options: Option[] = manifest.inputs.find((i: { id: string }) => i.id === "platform").options;
 	const preset = (value: string) => options.find((o) => o.value === value)?.sets?.mesh;
 
-	it("fill the defaults the documentation gives: Istio 2, Linkerd 1 once turned on, none 0", () => {
+	it("fill the defaults the documentation gives: Istio over gRPC 2, Linkerd 1 once turned on, none 0", () => {
 		assert.equal(preset("istio"), 2);
 		assert.equal(preset("linkerd"), 1);
 		assert.equal(preset("none"), 0);

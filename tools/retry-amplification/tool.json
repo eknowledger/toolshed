@@ -3,7 +3,7 @@
   "id": "retry-amplification",
   "name": "Retry amplification calculator",
   "blurb": "Retries per layer and how deep the chain goes: how many calls reach the bottom service for one user request when every layer retries what it gets, and the extra load on it while it fails.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "capabilities": [
     "pure"
   ],
@@ -38,13 +38,13 @@
       "id": "platform",
       "type": "select",
       "label": "Mesh",
-      "description": "Fills the proxy retries with that mesh's default. Linkerd retries only once you turn retries on for a route, and then 1 time unless you say otherwise.",
+      "description": "Fills the proxy retries with that mesh's default. Istio's 2 multiply like this over gRPC. Over plain HTTP it doesn't retry a 503, so a down bottom service gets 3 calls and a 503 gets 1. Linkerd retries only once you turn retries on for a route, and then 1 time unless you say otherwise.",
       "primary": true,
       "default": "istio",
       "options": [
         {
           "value": "istio",
-          "label": "Istio, 2 retries",
+          "label": "Istio over gRPC, 2 retries",
           "sets": {
             "mesh": 2
           }

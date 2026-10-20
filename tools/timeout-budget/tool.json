@@ -3,7 +3,7 @@
   "id": "timeout-budget",
   "name": "Timeout budget checker",
   "blurb": "A call chain's per-try timeouts and retries, top first: the worst case when the bottom hangs, whether it fits the caller's deadline, and which retries can never finish in time.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "capabilities": [
     "pure"
   ],
@@ -60,7 +60,7 @@
       "type": "number",
       "label": "Backoff between tries",
       "unit": "ms",
-      "description": "Average wait before each retry. Istio's base is 25 ms; Envoy jitters it, up to 74 ms before a second retry.",
+      "description": "Wait before each retry. Envoy waits a random 0 to 24 ms before the first retry, more after.",
       "default": 25,
       "min": 0,
       "max": 600000,

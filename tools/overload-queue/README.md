@@ -1,11 +1,11 @@
-# Overload and queue simulator
+# Load shedding simulator
 
 For a minute, more requests arrive than a service can answer. Somebody has to hear "no". Capacity decides how many
 people can be answered; what the service does with the request that does not fit decides whether that many actually
 are, which ones, and whether the rest hear "no" at once or after waiting for nothing.
 
-Give it seven numbers: the policy, workers, mean service time, the normal rate, the rate during the spike, the
-client's timeout, and how many times it retries. Press Run. It simulates the spike, a minute before it and three
+Give it eight numbers: the policy, workers, mean service time, the normal rate, the rate during the spike, the
+client's timeout, how many times it retries, and the size of the bounded queue. Press Run. It simulates the spike, a minute before it and three
 minutes after, runs every other policy at the same numbers, and answers in this order:
 
 1. **What happened to the people who arrived during the spike**, one bar per policy, yours first: answered in time
@@ -18,8 +18,9 @@ minutes after, runs every other policy at the same numbers, and answers in this 
 4. **Whether a spike can leave it stuck**, beside what this run did. A queue that can hold people past their
    timeout (an unbounded one) gets stuck if, once everyone is timing out, the normal rate times the tries that fit
    in a person's 10 s is at least capacity: the queue then can't drain however long ago the spike ended. Within 15%
-   of that line chance decides, and it says so. A bounded queue or a queue timeout says how long anyone can wait in
-   it instead. If the normal rate alone is at or over capacity, it says that.
+   of that line chance decides, and it says so. A bounded queue whose bound is less work than the timeout, or a
+   queue timeout, says how long anyone can wait in it instead; a bound that is more work than the timeout is held to
+   the same test as an unbounded queue, and says so. If the normal rate alone is at or over capacity, it says that.
 5. **What to change**, the worst problem first, when there is something to change: more workers if the normal rate
    alone is over capacity; fewer retries if a spike can leave the queue stuck; a better policy, if one in the
    comparison answers at least 5 points more people at the same capacity, with that policy's own numbers; and the
@@ -32,7 +33,8 @@ minutes after, runs every other policy at the same numbers, and answers in this 
 A shop's sale. The service has 8 workers at 80 ms a request, so it answers 100 a second. It normally gets 70 a
 second, and for one minute of the sale it gets 150. Clients wait 2 s and do not retry, and the service queues
 everything. Enter **Policy** *Unbounded queue*, **Retries** 0, **Spike rate** 150, **Normal rate** 70, **Workers** 8,
-**Service time** 80 ms, **Timeout** 2 s, and press Run (or press the sample *The sale, unbounded queue*).
+**Service time** 80 ms, **Timeout** 2 s, **Queue size** 0, and press Run (or press the sample *The sale, unbounded
+queue*).
 
 The bars, as numbers:
 
@@ -70,6 +72,43 @@ queue grew past 2 s of work, so almost everyone waited out their timeout, and th
 serves the rest in time. Press *Unbounded, with 3 retries* to see the same sale never recover: 280/s of tries against
 100/s, "a spike can leave it stuck", this run stuck to the end, and the first change becomes retrying less.
 
+### A real default: a bound of 1,024
+
+The bound of 50 above is derived, a quarter of the timeout's worth of work. Proxies ship a fixed number instead:
+Envoy's default limit on pending requests is 1,024. Press *The sale, bounded at 1,024 (Envoy's default)*, which is
+the same sale with **Policy** *Bounded queue* and **Queue size** 1024:
+
+| Policy | Answered in time | Refused at once | Waited for nothing |
+|---|---|---|---|
+| Bounded queue (yours) | 8.4% | 22% | 69.6% |
+| Unbounded queue | 8.4% | 0% | 91.6% |
+| Skip the abandoned | 19.5% | 0% | 80.5% |
+| Bounded, orders first | 8.4% | 22% | 69.6% |
+| Queue timeout (CoDel) | 64.4% | 35.6% | 0% |
+| Newest first (LIFO + CoDel) | 64.3% | 35.7% | 0% |
+
+| Policy | Answered | p50 | Recovery | Wasted |
+|---|---|---|---|---|
+| Bounded queue (yours) | 8.4% | 1125 ms | 30 s | 8,097 |
+| Unbounded queue | 8.4% | 1125 ms | 90 s | 14,309 |
+| Skip the abandoned | 19.5% | 1961 ms | at once | 4,466 |
+| Bounded, orders first | 8.4% | 1125 ms | 30 s | 8,097 |
+| Queue timeout (CoDel) | 64.4% | 98 ms | at once | 0 |
+| Newest first (LIFO + CoDel) | 64.3% | 81 ms | at once | 0 |
+
+Under the chart: **Once everyone times out** 70/s of tries against 100/s (*The bound, 1,024, is 10.2 s of work, so it
+holds people past the 2 s timeout. 70/s times 1 try within 10 s. It drains, so a spike cannot leave it stuck.*), and
+**This run** recovered 30 s after the spike. What to change:
+
+| Change | What it does at these numbers |
+|---|---|
+| Switch to queue timeout (CoDel). | 64.4% answered instead of 8.4%, and 0.0% wait for nothing instead of 69.6%. Back to normal: at once. |
+| Or add workers for the spike. | 13 workers is the fewest whose capacity is over the 150/s spike. The capacity planner sizes them for a wait target. |
+
+A bound of 1,024 is ten seconds of work in front of a 2 s timeout, so it answers no more people than no bound at all.
+It refuses the 22% who arrive once it is full, which is why it recovers in 30 s rather than 90. Set **Retries** to 2
+and it never recovers: 70/s times 3 tries is 210/s against 100/s.
+
 ## The policies
 
 | Policy | What it does with the request that does not fit |
@@ -88,8 +127,12 @@ serves the rest in time. Press *Unbounded, with 3 retries* to see the same sale 
 | Spike length | 60 s | Long enough to fill any queue that is going to fill; the shares barely move beyond that |
 | Patience | 10 s from the first try | It only matters with retries, where it caps how many tries a person sends |
 | Backoff | about 1 s between tries, plus or minus 50% | A second-order effect next to the number of retries |
-| Queue bound | a quarter of the timeout's worth of work: `timeout x capacity / 4` | The rule: a bound sheds only if the work it holds is shorter than the timeout. A quarter leaves room for the service time and for bursts. 50 at 2 s and 100/s |
 | Orders | 1 request in 5 | Only the orders-first policy uses it |
+
+**Queue size** is an input, but 0, its default, derives it: a quarter of the timeout's worth of work,
+`timeout x capacity / 4`, which is 50 at 2 s and 100/s. That is the rule the backpressure post teaches: a bound sheds
+only if the work it holds is shorter than the timeout, and a quarter leaves room for the service time and for bursts.
+Any other size is used as typed. Only the two bounded policies read it.
 
 ## Where it stops being true
 
@@ -103,7 +146,8 @@ serves the rest in time. Press *Unbounded, with 3 retries* to see the same sale 
 
 A discrete-event simulation, seeded, so the same inputs always give the same answer. It is the same model as
 `backpressure/shed_sim.py` in [mainlog-code](https://github.com/eknowledger/mainlog-code), down to the random
-generator and the order it is drawn in, so with the defaults it prints that script's numbers exactly. The fixtures
+generator and the order it is drawn in, so with the defaults it prints that script's numbers exactly. A typed queue
+size is that script's `--queue-bound`. The fixtures
 are those numbers.
 
 A run is limited to about two million attempts, which is enough for rates in the low thousands a second. The shares
