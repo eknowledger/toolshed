@@ -715,5 +715,451 @@
 			"message": "route is listed twice",
 			"input": "labels"
 		}
+	},
+	{
+		"name": "Amazon Managed Prometheus bills samples: the Go service at 30 s",
+		"input": {
+			"backend": "amp",
+			"labels": "route 12\nmethod 3\nstatus 6",
+			"type": "histogram",
+			"client": "go",
+			"buckets": 11,
+			"created": false,
+			"targets": 20,
+			"occur": 25,
+			"interval": 30,
+			"price": 0.9
+		},
+		"match": "subset",
+		"why": "15,120 series x 2,592,000 s in 30 days / 30 s = 1,306,368,000 samples; at $0.90 per 10 million, 130.64 x $0.90 = $117.57, shown as $118.",
+		"fieldCount": 3,
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Label sets",
+					"value": "54",
+					"note": "Prometheus's guide aims for fewer than 10.",
+					"tone": "warn"
+				},
+				{
+					"label": "Samples ingested",
+					"value": "1.31 billion a month",
+					"note": "One per series every 30 s. In a 30-day month."
+				},
+				{
+					"label": "Bill",
+					"value": "$118 a month",
+					"note": "At $0.90 per 10 million samples ingested."
+				}
+			]
+		}
+	},
+	{
+		"name": "Amazon Managed Prometheus: the same series as self-hosted",
+		"input": {
+			"backend": "amp",
+			"labels": "route 12\nmethod 3\nstatus 6",
+			"type": "histogram",
+			"client": "go",
+			"buckets": 11,
+			"created": false,
+			"targets": 20,
+			"occur": 25,
+			"interval": 30,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "AMP stores the Prometheus series the client writes: 54 label sets x 14 x 20 targets = 15,120.",
+		"fieldCount": 1,
+		"expect": {
+			"kind": "fields",
+			"role": "key",
+			"fields": [
+				{
+					"label": "Time series",
+					"value": "15,120 series"
+				}
+			]
+		}
+	},
+	{
+		"name": "Azure managed Prometheus: the defaults' samples",
+		"input": {
+			"backend": "azure-prom",
+			"labels": "route 8\nstatus 5",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "720 series x 2,592,000 / 15 = 124,416,000 samples a month.",
+		"fieldCount": 2,
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Label sets",
+					"value": "40",
+					"note": "Prometheus's guide aims for fewer than 10. Assumes every combination of values occurs; set the share that does if you know it.",
+					"tone": "warn"
+				},
+				{
+					"label": "Samples ingested",
+					"value": "124 million a month",
+					"note": "One per series every 15 s. In a 30-day month."
+				}
+			]
+		}
+	},
+	{
+		"name": "Azure managed Prometheus: one metric over the workspace's series and events limits",
+		"input": {
+			"backend": "azure-prom",
+			"labels": "user 2000000",
+			"type": "counter",
+			"client": "python",
+			"buckets": 14,
+			"created": false,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "2,000,000 series is over the 1,000,000 active series default; 2,000,000 x 60 / 15 = 8,000,000 events a minute is over 1,000,000.",
+		"fieldCount": 4,
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Label sets",
+					"value": "2,000,000",
+					"note": "Over 100, where Prometheus's guide says to look for another way.",
+					"tone": "bad"
+				},
+				{
+					"label": "Samples ingested",
+					"value": "346 billion a month",
+					"note": "One per series every 15 s. In a 30-day month."
+				},
+				{
+					"label": "Series limit",
+					"value": "2,000,000 of 1,000,000",
+					"note": "Azure Monitor managed service for Prometheus allows 1,000,000 active time series per Azure Monitor workspace, the default limit.",
+					"tone": "bad"
+				},
+				{
+					"label": "Ingest limit",
+					"value": "8,000,000 events a minute",
+					"note": "Azure allows 1,000,000 events per minute ingested into a workspace.",
+					"tone": "bad"
+				}
+			]
+		}
+	},
+	{
+		"name": "Google Managed Prometheus: a histogram is one distribution series",
+		"input": {
+			"backend": "gmp",
+			"labels": "route 8\nstatus 5",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": false,
+			"targets": 1,
+			"occur": 100,
+			"interval": 30,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "8 x 5 label sets x 1 distribution series x 1 target = 40.",
+		"fieldCount": 1,
+		"expect": {
+			"kind": "fields",
+			"role": "key",
+			"fields": [
+				{
+					"label": "Time series",
+					"value": "40 series"
+				}
+			]
+		}
+	},
+	{
+		"name": "Google Managed Prometheus: billed up to buckets + 3 samples a scrape",
+		"input": {
+			"backend": "gmp",
+			"labels": "route 8\nstatus 5",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": false,
+			"targets": 1,
+			"occur": 100,
+			"interval": 30,
+			"price": 0.06
+		},
+		"match": "subset",
+		"why": "40 x (2 + 15 buckets) x 2,592,000 / 30 = 58,752,000 samples at most; 58.752 x $0.06 = $3.53 at most.",
+		"fieldCount": 3,
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Label sets",
+					"value": "40",
+					"note": "Prometheus's guide aims for fewer than 10. Assumes every combination of values occurs; set the share that does if you know it.",
+					"tone": "warn"
+				},
+				{
+					"label": "Samples ingested",
+					"value": "Up to 58.75 million a month",
+					"note": "Each scrape of a histogram is 2 samples plus 1 per bucket with a count in it, 15 buckets here. In a 30-day month."
+				},
+				{
+					"label": "Bill",
+					"value": "Up to $3.53 a month",
+					"note": "At $0.06 per 1 million samples ingested."
+				}
+			]
+		}
+	},
+	{
+		"name": "CloudWatch EMF: one metric per dimension combination, targets not a factor",
+		"input": {
+			"backend": "cloudwatch",
+			"labels": "operation 6\nstatus 3\ncustomer 200",
+			"type": "histogram",
+			"client": "custom",
+			"buckets": 11,
+			"created": false,
+			"targets": 12,
+			"occur": 50,
+			"interval": 60,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "6 x 3 x 200 x 50% = 1,800 combinations, one metric each; 12 processes publishing the same dimensions share them.",
+		"expect": {
+			"kind": "text",
+			"role": "formula",
+			"mono": true,
+			"text": "6 operation x 3 status x 200 customer values x 50% that occur x 1 metric per label set"
+		}
+	},
+	{
+		"name": "CloudWatch EMF: 1,800 custom metrics",
+		"input": {
+			"backend": "cloudwatch",
+			"labels": "operation 6\nstatus 3\ncustomer 200",
+			"type": "histogram",
+			"client": "custom",
+			"buckets": 11,
+			"created": false,
+			"targets": 12,
+			"occur": 50,
+			"interval": 60,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "6 x 3 x 200 x 50% = 1,800.",
+		"fieldCount": 1,
+		"expect": {
+			"kind": "fields",
+			"role": "key",
+			"fields": [
+				{
+					"label": "Custom metrics",
+					"value": "1,800 custom metrics"
+				}
+			]
+		}
+	},
+	{
+		"name": "CloudWatch: billed per metric-month",
+		"input": {
+			"backend": "cloudwatch",
+			"labels": "operation 6\nstatus 3\ncustomer 200",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 12,
+			"occur": 50,
+			"interval": 15,
+			"price": 0.3
+		},
+		"match": "subset",
+		"why": "1,800 metric-months x $0.30 = $540.",
+		"fieldCount": 2,
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Billed as",
+					"value": "1,800 metric-months",
+					"note": "Prorated by the hour, for the hours a metric gets data. PutMetricData requests, or an EMF log's ingestion, are billed on top."
+				},
+				{
+					"label": "Bill",
+					"value": "$540 a month",
+					"note": "At $0.30 per metric-month."
+				}
+			]
+		}
+	},
+	{
+		"name": "Azure custom metrics: one series per dimension combination",
+		"input": {
+			"backend": "azure-custom",
+			"labels": "route 8\ntenant 500",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 4,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "8 x 500 = 4,000; the type writes one series and the 4 targets share them.",
+		"fieldCount": 1,
+		"expect": {
+			"kind": "fields",
+			"role": "key",
+			"fields": [
+				{
+					"label": "Time series",
+					"value": "4,000 series"
+				}
+			]
+		}
+	},
+	{
+		"name": "Azure custom metrics: 11 dimensions is over the 10 a metric can have",
+		"input": {
+			"backend": "azure-custom",
+			"labels": "a 1\nb 1\nc 1\nd 1\ne 1\nf 1\ng 1\nh 1\ni 1\nj 1\nk 1",
+			"type": "gauge",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "Azure Monitor allows 10 dimension keys per custom metric.",
+		"fieldCount": 2,
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Billed as",
+					"value": "Free during the preview",
+					"note": "For new work Microsoft points to OpenTelemetry metrics in an Azure Monitor workspace, billed per sample ingested."
+				},
+				{
+					"label": "Label limit",
+					"value": "11 labels",
+					"note": "Azure Monitor custom metrics allows 10 dimension keys per metric.",
+					"tone": "bad"
+				}
+			]
+		}
+	},
+	{
+		"name": "Cloud Monitoring custom metrics: a distribution is 80 bytes a point",
+		"input": {
+			"backend": "gcm-custom",
+			"labels": "route 8\nstatus 5",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "40 series x 80 bytes x 2,592,000 / 15 = 552,960,000 bytes = 527.34 MiB, shown as 527.",
+		"fieldCount": 1,
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Bytes ingested",
+					"value": "527 MiB a month",
+					"note": "80 bytes a point, one point per series every 15 s, in a 30-day month. The first 150 MiB a month of each billing account are free."
+				}
+			]
+		}
+	},
+	{
+		"name": "Cloud Monitoring custom metrics: a counter is 8 bytes a point",
+		"input": {
+			"backend": "gcm-custom",
+			"labels": "route 8\nstatus 5",
+			"type": "counter",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "40 series x 8 bytes x 2,592,000 / 15 = 55,296,000 bytes = 52.73 MiB.",
+		"fieldCount": 1,
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Bytes ingested",
+					"value": "52.73 MiB a month",
+					"note": "8 bytes a point, one point per series every 15 s, in a 30-day month. The first 150 MiB a month of each billing account are free."
+				}
+			]
+		}
+	},
+	{
+		"name": "Cloud Monitoring custom metrics refuse a point more often than every 5 s",
+		"input": {
+			"backend": "gcm-custom",
+			"labels": "route 8\nstatus 5",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 2,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "The Cloud Monitoring API requires points in a time series to be at least 5 seconds apart.",
+		"expect": {
+			"kind": "error",
+			"message": "Google Cloud Monitoring custom metrics accepts at most one point every 5 s per series, so the interval is at least that.",
+			"input": "interval"
+		}
 	}
 ]

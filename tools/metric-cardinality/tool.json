@@ -1,9 +1,9 @@
 {
 	"sdk": 6,
 	"id": "metric-cardinality",
-	"name": "Prometheus cardinality calculator",
-	"blurb": "List a metric's labels and how many values each takes, pick its type and client, and see how many time series it really writes, which change saves the most, and what it costs to keep.",
-	"version": "3.0.1",
+	"name": "Metric cardinality calculator",
+	"blurb": "List a metric's labels and how many values each takes, pick where it is stored, and see how many time series it really writes, which change saves the most, and what that backend bills it in.",
+	"version": "3.1.0",
 	"capabilities": ["pure"],
 	"runtime": {
 		"entry": "index.ts",
@@ -17,7 +17,7 @@
 			"id": "labels",
 			"type": "textarea",
 			"label": "Labels and their values",
-			"description": "One label per line: its name and how many different values it takes, such as \"route 8\". Leave it empty for a metric with no labels.",
+			"description": "One label per line, or dimension for CloudWatch and Azure: its name and how many different values it takes, such as \"route 8\". Leave it empty for a metric with no labels.",
 			"primary": true,
 			"default": "route 8\nstatus 5",
 			"rows": 4,
@@ -25,10 +25,48 @@
 			"dir": "ltr"
 		},
 		{
+			"id": "backend",
+			"type": "select",
+			"label": "Where the metric is stored",
+			"description": "Decides what one label set writes, whether each target gets its own series, the limits that apply, and the unit it is billed in.",
+			"primary": true,
+			"default": "prometheus",
+			"options": [
+				{
+					"value": "prometheus",
+					"label": "Prometheus, self-hosted"
+				},
+				{
+					"value": "amp",
+					"label": "Amazon Managed Service for Prometheus"
+				},
+				{
+					"value": "azure-prom",
+					"label": "Azure Monitor managed service for Prometheus"
+				},
+				{
+					"value": "gmp",
+					"label": "Google Cloud Managed Service for Prometheus"
+				},
+				{
+					"value": "cloudwatch",
+					"label": "Amazon CloudWatch custom metrics, including EMF"
+				},
+				{
+					"value": "azure-custom",
+					"label": "Azure Monitor custom metrics (not Prometheus)"
+				},
+				{
+					"value": "gcm-custom",
+					"label": "Google Cloud Monitoring custom metrics"
+				}
+			]
+		},
+		{
 			"id": "type",
 			"type": "select",
 			"label": "Metric type",
-			"description": "What one label set writes. A classic histogram is one series per bucket, plus _sum and _count.",
+			"description": "What one label set writes. On Prometheus a classic histogram is one series per bucket, plus _sum and _count; CloudWatch and Azure custom metrics store one series whatever the type.",
 			"primary": true,
 			"default": "histogram",
 			"options": [
@@ -100,7 +138,7 @@
 			"id": "targets",
 			"type": "number",
 			"label": "Targets",
-			"description": "Processes exposing the metric: pods, instances. Each one is scraped with its own instance label, so each multiplies the count.",
+			"description": "Processes writing the metric: pods, instances. On Prometheus each is scraped with its own instance label, and on Cloud Monitoring each writes to its own monitored resource, so each multiplies the count. On CloudWatch and Azure custom metrics they share a series unless a label tells them apart.",
 			"primary": true,
 			"default": 1,
 			"min": 1,
@@ -132,15 +170,15 @@
 			"id": "created",
 			"type": "toggle",
 			"label": "Writes _created",
-			"description": "One more series per label set for counters, histograms and summaries. Newer Prometheus servers can store it as metadata instead; turn it off if yours does.",
+			"description": "One more series per label set for counters, histograms and summaries, on the Prometheus backends. Newer Prometheus servers can store it as metadata instead; turn it off if yours does.",
 			"default": true
 		},
 		{
 			"id": "interval",
 			"type": "number",
-			"label": "Scrape interval",
+			"label": "Scrape or write interval",
 			"unit": "s",
-			"description": "How often each target is scraped. Prometheus's own default is 60 s; 15 s is common.",
+			"description": "How often each series gets a point. Prometheus's own default is 60 s; 15 s is common. Google takes at most one point every 5 s, and Azure custom metrics are ingested once a minute whatever you send.",
 			"default": 15,
 			"min": 1,
 			"max": 3600,
@@ -149,9 +187,9 @@
 		{
 			"id": "price",
 			"type": "number",
-			"label": "Price per 1,000 series",
-			"unit": "$ a month",
-			"description": "Your vendor's price for 1,000 active series a month. 0 leaves the bill out.",
+			"label": "Your price per billing unit",
+			"unit": "$",
+			"description": "What your backend charges for the unit the answer names: 1,000 active series a month for self-hosted or a vendor that bills series, 10 million samples on Amazon's or Azure's managed Prometheus, 1 million on Google's, a metric-month on CloudWatch, a MiB on Cloud Monitoring. 0 leaves the bill out.",
 			"default": 0,
 			"min": 0,
 			"max": 100000,
@@ -162,6 +200,7 @@
 		{
 			"label": "One label set, Python",
 			"input": {
+				"backend": "prometheus",
 				"labels": "route 1\nstatus 1",
 				"type": "histogram",
 				"client": "python",
@@ -174,6 +213,7 @@
 		{
 			"label": "Add a tenant label",
 			"input": {
+				"backend": "prometheus",
 				"labels": "route 1\nstatus 1\ntenant 500",
 				"type": "histogram",
 				"client": "python",
@@ -186,6 +226,7 @@
 		{
 			"label": "A Go service on 20 pods",
 			"input": {
+				"backend": "prometheus",
 				"labels": "route 12\nmethod 3\nstatus 6",
 				"type": "histogram",
 				"client": "go",
@@ -196,38 +237,43 @@
 			}
 		},
 		{
-			"label": "Same, as a counter",
+			"label": "Same, on Amazon Managed Prometheus",
 			"input": {
+				"backend": "amp",
 				"labels": "route 12\nmethod 3\nstatus 6",
-				"type": "counter",
+				"type": "histogram",
 				"client": "go",
 				"buckets": 11,
 				"created": false,
 				"targets": 20,
-				"occur": 25
+				"occur": 25,
+				"interval": 30
 			}
 		},
 		{
-			"label": "A user ID label",
+			"label": "CloudWatch EMF with a customer dimension",
 			"input": {
-				"labels": "route 8\nuser_id 250000",
-				"type": "counter",
-				"client": "go",
+				"backend": "cloudwatch",
+				"labels": "operation 6\nstatus 3\ncustomer 200",
+				"type": "histogram",
+				"client": "custom",
 				"buckets": 11,
 				"created": false,
-				"targets": 4,
-				"occur": 100
+				"targets": 12,
+				"occur": 50,
+				"interval": 60
 			}
 		},
 		{
 			"label": "Not a count",
 			"input": {
+				"backend": "prometheus",
 				"labels": "route lots"
 			}
 		}
 	],
 	"help": "README.md",
-	"tags": ["observability", "prometheus", "metrics", "cardinality"],
+	"tags": ["observability", "prometheus", "metrics", "cardinality", "cloudwatch", "azure-monitor", "cloud-monitoring"],
 	"links": [
 		{
 			"label": "Prometheus: do not overuse labels",
@@ -240,6 +286,22 @@
 		{
 			"label": "Prometheus: storage and capacity",
 			"href": "https://prometheus.io/docs/prometheus/latest/storage/#operational-aspects"
+		},
+		{
+			"label": "CloudWatch: dimensions",
+			"href": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Dimension"
+		},
+		{
+			"label": "Amazon Managed Service for Prometheus: quotas",
+			"href": "https://docs.aws.amazon.com/prometheus/latest/userguide/AMP_quotas.html"
+		},
+		{
+			"label": "Azure Monitor: service limits",
+			"href": "https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/service-limits"
+		},
+		{
+			"label": "Cloud Monitoring: quotas and limits",
+			"href": "https://cloud.google.com/monitoring/quotas"
 		}
 	],
 	"autoRun": false
