@@ -151,15 +151,58 @@ judges, and only on the Prometheus backends, because it is Prometheus's guide.
 Checked on 2026-10-19 against each provider's own documentation and pricing pages. Only what those pages state is
 modelled; where they are silent, the method notes say so.
 
-| Backend | What one label set writes | Targets | Limits used | Billed per | Sources |
-|---|---|---|---|---|---|
-| Prometheus, self-hosted | By type, as above | Multiply, one `instance` each | Prometheus's guide: under 10 label sets, investigate over 100 | Your vendor's price per 1,000 active series, if any | [instrumentation](https://prometheus.io/docs/practices/instrumentation/#do-not-overuse-labels), [storage](https://prometheus.io/docs/prometheus/latest/storage/#operational-aspects) |
-| Amazon Managed Service for Prometheus | By type, as self-hosted | Multiply | "Active series per workspace: 50,000,000", adjustable | "Amazon Managed Service for Prometheus counts each metric sample ingested"; native histograms: "each populated bucket ... counts as 0.25 of a metric sample". Storage and query samples are billed separately and not sized here | [quotas](https://docs.aws.amazon.com/prometheus/latest/userguide/AMP_quotas.html), [pricing](https://aws.amazon.com/prometheus/pricing/) |
-| Azure Monitor managed service for Prometheus | By type, as self-hosted | Multiply | Per workspace: "Active time series with metrics that have been reported in the last ~12 hours: 1,000,000" and "Events per minute ingested: 1,000,000", both raisable on request | "Metric samples ingested", per 10 million; query samples are billed separately | [limits](https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/service-limits), [pricing](https://azure.microsoft.com/en-us/pricing/details/monitor/) |
-| Google Cloud Managed Service for Prometheus | A histogram is one series: "Prometheus histogram metrics are converted to the analogous Cloud Monitoring `Distribution` type". Others as self-hosted | Multiply | "Active time series from Prometheus per monitored resource: 1,000,000"; "a minimum scrape interval of 5 seconds" | Samples ingested, per million: a scalar point is 1; a fixed-bucket distribution "2 for each point ... plus 1 for each histogram bucket that has a non-zero count"; an exponential one 2 plus 1/8 per non-zero bucket | [exemplars](https://cloud.google.com/stackdriver/docs/managed-prometheus/exemplars), [quotas](https://cloud.google.com/monitoring/quotas), [overview](https://cloud.google.com/stackdriver/docs/managed-prometheus), [pricing](https://cloud.google.com/stackdriver/pricing) |
-| Amazon CloudWatch custom metrics, including EMF | One metric: "CloudWatch treats each unique combination of dimensions as a separate metric" | Not a factor, unless a dimension tells them apart | "You can assign up to 30 dimensions to a metric"; an EMF DimensionSet "MUST NOT contain more than 30 dimension keys" | Per metric-month: "All custom metrics ... are prorated by the hour". PutMetricData requests, and EMF's log ingestion, are billed on top and not sized here | [concepts](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Dimension), [EMF](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html), [pricing](https://aws.amazon.com/cloudwatch/pricing/) |
-| Azure Monitor custom metrics (not Prometheus) | One series: "An active time series is any unique combination of metric, dimension key, or dimension value" | Not a factor, unless a dimension tells them apart | "Total active time series in a subscription per region: 50,000"; "Dimension keys per metric: 10". Ingested "at a fixed 60-second interval" | Nothing: "Native custom metrics are also free during the preview", and they "won't be made generally available" | [custom metrics](https://learn.microsoft.com/en-us/azure/azure-monitor/metrics/metrics-custom-overview) |
-| Google Cloud Monitoring custom metrics | One series per label set; a histogram is one distribution | Multiply: each is its own monitored resource | "Labels per custom ... metric descriptor: 30"; "Active time series from custom metrics per monitored resource: 200,000"; points "at least 5 seconds apart"; "Histogram buckets per custom distribution metric: 200" | Bytes ingested, per MiB: "8 bytes for each data point" of a scalar, "80 bytes for each data point" of a distribution; the first 150 MiB a month are free | [quotas](https://cloud.google.com/monitoring/quotas), [pricing](https://cloud.google.com/stackdriver/pricing) |
+| Backend | One label set writes | Billed per |
+|---|---|---|
+| Prometheus, self-hosted | By type | 1,000 active series, at a vendor's price |
+| Amazon Managed Prometheus | By type | 10 million samples |
+| Azure managed Prometheus | By type | 10 million samples |
+| Google Managed Prometheus | By type; a histogram is 1 | 1 million samples |
+| CloudWatch custom metrics | 1 | metric-month |
+| Azure custom metrics | 1 | free in preview |
+| Cloud Monitoring custom metrics | 1; a summary by its parts | MiB ingested |
+
+Targets multiply on every backend except CloudWatch and Azure custom metrics. The exact rules, quoted:
+
+- **Prometheus, self-hosted.** The instrumentation guide's under 10 label sets, and investigate anything over 100
+  ([instrumentation](https://prometheus.io/docs/practices/instrumentation/#do-not-overuse-labels)); 1 to 2 bytes a
+  sample on disk ([storage](https://prometheus.io/docs/prometheus/latest/storage/#operational-aspects)).
+- **Amazon Managed Service for Prometheus.** "Active series per workspace: 50,000,000", adjustable
+  ([quotas](https://docs.aws.amazon.com/prometheus/latest/userguide/AMP_quotas.html)). "Amazon Managed Service for
+  Prometheus counts each metric sample ingested"; for native histograms "each populated bucket (a bucket with
+  non-zero observations) counts as 0.25 of a metric sample"
+  ([pricing](https://aws.amazon.com/prometheus/pricing/)). Storage and query samples are billed separately and not
+  sized here.
+- **Azure Monitor managed service for Prometheus.** Per workspace, "Active time series with metrics that have been
+  reported in the last ~12 hours: 1,000,000" and "Events per minute ingested: 1,000,000", both raisable on request
+  ([limits](https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/service-limits)). Billed on "Metric
+  samples ingested", per 10 million; query samples separately
+  ([pricing](https://azure.microsoft.com/en-us/pricing/details/monitor/)).
+- **Google Cloud Managed Service for Prometheus.** "Prometheus histogram metrics are converted to the analogous
+  Cloud Monitoring `Distribution` type"
+  ([exemplars](https://cloud.google.com/stackdriver/docs/managed-prometheus/exemplars)). "Active time series from
+  Prometheus per monitored resource: 1,000,000" ([quotas](https://cloud.google.com/monitoring/quotas)); "a minimum
+  scrape interval of 5 seconds" ([overview](https://cloud.google.com/stackdriver/docs/managed-prometheus)). Samples
+  are counted as "1 for each point" of a scalar, and for a fixed-bucket distribution "2 for each point written to a
+  time series, plus 1 for each histogram bucket that has a non-zero count"; an exponential one is 2 plus 1/8 per
+  non-zero bucket ([pricing](https://cloud.google.com/stackdriver/pricing)).
+- **Amazon CloudWatch custom metrics, including EMF.** "CloudWatch treats each unique combination of dimensions as
+  a separate metric, even if the metrics have the same metric name", and "You can assign up to 30 dimensions to a
+  metric" ([concepts](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Dimension)).
+  An EMF DimensionSet "MUST NOT contain more than 30 dimension keys", and EMF "will by design create a custom metric
+  corresponding to each unique dimension combination"
+  ([EMF](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html)).
+  "All custom metrics ... are prorated by the hour"; PutMetricData requests, and EMF's log ingestion, are billed on
+  top and not sized here ([pricing](https://aws.amazon.com/cloudwatch/pricing/)).
+- **Azure Monitor custom metrics.** "An active time series is any unique combination of metric, dimension key, or
+  dimension value"; "Total active time series in a subscription per region: 50,000"; "Dimension keys per metric:
+  10"; ingested "at a fixed 60-second interval"; "Native custom metrics are also free during the preview", and they
+  "won't be made generally available"
+  ([custom metrics](https://learn.microsoft.com/en-us/azure/azure-monitor/metrics/metrics-custom-overview)).
+- **Google Cloud Monitoring custom metrics.** "Labels per custom, external, and workload metric descriptor: 30";
+  "Active time series from custom metrics per monitored resource: 200,000"; points "at least 5 seconds apart";
+  "Histogram buckets per custom distribution metric: 200" ([quotas](https://cloud.google.com/monitoring/quotas)).
+  Billed on bytes: "8 bytes for each data point" of a scalar and "80 bytes for each data point" of a distribution,
+  with the first 150 MiB a month free ([pricing](https://cloud.google.com/stackdriver/pricing)).
 
 What the tool does not claim, because those pages don't say:
 
