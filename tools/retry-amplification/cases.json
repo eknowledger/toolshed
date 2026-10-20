@@ -386,7 +386,7 @@
     }
   },
   {
-    "name": "what to change for Istio's default: retry only at the top leaves 3, a 20% budget about 1.7",
+    "name": "what to change for Istio's default over gRPC: retry only at the top leaves 3, a 20% budget about 1.7",
     "input": {
       "depth": 3,
       "mesh": 2,
@@ -518,7 +518,7 @@
     }
   },
   {
-    "name": "the chain for Istio's default: one node per service, x3 on every hop, 27 at the bottom",
+    "name": "the chain for Istio's default over gRPC: one node per service, x3 on every hop, 27 at the bottom",
     "input": {
       "depth": 3,
       "mesh": 2,
