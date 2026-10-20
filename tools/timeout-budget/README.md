@@ -81,6 +81,7 @@ worst case of 1.48 s, which the tool gives as one quiet line with no banner and 
   default includes none of them: set a `perTryTimeout`, leave `retryOn` alone, and the timed-out try is simply not
   retried. Measured with Envoy 1.39.3 in mainlog-code's `service-mesh/retry_chain.py`: 1 try with Istio's default,
   3 with `gateway-error` added.
-- Backoff is a fixed average wait between tries. Envoy's is exponential with jitter, from a 25 ms base: the first
-  retry waits 0 to 24 ms and the second 0 to 74 ms, so leave a little room rather than fitting a chain exactly.
+- Backoff is one fixed wait before each retry. Envoy's is random and grows from a 25 ms base: 0 to 24 ms before the
+  first retry, and before the second 0 to 74 ms by its documentation, 0 to 49 ms in the 1.39.3 code. So leave a
+  little room rather than fitting a chain exactly.
 - The services' own work is not counted: only time spent waiting on the call below.
