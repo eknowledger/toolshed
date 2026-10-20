@@ -1,9 +1,9 @@
 {
 	"sdk": 6,
 	"id": "metric-cardinality",
-	"name": "Metric cardinality and cost",
+	"name": "Prometheus cardinality calculator",
 	"blurb": "List a metric's labels and how many values each takes, pick its type and client, and see how many time series it really writes, which change saves the most, and what it costs to keep.",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"capabilities": ["pure"],
 	"runtime": {
 		"entry": "index.ts",

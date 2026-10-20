@@ -1,4 +1,4 @@
-# Metric cardinality and cost
+# Prometheus cardinality calculator
 
 A metric is not one time series. It is one per combination of its label values, times however many series its
 type writes for each combination, times every process that exposes it. Each factor is easy; the product is the
