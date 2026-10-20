@@ -1,0 +1,719 @@
+[
+	{
+		"name": "the defaults lead with the number: 720 series",
+		"input": {
+			"labels": "route 8\nstatus 5",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "Every number is a product of the inputs, computed by hand: label sets are the product of the value counts times the share that occurs, rounded up; series are label sets x series per label set x targets.",
+		"fieldCount": 1,
+		"expect": {
+			"kind": "fields",
+			"role": "key",
+			"fields": [
+				{
+					"label": "Time series",
+					"value": "720 series"
+				}
+			]
+		}
+	},
+	{
+		"name": "and the multiplication under it, factor by factor",
+		"input": {
+			"labels": "route 8\nstatus 5",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "Every number is a product of the inputs, computed by hand: label sets are the product of the value counts times the share that occurs, rounded up; series are label sets x series per label set x targets.",
+		"expect": {
+			"kind": "text",
+			"role": "formula",
+			"mono": true,
+			"text": "8 route x 5 status values x 18 series per label set x 1 target"
+		}
+	},
+	{
+		"name": "the defaults' changes, fewest series first, with the native histogram the biggest cut",
+		"input": {
+			"labels": "route 8\nstatus 5",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "Every number is a product of the inputs, computed by hand: label sets are the product of the value counts times the share that occurs, rounded up; series are label sets x series per label set x targets.",
+		"expect": {
+			"kind": "table",
+			"role": "comparison",
+			"caption": "Each change on its own",
+			"columns": [
+				{
+					"label": "Change"
+				},
+				{
+					"label": "Series after",
+					"align": "end",
+					"mono": true
+				},
+				{
+					"label": "Saves",
+					"align": "end",
+					"mono": true
+				}
+			],
+			"rows": [
+				[
+					"Native histogram",
+					{
+						"text": "40",
+						"mono": true
+					},
+					{
+						"text": "680 (94%)",
+						"mono": true
+					}
+				],
+				[
+					"Without route",
+					{
+						"text": "90",
+						"mono": true
+					},
+					{
+						"text": "630 (88%)",
+						"mono": true
+					}
+				],
+				[
+					"Without status",
+					{
+						"text": "144",
+						"mono": true
+					},
+					{
+						"text": "576 (80%)",
+						"mono": true
+					}
+				],
+				[
+					"Without _created",
+					{
+						"text": "680",
+						"mono": true
+					},
+					{
+						"text": "40 (6%)",
+						"mono": true
+					}
+				]
+			],
+			"link": {
+				"chart": "changes",
+				"keys": ["Native histogram", "Without route", "Without status", "Without _created"]
+			}
+		}
+	},
+	{
+		"name": "the chart draws every change against the series now",
+		"input": {
+			"labels": "route 8\nstatus 5",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "Every number is a product of the inputs, computed by hand: label sets are the product of the value counts times the share that occurs, rounded up; series are label sets x series per label set x targets.",
+		"expect": {
+			"kind": "series",
+			"chart": {
+				"id": "changes",
+				"xLabel": "Change",
+				"yLabel": "Series",
+				"orientation": "horizontal",
+				"x": ["Native histogram", "Without route", "Without status", "Without _created", "Now"],
+				"series": [
+					{
+						"label": "Series",
+						"shape": "bar",
+						"points": [40, 90, 144, 680, 720]
+					}
+				],
+				"readout": {
+					"highlightTable": true
+				}
+			}
+		}
+	},
+	{
+		"name": "the defaults' quiet numbers: 40 label sets against the guide, samples and disk",
+		"input": {
+			"labels": "route 8\nstatus 5",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "Every number is a product of the inputs, computed by hand: label sets are the product of the value counts times the share that occurs, rounded up; series are label sets x series per label set x targets.",
+		"fieldCount": 3,
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Label sets",
+					"value": "40",
+					"note": "Prometheus's guide aims for fewer than 10. Assumes every combination of values occurs; set the share that does if you know it.",
+					"tone": "warn"
+				},
+				{
+					"label": "Samples",
+					"value": "48 a second",
+					"note": "One per series every 15 s."
+				},
+				{
+					"label": "Disk",
+					"value": "62.2 MB to 124 MB",
+					"note": "Over 15 days, Prometheus's default retention, at 1 to 2 bytes a sample."
+				}
+			]
+		}
+	},
+	{
+		"name": "the defaults' method: what one label set writes, and how to make each change",
+		"input": {
+			"labels": "route 8\nstatus 5",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "Every number is a product of the inputs, computed by hand: label sets are the product of the value counts times the share that occurs, rounded up; series are label sets x series per label set x targets.",
+		"fieldCount": 4,
+		"expect": {
+			"kind": "fields",
+			"role": "method",
+			"fields": [
+				{
+					"group": "How this was worked out",
+					"label": "Series per label set",
+					"value": "18",
+					"note": "14 buckets + le=\"+Inf\" + _sum + _count + _created"
+				},
+				{
+					"group": "How to make each change",
+					"label": "A label",
+					"value": "Drop it, or group its values into a few",
+					"note": "The table counts dropping it; grouping leaves more. Put the detail on a span or a log line instead."
+				},
+				{
+					"group": "How to make each change",
+					"label": "Native histogram",
+					"value": "All the buckets in one series",
+					"note": "Prometheus has to have native histograms turned on."
+				},
+				{
+					"group": "How to make each change",
+					"label": "_created",
+					"value": "PROMETHEUS_DISABLE_CREATED_SERIES=True",
+					"note": "In Python's prometheus_client. Newer Prometheus servers can store it as metadata instead."
+				}
+			]
+		}
+	},
+	{
+		"name": "one label set from prometheus_client for python",
+		"input": {
+			"labels": "route 1\nstatus 1",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "prometheus_client 0.26.0 writes 18 series for one label set of a default histogram: 15 buckets with +Inf, _count, _sum and _created (observability-driven/series_cost.py). 18 / 15 s = 1.2 samples/s; x 86,400 = 103,680 a day; x 15 days, Prometheus's default retention, = 1,555,200 samples, 1.6 to 3.1 MB.",
+		"fieldCount": 1,
+		"expect": {
+			"kind": "fields",
+			"role": "key",
+			"fields": [
+				{
+					"label": "Time series",
+					"value": "18 series"
+				}
+			]
+		}
+	},
+	{
+		"name": "a tenant label with 500 values",
+		"input": {
+			"labels": "route 1\nstatus 1\ntenant 500",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "The same client with 500 tenant values writes 9,000 series (series_cost.py). 500 label sets is past Prometheus's 'investigate anything over 100'. 9,000 / 15 = 600/s; 51,840,000 a day; 777,600,000 kept, 778 MB to 1.6 GB.",
+		"fieldCount": 3,
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Label sets",
+					"value": "500",
+					"note": "Over 100, where Prometheus's guide says to look for another way.",
+					"tone": "bad"
+				},
+				{
+					"label": "Samples",
+					"value": "600 a second",
+					"note": "One per series every 15 s."
+				},
+				{
+					"label": "Disk",
+					"value": "778 MB to 1.6 GB",
+					"note": "Over 15 days, Prometheus's default retention, at 1 to 2 bytes a sample."
+				}
+			]
+		}
+	},
+	{
+		"name": "a 500-value tenant label is the first thing to change",
+		"input": {
+			"labels": "route 1\nstatus 1\ntenant 500",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "Without tenant: 1 label set x 18 = 18 series, saving 8,982 of 9,000, which is 99.8% and reads 'over 99%' rather than rounding to 100%. tenant has over 100 values, so bad.",
+		"expect": {
+			"kind": "table",
+			"role": "comparison",
+			"caption": "Each change on its own",
+			"columns": [
+				{
+					"label": "Change"
+				},
+				{
+					"label": "Series after",
+					"align": "end",
+					"mono": true
+				},
+				{
+					"label": "Saves",
+					"align": "end",
+					"mono": true
+				}
+			],
+			"rows": [
+				[
+					"Without tenant",
+					{
+						"text": "18",
+						"mono": true
+					},
+					{
+						"text": "8,982 (over 99%)",
+						"mono": true
+					}
+				],
+				[
+					"Native histogram",
+					{
+						"text": "500",
+						"mono": true
+					},
+					{
+						"text": "8,500 (94%)",
+						"mono": true
+					}
+				],
+				[
+					"Without _created",
+					{
+						"text": "8,500",
+						"mono": true
+					},
+					{
+						"text": "500 (6%)",
+						"mono": true
+					}
+				]
+			],
+			"link": {
+				"chart": "changes",
+				"keys": ["Without tenant", "Native histogram", "Without _created"]
+			}
+		}
+	},
+	{
+		"name": "twenty pods, a quarter of the combinations, go's buckets",
+		"input": {
+			"labels": "route 12\nmethod 3\nstatus 6",
+			"type": "histogram",
+			"client": "go",
+			"buckets": 11,
+			"created": false,
+			"targets": 20,
+			"occur": 25,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "12 x 3 x 6 = 216 combinations, a quarter occur: 54 label sets. 11 buckets + Inf + _sum + _count = 14 per set, x 20 pods = 15,120.",
+		"expect": {
+			"kind": "text",
+			"role": "formula",
+			"mono": true,
+			"text": "12 route x 3 method x 6 status values x 25% that occur x 14 series per label set x 20 targets"
+		}
+	},
+	{
+		"name": "twenty pods, a quarter of the combinations, go's buckets: the count",
+		"input": {
+			"labels": "route 12\nmethod 3\nstatus 6",
+			"type": "histogram",
+			"client": "go",
+			"buckets": 11,
+			"created": false,
+			"targets": 20,
+			"occur": 25,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "Every number is a product of the inputs, computed by hand: label sets are the product of the value counts times the share that occurs, rounded up; series are label sets x series per label set x targets.",
+		"fieldCount": 1,
+		"expect": {
+			"kind": "fields",
+			"role": "key",
+			"fields": [
+				{
+					"label": "Time series",
+					"value": "15,120 series"
+				}
+			]
+		}
+	},
+	{
+		"name": "exactly 10 label sets is not below 10",
+		"input": {
+			"labels": "route 10",
+			"type": "gauge",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "Prometheus's guide says keep cardinality below 10, so 10 itself is already at the line and warns.",
+		"fieldCount": 3,
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Label sets",
+					"value": "10",
+					"note": "Prometheus's guide aims for fewer than 10.",
+					"tone": "warn"
+				},
+				{
+					"label": "Samples",
+					"value": "0.67 a second",
+					"note": "One per series every 15 s."
+				},
+				{
+					"label": "Disk",
+					"value": "864 KB to 1.7 MB",
+					"note": "Over 15 days, Prometheus's default retention, at 1 to 2 bytes a sample."
+				}
+			]
+		}
+	},
+	{
+		"name": "a counter with no labels and no _created",
+		"input": {
+			"labels": "",
+			"type": "counter",
+			"client": "python-nocreated",
+			"buckets": 14,
+			"created": false,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "No labels is one label set, and a counter without _created is one series. No biggest-multiplier field when there are no labels.",
+		"fieldCount": 1,
+		"expect": {
+			"kind": "fields",
+			"role": "method",
+			"fields": [
+				{
+					"group": "How this was worked out",
+					"label": "Series per label set",
+					"value": "1",
+					"note": "_total"
+				}
+			]
+		}
+	},
+	{
+		"name": "a summary with three quantiles",
+		"input": {
+			"labels": "route 8",
+			"type": "summary3",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "The '3 quantiles' summary type: 0.5, 0.9 and 0.99, plus _sum, _count and _created = 6 per label set; 8 routes = 48.",
+		"fieldCount": 1,
+		"expect": {
+			"kind": "fields",
+			"role": "key",
+			"fields": [
+				{
+					"label": "Time series",
+					"value": "48 series"
+				}
+			]
+		}
+	},
+	{
+		"name": "a summary with three quantiles: six series per label set",
+		"input": {
+			"labels": "route 8",
+			"type": "summary3",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "Every number is a product of the inputs, computed by hand: label sets are the product of the value counts times the share that occurs, rounded up; series are label sets x series per label set x targets.",
+		"fieldCount": 3,
+		"expect": {
+			"kind": "fields",
+			"role": "method",
+			"fields": [
+				{
+					"group": "How this was worked out",
+					"label": "Series per label set",
+					"value": "6",
+					"note": "3 quantiles + _sum + _count + _created"
+				},
+				{
+					"group": "How to make each change",
+					"label": "A label",
+					"value": "Drop it, or group its values into a few",
+					"note": "The table counts dropping it; grouping leaves more. Put the detail on a span or a log line instead."
+				},
+				{
+					"group": "How to make each change",
+					"label": "_created",
+					"value": "PROMETHEUS_DISABLE_CREATED_SERIES=True",
+					"note": "In Python's prometheus_client. Newer Prometheus servers can store it as metadata instead."
+				}
+			]
+		}
+	},
+	{
+		"name": "a native histogram is one series per label set",
+		"input": {
+			"labels": "route 8\nstatus 5",
+			"type": "native",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "A native histogram carries its buckets inside one sample, so 40 label sets are 40 series whatever the bucket count.",
+		"fieldCount": 1,
+		"expect": {
+			"kind": "fields",
+			"role": "key",
+			"fields": [
+				{
+					"label": "Time series",
+					"value": "40 series"
+				}
+			]
+		}
+	},
+	{
+		"name": "a price turns series into a bill",
+		"input": {
+			"labels": "route 1\nstatus 1\ntenant 500",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 2
+		},
+		"match": "subset",
+		"why": "9,000 series / 1,000 x $2 = $18.00 a month.",
+		"fieldCount": 4,
+		"expect": {
+			"kind": "fields",
+			"role": "metrics",
+			"fields": [
+				{
+					"label": "Label sets",
+					"value": "500",
+					"note": "Over 100, where Prometheus's guide says to look for another way.",
+					"tone": "bad"
+				},
+				{
+					"label": "Samples",
+					"value": "600 a second",
+					"note": "One per series every 15 s."
+				},
+				{
+					"label": "Disk",
+					"value": "778 MB to 1.6 GB",
+					"note": "Over 15 days, Prometheus's default retention, at 1 to 2 bytes a sample."
+				},
+				{
+					"label": "Bill",
+					"value": "$18.00 a month",
+					"note": "At $2.00 per 1,000 active series."
+				}
+			]
+		}
+	},
+	{
+		"name": "a count that is not a number",
+		"input": {
+			"labels": "route lots",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "The message names the line it could not read.",
+		"expect": {
+			"kind": "error",
+			"message": "\"route lots\" is not a label and a count",
+			"input": "labels"
+		}
+	},
+	{
+		"name": "le on a histogram collides",
+		"input": {
+			"labels": "le 5",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "A classic histogram writes le itself.",
+		"expect": {
+			"kind": "error",
+			"message": "\"le\" is the label a histogram writes itself",
+			"input": "labels"
+		}
+	},
+	{
+		"name": "a label listed twice",
+		"input": {
+			"labels": "route 8\nroute 3",
+			"type": "histogram",
+			"client": "python",
+			"buckets": 14,
+			"created": true,
+			"targets": 1,
+			"occur": 100,
+			"interval": 15,
+			"price": 0
+		},
+		"match": "subset",
+		"why": "Two counts for one label is ambiguous.",
+		"expect": {
+			"kind": "error",
+			"message": "route is listed twice",
+			"input": "labels"
+		}
+	}
+]

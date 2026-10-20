@@ -5,8 +5,9 @@
  * The arithmetic is post 6's demo, `topology_cost.py`, and the fixtures are its output. Every number is a count of
  * streams times one stream's rate, so nothing here is measured and nothing is estimated:
  *
- *  - one packet is the Opus payload (bitrate x frame / 8) plus 12 B of RTP, 8 of UDP and 20 of IPv4, plus the SRTP
- *    tag and the RFC 6464 audio-level extension when asked for;
+ *  - one packet is the codec payload (bitrate x frame / 8), plus 12 B of RTP (RFC 3550), 8 of UDP and 20 of IPv4 or
+ *    40 of IPv6 (RFC 8200's fixed header), plus the SRTP authentication tag (10 B for AES_CM_128_HMAC_SHA1_80, RFC
+ *    3711; 16 B for AEAD_AES_128_GCM, RFC 7714) and any RTP header extensions, in RFC 8285's one-byte form;
  *  - mesh sends every voice N-1 times from the client; an SFU receives N and sends K(N-1), K being the streams it
  *    forwards; an MCU receives N and sends N mixes, each leaving out its listener's own voice (RFC 7667 section
  *    3.6.1); the server that is the other peer is one stream each way, per user.
@@ -14,9 +15,20 @@
  * Assumptions, each a choice the README states: everyone talks all the time (no DTX), mesh runs one encoder per
  * connection as RFC 7667 section 3.4 draws it, and the peer server talks back while the user talks.
  */
-import type { Cell, Field, Output, Tool } from "@toolbench/sdk";
+import type { Cell, Output, Tool } from "@toolbench/sdk";
 
-type Input = { participants: number; bitrate: number; frame: string; srtp: string; level: boolean; loudest: number; pattern: string };
+type Input = {
+	participants: number;
+	pattern: string;
+	loudest: number;
+	codec?: string;
+	bitrate: number;
+	frame: string;
+	packet?: string;
+	ip?: string;
+	srtp: string;
+	ext?: string;
+};
 
 class InputError extends Error {
 	readonly input: string;
@@ -26,8 +38,29 @@ class InputError extends Error {
 	}
 }
 
-const HEADERS = 12 + 8 + 20;
-const LEVEL_B = 8;
+const RTP_B = 12;
+const UDP_B = 8;
+const IP_B: Record<string, number> = { "4": 20, "6": 40 };
+
+/**
+ * Header extensions, each as the bytes of data its element carries. In RFC 8285's one-byte form every element is one
+ * byte of ID and length plus its data, after a 4-byte header (0xBEDE and a length), padded to a multiple of 4 bytes:
+ * the audio level is 1 byte of data (RFC 6464), the MID "0" 1, a transport-wide sequence number 2, abs-send-time 3.
+ */
+const EXTENSIONS: Record<string, { label: string; data: number[] }> = {
+	none: { label: "no header extensions", data: [] },
+	level: { label: "the audio level", data: [1] },
+	"level-mid": { label: "the audio level and the MID", data: [1, 1] },
+	"level-mid-twcc": { label: "the audio level, the MID and a transport-wide sequence number", data: [1, 1, 2] },
+	"level-mid-twcc-abs": { label: "the audio level, the MID, a transport-wide sequence number and abs-send-time", data: [1, 1, 2, 3] },
+};
+
+/** Bytes on the wire for a set of one-byte-form extensions: none at all, or the 4-byte header, the elements, and padding. */
+export function extensionBytes(data: number[]): number {
+	if (data.length === 0) return 0;
+	const raw = 4 + data.reduce((sum, d) => sum + 1 + d, 0);
+	return Math.ceil(raw / 4) * 4;
+}
 
 type Ops = { unprotect: number; decode: number; mix: number; encode: number; protect: number };
 type Row = { key: string; name: string; up: number; down: number; serverIn: number | null; serverOut: number | null; server: Ops | null; grows: string };
@@ -56,9 +89,6 @@ export function rows(n: number, k: number): Row[] {
 	];
 }
 
-const opsText = (o: Ops) =>
-	[plural(o.unprotect, "decrypt"), o.decode ? plural(o.decode, "decode") : "0 decodes", o.mix ? plural(o.mix, "mix", "mixes") : "", o.encode ? plural(o.encode, "encode") : "", plural(o.protect, "encrypt")].filter(Boolean).join(", ");
-
 export default {
 	run(input: Input) {
 		try {
@@ -66,78 +96,205 @@ export default {
 			if (!Number.isInteger(n) || n < 2) throw new InputError("A call needs at least 2 participants.", "participants");
 			if (n > 50) throw new InputError("At most 50 participants.", "participants");
 			const bitrate = Number(input.bitrate);
-			if (!Number.isInteger(bitrate) || bitrate < 6 || bitrate > 510) throw new InputError("Opus runs from 6 to 510 kb/s (RFC 6716 section 2.1.1).", "bitrate");
+			if (!Number.isInteger(bitrate) || bitrate < 6 || bitrate > 510)
+				throw new InputError("The bitrate must be 6 to 510 kb/s, Opus's range (RFC 6716 section 2.1.1). G.711 is 64.", "bitrate");
 			const frame = Number(input.frame);
 			if (![10, 20, 40, 60].includes(frame)) throw new InputError("Frames are 10, 20, 40 or 60 ms.", "frame");
 			if ((bitrate * frame) % 8 !== 0) throw new InputError("bitrate x frame length must be a whole number of bytes.", "bitrate");
 			const loudest = Number(input.loudest ?? 0);
 			if (!Number.isInteger(loudest) || loudest < 0) throw new InputError("The number of loudest streams is a whole number, 0 for all.", "loudest");
 			if (loudest > n) throw new InputError("The loudest streams can be at most the number of participants.", "loudest");
+			const ipB = IP_B[input.ip ?? "4"];
+			if (ipB === undefined) throw new InputError("IP is version 4 or 6.", "ip");
+			const ext = EXTENSIONS[input.ext ?? "none"];
+			if (!ext) throw new InputError(`Header extensions must be one of ${Object.keys(EXTENSIONS).join(", ")}.`, "ext");
 			const tag = Number(input.srtp);
+			const extB = extensionBytes(ext.data);
+
 			const payload = (bitrate * frame) / 8;
-			const size = payload + HEADERS + tag + (input.level ? LEVEL_B : 0);
+			const sizeAt = (ms: number) => (bitrate * ms) / 8 + RTP_B + UDP_B + ipB + tag + extB;
+			const size = sizeAt(frame);
 			const pps = 1000 / frame;
 			const per = (size * 8 * pps) / 1000;
 			const k = loudest === 0 ? n : loudest;
 			const all = rows(n, k);
 			const pick = all.find((r) => r.key === input.pattern) ?? all[1]!;
+			const none: Cell = { text: "none", tone: "muted" };
+			const rate = (streams: number | null): Cell => (streams === null ? none : { text: kb(streams * per), mono: true });
 
-			const fields: Field[] = [
-				{ label: "Client up", value: `${kb(pick.up * per)} kb/s`, note: plural(pick.up, "stream") },
-				{ label: "Client down", value: `${kb(pick.down * per)} kb/s`, note: plural(pick.down, "stream") },
-				{
-					label: "Server out",
-					value: pick.serverOut === null ? "no server" : `${kb(pick.serverOut * per)} kb/s`,
-					note: pick.serverOut === null ? "every client sends to every other" : `${kb(pick.serverOut * pps)} packets/s`,
-				},
-				{ label: "Server work per frame", value: pick.server ? opsText(pick.server) : "none", note: `every ${frame} ms` },
-				{ label: "Grows with N", value: pick.grows },
-				{ label: "Packet", value: `${size} B`, note: `${payload} B Opus + 40 B headers${tag ? ` + ${tag} B SRTP tag` : ""}${input.level ? " + 8 B audio level" : ""}` },
-				{ label: "Per stream", value: `${kb(per)} kb/s`, note: `${pps} packets/s` },
-			];
-			const x = all.map((r) => r.name);
-			const chart = {
-				id: "cost",
-				xLabel: "Pattern",
-				yLabel: "Rate",
-				yUnit: "kb/s",
-				orientation: "horizontal" as const,
-				x,
-				series: [
-					{ label: "One client's upload", unit: "kb/s", shape: "bar" as const, points: all.map((r) => r.up * per) },
-					{ label: "One client's download", unit: "kb/s", shape: "bar" as const, points: all.map((r) => r.down * per) },
-					{ label: "Server out", unit: "kb/s", shape: "bar" as const, points: all.map((r) => (r.serverOut === null ? null : r.serverOut * per)) },
+			/*
+			 * The answer is the comparison: the question is which pattern, so all four go first, in one frame. Client
+			 * columns are one device and server columns the whole call, which the caption says because the two scopes
+			 * sit side by side. The pattern the reader picked is named in words, not coloured: picking it is not a
+			 * judgement about it.
+			 */
+			const comparison: Output = {
+				kind: "table",
+				role: "comparison",
+				caption: `${plural(n, "person", "people")}, everyone talking${k < n ? `, the SFU forwarding the ${k} loudest` : ""}. In kb/s: the client columns are one device, the server columns the whole call`,
+				columns: [
+					{ label: "Pattern" },
+					{ label: "Client up", align: "end", mono: true },
+					{ label: "Client down", align: "end", mono: true },
+					{ label: "Server in", align: "end", mono: true },
+					{ label: "Server out", align: "end", mono: true },
 				],
-				readout: { highlightTable: true },
+				rows: all.map((r): Cell[] => [
+					`${r.key === "peer" ? "Peer, per user" : r.name}${r.key === pick.key ? " (picked)" : ""}`,
+					{ text: kb(r.up * per), mono: true },
+					{ text: kb(r.down * per), mono: true },
+					rate(r.serverIn),
+					rate(r.serverOut),
+				]),
 			};
-			const dash = "–";
-			const tableRows: Cell[][] = all.map((r) => [
-				r.key === "peer" ? `${r.name} (per user)` : r.name,
-				{ text: kb(r.up * per), mono: true },
-				{ text: kb(r.down * per), mono: true },
-				{ text: r.serverIn === null ? dash : kb(r.serverIn * per), mono: true },
-				{ text: r.serverOut === null ? dash : kb(r.serverOut * per), mono: true },
-				{ text: r.serverOut === null ? dash : kb(r.serverOut * pps), mono: true },
-				{ text: r.server ? `${r.server.unprotect} / ${r.server.decode} / ${r.server.mix} / ${r.server.encode} / ${r.server.protect}` : dash, mono: true },
-			]);
+
+			/*
+			 * The picked pattern's streams, as counts of one stream's rate. Nodes are aggregates (all the clients, not
+			 * each one), so the picture stays three boxes at 50 people; the per-device figures are in the table above.
+			 */
+			const each = (count: number) => `${count} x ${kb(per)} kb/s`;
+			const graph: Output = (() => {
+				if (pick.key === "mesh") {
+					return {
+						kind: "graph",
+						graph: {
+							label: `Mesh, ${n} people: every device sends to every other`,
+							spacing: "compact",
+							nodes: [
+								{ id: "talk", label: plural(n, "client"), note: `each sends ${plural(n - 1, "stream")}` },
+								{ id: "hear", label: plural(n, "client"), note: `each receives ${n - 1}` },
+							],
+							edges: [{ from: "talk", to: "hear", label: each(n * (n - 1)) }],
+						},
+					};
+				}
+				if (pick.key === "peer") {
+					return {
+						kind: "graph",
+						graph: {
+							label: "The server is the other end: one stream each way, per user",
+							spacing: "compact",
+							nodes: [
+								{ id: "user", label: "1 user" },
+								{ id: "server", label: "Server", note: "decodes, then encodes its reply" },
+							],
+							edges: [
+								{ from: "user", to: "server", label: each(1) },
+								{ from: "server", to: "user", label: each(1) },
+							],
+						},
+					};
+				}
+				const server = pick.key === "sfu" ? "SFU" : "MCU";
+				return {
+					kind: "graph",
+					graph: {
+						label: `${pick.name}, ${n} people: every stream in and out of the server`,
+						spacing: "compact",
+						nodes: [
+							{ id: "talk", label: plural(n, "client"), note: "talking" },
+							{ id: "server", label: server, note: pick.key === "sfu" ? "forwards without decoding" : n > 2 ? "one mix per listener" : "decodes and re-encodes" },
+							{ id: "hear", label: plural(n, "client"), note: pick.key === "mcu" ? (n > 2 ? "each hears one mix" : "each hears 1 voice") : `each hears ${plural(pick.down, "voice")}` },
+						],
+						edges: [
+							{ from: "talk", to: "server", label: each(pick.serverIn!) },
+							{ from: "server", to: "hear", label: pick.key === "mcu" && pick.server!.mix > 0 ? `${n} mixes x ${kb(per)} kb/s` : each(pick.serverOut!) },
+						],
+					},
+				};
+			})();
+
+			/*
+			 * What would make the picked pattern cheaper, each computed rather than asserted. Switching pattern is not
+			 * here: the comparison above already prices every switch. Sorted by the kb/s each takes off the busiest
+			 * flow, the server's output or a mesh device's upload, largest first.
+			 */
+			type Advice = { change: string; saves: number; gain: string; cost: string };
+			const advice: Advice[] = [];
+			if (pick.key === "sfu" && k === n && n > 3) {
+				const top = rows(n, 3)[1]!;
+				advice.push({
+					change: "Forward only the 3 loudest",
+					saves: (pick.serverOut! - top.serverOut!) * per,
+					gain: `The server's output falls from ${kb(pick.serverOut! * per)} to ${kb(top.serverOut! * per)} kb/s, each listener's from ${kb(pick.down * per)} to ${kb(top.down * per)}.`,
+					cost: "Quieter voices are not heard while three others are louder. Senders must write the audio level.",
+				});
+			}
+			if (frame < 60) {
+				const longer = frame === 10 ? 20 : frame === 20 ? 40 : 60;
+				const perLonger = (sizeAt(longer) * 8 * (1000 / longer)) / 1000;
+				const streams = pick.serverOut ?? pick.up;
+				advice.push({
+					change: `Send ${longer} ms frames`,
+					saves: (per - perLonger) * streams,
+					gain: `Each stream falls from ${kb(per)} to ${kb(perLonger)} kb/s, because the headers are sent ${longer === 2 * frame ? "half" : "two thirds"} as often.`,
+					cost: `${longer - frame} ms more delay, and each lost packet takes ${longer} ms of sound.`,
+				});
+			}
+			advice.sort((x, y) => y.saves - x.saves);
+
+			/*
+			 * Server work, with the five operations as named columns rather than "3 / 0 / 0 / 0 / 6". Mesh has no
+			 * server, so it has no row. With the tag left out of the size, the crypto counts still stand: WebRTC always
+			 * encrypts, and the choice only changes what one packet weighs.
+			 */
+			const servers = all.filter((r) => r.server !== null);
+			const work: Output = {
+				kind: "table",
+				role: "comparison",
+				caption: `Server operations every ${frame} ms frame${tag === 0 ? ". Decrypts and encrypts assume SRTP, which WebRTC always uses, though the packet size here leaves out its tag" : ""}`,
+				columns: [
+					{ label: "Pattern" },
+					{ label: "Decrypt", align: "end", mono: true },
+					{ label: "Decode", align: "end", mono: true },
+					{ label: "Mix", align: "end", mono: true },
+					{ label: "Encode", align: "end", mono: true },
+					{ label: "Encrypt", align: "end", mono: true },
+				],
+				rows: servers.map((r): Cell[] => [
+					r.key === "peer" ? "Peer, per user" : r.name,
+					{ text: String(r.server!.unprotect), mono: true },
+					{ text: String(r.server!.decode), mono: true },
+					{ text: String(r.server!.mix), mono: true },
+					{ text: String(r.server!.encode), mono: true },
+					{ text: String(r.server!.protect), mono: true },
+				]),
+			};
+
+			const breakdown = [
+				`${payload} B of sound`,
+				`${RTP_B} B RTP`,
+				`${UDP_B} B UDP`,
+				`${ipB} B IPv${input.ip ?? "4"}`,
+				...(tag ? [`${tag} B SRTP tag`] : []),
+				...(extB ? [`${extB} B of header extensions, for ${ext.label}`] : []),
+			];
+			const method: Output = {
+				kind: "fields",
+				role: "method",
+				fields: [
+					{ label: "One packet", value: `${size} B`, note: `${breakdown.join(", ")}.` },
+					{ label: "One stream", value: `${kb(per)} kb/s`, note: `${pps} packets a second, so the server sends ${pick.serverOut === null ? "none" : kb(pick.serverOut * pps)} a second for the ${pick.key === "peer" ? "peer server, per user" : pick.name}.` },
+					{ label: "Assumes", value: "Everyone talks all the time, with no silence suppression, so these are the busiest case." },
+				],
+			};
+
 			const parts: Output[] = [
-				{ kind: "fields", fields },
-				{ kind: "series", chart },
-				{
-					kind: "table",
-					caption: `${n} participants${k < n ? `, the SFU forwarding the ${k} loudest` : ""}. Server work is per ${frame} ms frame: decrypts / decodes / mixes / encodes / encrypts`,
-					columns: [
-						{ label: "Pattern" },
-						{ label: "Up, kb/s", align: "end", mono: true },
-						{ label: "Down, kb/s", align: "end", mono: true },
-						{ label: "Server in, kb/s", align: "end", mono: true },
-						{ label: "Server out, kb/s", align: "end", mono: true },
-						{ label: "Server packets/s out", align: "end", mono: true },
-						{ label: "Server work per frame", mono: true },
-					],
-					rows: tableRows,
-					link: { chart: "cost", keys: x },
-				},
+				comparison,
+				graph,
+				...(advice.length > 0
+					? [
+							{
+								kind: "table" as const,
+								role: "actions",
+								caption: `What would make the ${pick.key === "peer" ? "peer server" : pick.name} cheaper, largest saving first`,
+								columns: [{ label: "Change" }, { label: "What it saves" }, { label: "What it costs" }],
+								rows: advice.map((a): Cell[] => [a.change, a.gain, a.cost]),
+							},
+						]
+					: []),
+				work,
+				method,
 			];
 			return { kind: "group", parts };
 		} catch (error) {

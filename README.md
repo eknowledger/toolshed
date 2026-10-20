@@ -4,16 +4,26 @@ Small, exact tools for systems questions. Each one shows how it got its answer.
 
 | Tool | Answers |
 |---|---|
-| [`bitrate-under-loss`](tools/bitrate-under-loss) | How much a voice call loses before receiver reports make the sender back off, and how long it takes to come back, at 5, 2 or 1 s between reports |
-| [`call-topology-cost`](tools/call-topology-cost) | Where a voice call's cost lands for mesh, an SFU, an MCU and a server that is the other peer: upload, download, server traffic and work per frame |
-| [`capacity-planner`](tools/capacity-planner) | How many servers keep the wait under a target, and what the queue does either side of that number |
-| [`ice-pair-ranker`](tools/ice-pair-ranker) | Which ICE candidate pairs a call checks, in what order, and which are pruned because they would send the same check |
-| [`jitter-fec`](tools/jitter-fec) | Which frames of a voice stream play, which are rebuilt from a copy in a later packet, and which are made up, over a network that delays and loses packets |
+| [`agent-tool-schema-linter`](tools/agent-tool-schema-linter) | Which fields of the tools an agent can call, an MCP server's tool list included, and of the events agents send each other are data, and which carry someone else's words to a model |
+| [`call-topology-cost`](tools/call-topology-cost) | Where a voice call's cost lands for mesh, an SFU, an MCU and a server that is the other peer: upload, download, server traffic and work per frame, with real packet sizes, and what would make it cheaper |
+| [`capacity-planner`](tools/capacity-planner) | How many servers keep the wait under a target, at all or past a limit, the p95 and p99 wait there, and what the queue does either side of that number |
+| [`copy-drift`](tools/copy-drift) | Whether two copies of a function have been changing together or drifting apart, from their git history, and where they differ once names are set aside |
+| [`fan-out-tail`](tools/fan-out-tail) | How many pages a rare slow call reaches when a page waits for N calls to one backend or several, which backend to fix first, and which of a call's percentiles a page's p99 really is |
+| [`ice-pair-ranker`](tools/ice-pair-ranker) | Which ICE candidate pairs a call checks, in what order, which are pruned because they would send the same check, and what in the candidates will stop it connecting, from SDP, candidate JSON or getStats() |
+| [`jitter-fec`](tools/jitter-fec) | Which frames of a voice stream play, which are rebuilt from a copy in a later packet, and which are made up, over a network that delays and loses packets, and which buffer and protection would fix it |
+| [`llm-timeout-check`](tools/llm-timeout-check) | How long one agent task can run before its SDK and loop settings stop it, when the model is silent, trickling or overloaded, and what to set when that is too long |
 | [`loss-playout`](tools/loss-playout) | One voice frame is lost: over UDP and over TCP, which frames still play on time, and how much audio has to be concealed |
-| [`rtcp-inspector`](tools/rtcp-inspector) | What an RTP or RTCP packet actually contains, byte by byte, including the fields nobody checks by eye |
+| [`metric-cardinality`](tools/metric-cardinality) | How many time series one metric really writes, given its labels, type, client library and targets, which change saves the most, and what keeping them costs |
+| [`overload-queue`](tools/overload-queue) | What a service does for a minute of more requests than it can answer: who is answered in time, who waits for nothing, and whether it recovers |
+| [`percentile-rollup`](tools/percentile-rollup) | A service's p99 from per-instance histograms (Prometheus, Google Cloud Monitoring, AWS X-Ray, or a KQL or Logs Insights query) or raw latencies, how far off the bucket edges let it be, and which way the averaged per-instance p99 is wrong |
+| [`pr-split-cost`](tools/pr-split-cost) | How much the wait for a first review grows with a PR's size on your repository, and what splitting a change into k PRs costs in waiting |
+| [`retry-amplification`](tools/retry-amplification) | How many calls reach the bottom service for one user request when every layer retries, and the extra load while it fails |
+| [`rtcp-inspector`](tools/rtcp-inspector) | What an RTP or RTCP packet says, byte by byte: the loss and round trip in its reports, and the NACK, PLI, FIR, REMB, TWCC and RFC 8888 feedback a call sends |
 | [`sdp-explainer`](tools/sdp-explainer) | What each line of a WebRTC offer or answer sets, which phase of the call reads it, and which rule it breaks |
-| [`stun-decoder`](tools/stun-decoder) | What a STUN message says, attribute by attribute, with the addresses un-XORed and its integrity checked |
-| [`tcp-throughput`](tools/tcp-throughput) | What one TCP connection can carry over a given path, and whether the window or the loss is the limit |
+| [`state-machine-analyzer`](tools/state-machine-analyzer) | Every state of a machine against every event: which cells nobody decided, which states can't be reached or left, and a test per cell |
+| [`stun-decoder`](tools/stun-decoder) | What a STUN message says and what to fix, attribute by attribute, with the addresses un-XORed and its integrity checked, TURN long-term credentials included, from hex or a Wireshark dump |
+| [`tcp-throughput`](tools/tcp-throughput) | What one TCP connection can carry over a given path, how much of the link that is, and whether the window or the loss is the limit |
+| [`timeout-budget`](tools/timeout-budget) | A call chain's worst case when the bottom hangs, whether it fits the caller's deadline, and which retries can never finish |
 
 They are built on [toolbench](https://github.com/eknowledger/toolbench), which turns a tool
 directory into a working interface in a page. Each tool here is a plain TypeScript module with a

@@ -1,47 +1,119 @@
 [
   {
-    "name": "the defaults: an 80ms path where loss and a 64KB window nearly tie",
+    "name": "the answer at the defaults: one connection uses about half a percent of a gigabit",
     "input": {
       "rtt": 80,
       "loss": 0.1,
       "window": 64,
+      "link": 1000,
       "mss": 1460,
       "sweep": "rtt"
     },
     "match": "subset",
-    "why": "The ceilings and which one binds are the assertion; the chart and the table are the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
-    "fieldCount": 6,
+    "why": "Mathis gives 1460 x 8 x sqrt(1.5) / (0.08 x sqrt(0.001)) = 5,654,600 bit/s, under the window's 65,536 x 8 / 0.08 = 6,553,600, so loss binds; 5.6546 Mbit/s of 1000 is 0.565%, two figures 0.57%.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "One connection tops out at 5.65 Mbit/s, 0.57% of the link",
+      "columns": [
+        {
+          "label": "Limit"
+        },
+        {
+          "label": "Ceiling",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Status"
+        }
+      ],
+      "rows": [
+        [
+          "Packet loss",
+          {
+            "text": "5.65 Mbit/s",
+            "mono": true
+          },
+          "Sets the limit"
+        ],
+        [
+          "Receive window",
+          {
+            "text": "6.55 Mbit/s",
+            "mono": true
+          },
+          "Next"
+        ],
+        [
+          "Link",
+          {
+            "text": "1.00 Gbit/s",
+            "mono": true
+          },
+          ""
+        ]
+      ]
+    }
+  },
+  {
+    "name": "the defaults, how it was worked out: the window and the loss model, named",
+    "input": {
+      "rtt": 80,
+      "loss": 0.1,
+      "window": 64,
+      "link": 1000,
+      "mss": 1460,
+      "sweep": "rtt"
+    },
+    "match": "subset",
+    "why": "Values derived from the published formulas, window x 8 / RTT and Mathis's MSS x 8 x sqrt(3/2) / (RTT x sqrt(p)), independently of this implementation; subset because the chart is the same numbers swept.",
+    "fieldCount": 2,
     "expect": {
       "kind": "fields",
+      "role": "method",
       "fields": [
         {
-          "label": "Throughput ceiling",
-          "value": "5.65 Mbit/s",
-          "note": "one connection, loss limited",
-          "tone": "warn"
+          "group": "How this was worked out",
+          "label": "Receive window",
+          "value": "64.0 KB per 80 ms round trip",
+          "note": "One window in flight, then a full round trip waiting for its acknowledgement: window / RTT."
         },
         {
-          "label": "What binds it",
-          "value": "Packet loss"
-        },
+          "group": "How this was worked out",
+          "label": "Packet loss",
+          "value": "0.1% with 1460 B segments",
+          "note": "MSS x 1.22 / (RTT x sqrt(loss)), Mathis et al.: a Reno-style sender that halves its window on every loss. CUBIC and BBR do better on long paths."
+        }
+      ]
+    }
+  },
+  {
+    "name": "the defaults: an 80ms path where loss and a 64KB window nearly tie: what fixing it buys",
+    "input": {
+      "rtt": 80,
+      "loss": 0.1,
+      "window": 64,
+      "link": 1000,
+      "mss": 1460,
+      "sweep": "rtt"
+    },
+    "match": "subset",
+    "why": "Loss at which Mathis meets the window's 6,553,600 bit/s: (1460 x 8 x sqrt(1.5) / (0.08 x 6,553,600))^2 = 0.000744, so 0.074%. The link's bandwidth-delay product is 1e9 x 0.08 / 8 = 10,000,000 B = 9.54 MB, and the loss for it (14,304 / 80,000,000)^2 = 3.2e-8, 0.0000032%, one in 31 million.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "fields": [
         {
-          "label": "Window allows",
+          "label": "Cut loss below 0.074%",
           "value": "6.55 Mbit/s",
-          "note": "64.0 KB in flight per 80.00 ms"
+          "note": "Then the receive window is the limit."
         },
         {
-          "label": "Loss allows",
-          "value": "5.65 Mbit/s",
-          "note": "at 0.1000% loss"
-        },
-        {
-          "label": "Window to lift that limit",
-          "value": "55.2 KB",
-          "note": "the bandwidth-delay product at the other ceiling"
-        },
-        {
-          "label": "Data in flight at the ceiling",
-          "value": "55.2 KB"
+          "label": "To fill the link",
+          "value": "1.00 Gbit/s",
+          "note": "A window of at least 9.54 MB, and loss below 0.0000032%, about one packet in 31 million."
         }
       ]
     }
@@ -52,43 +124,78 @@
       "rtt": 80,
       "loss": 0,
       "window": 64,
+      "link": 1000,
       "mss": 1460,
       "sweep": "rtt"
     },
     "match": "subset",
-    "why": "The ceilings and which one binds are the assertion; the chart and the table are the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
-    "fieldCount": 6,
+    "why": "The ceilings and which one binds are the assertion; the chart is the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "One connection tops out at 6.55 Mbit/s, 0.66% of the link",
+      "columns": [
+        {
+          "label": "Limit"
+        },
+        {
+          "label": "Ceiling",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Status"
+        }
+      ],
+      "rows": [
+        [
+          "Receive window",
+          {
+            "text": "6.55 Mbit/s",
+            "mono": true
+          },
+          "Sets the limit"
+        ],
+        [
+          "Link",
+          {
+            "text": "1.00 Gbit/s",
+            "mono": true
+          },
+          "Next"
+        ],
+        [
+          "Packet loss",
+          {
+            "text": "unbounded",
+            "mono": true
+          },
+          ""
+        ]
+      ]
+    }
+  },
+  {
+    "name": "no loss at all, so only the window binds and the answer is unbounded loss: what fixing it buys",
+    "input": {
+      "rtt": 80,
+      "loss": 0,
+      "window": 64,
+      "link": 1000,
+      "mss": 1460,
+      "sweep": "rtt"
+    },
+    "match": "subset",
+    "why": "The same computation as the case above; what fixing it buys is the same formulas solved the other way: the window for a rate is its bandwidth-delay product, and the loss is Mathis solved for p.",
+    "fieldCount": 1,
     "expect": {
       "kind": "fields",
+      "role": "answer",
       "fields": [
         {
-          "label": "Throughput ceiling",
-          "value": "6.55 Mbit/s",
-          "note": "one connection, window limited",
-          "tone": "normal"
-        },
-        {
-          "label": "What binds it",
-          "value": "Receive window"
-        },
-        {
-          "label": "Window allows",
-          "value": "6.55 Mbit/s",
-          "note": "64.0 KB in flight per 80.00 ms"
-        },
-        {
-          "label": "Loss allows",
-          "value": "unbounded",
-          "note": "no loss, so nothing tells the sender to stop"
-        },
-        {
-          "label": "Window to lift that limit",
-          "value": "64.0 KB",
-          "note": "the bandwidth-delay product at the other ceiling"
-        },
-        {
-          "label": "Data in flight at the ceiling",
-          "value": "64.0 KB"
+          "label": "Raise the window to 9.54 MB",
+          "value": "1.00 Gbit/s",
+          "note": "Then the link is the limit."
         }
       ]
     }
@@ -99,43 +206,83 @@
       "rtt": 250,
       "loss": 0.5,
       "window": 4096,
+      "link": 1000,
       "mss": 1460,
       "sweep": "loss"
     },
     "match": "subset",
-    "why": "The ceilings and which one binds are the assertion; the chart and the table are the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
-    "fieldCount": 6,
+    "why": "The ceilings and which one binds are the assertion; the chart is the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "One connection tops out at 809.2 kbit/s, 0.081% of the link",
+      "columns": [
+        {
+          "label": "Limit"
+        },
+        {
+          "label": "Ceiling",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Status"
+        }
+      ],
+      "rows": [
+        [
+          "Packet loss",
+          {
+            "text": "809.2 kbit/s",
+            "mono": true
+          },
+          "Sets the limit"
+        ],
+        [
+          "Receive window",
+          {
+            "text": "134.22 Mbit/s",
+            "mono": true
+          },
+          "Next"
+        ],
+        [
+          "Link",
+          {
+            "text": "1.00 Gbit/s",
+            "mono": true
+          },
+          ""
+        ]
+      ]
+    }
+  },
+  {
+    "name": "a continent away with a big window: loss binds and configuration cannot help: what fixing it buys",
+    "input": {
+      "rtt": 250,
+      "loss": 0.5,
+      "window": 4096,
+      "link": 1000,
+      "mss": 1460,
+      "sweep": "loss"
+    },
+    "match": "subset",
+    "why": "The same computation as the case above; what fixing it buys is the same formulas solved the other way: the window for a rate is its bandwidth-delay product, and the loss is Mathis solved for p.",
+    "fieldCount": 2,
     "expect": {
       "kind": "fields",
+      "role": "answer",
       "fields": [
         {
-          "label": "Throughput ceiling",
-          "value": "809.2 kbit/s",
-          "note": "one connection, loss limited",
-          "tone": "warn"
-        },
-        {
-          "label": "What binds it",
-          "value": "Packet loss"
-        },
-        {
-          "label": "Window allows",
+          "label": "Cut loss below 0.000018%",
           "value": "134.22 Mbit/s",
-          "note": "4.00 MB in flight per 250.00 ms"
+          "note": "Then the receive window is the limit."
         },
         {
-          "label": "Loss allows",
-          "value": "809.2 kbit/s",
-          "note": "at 0.5000% loss"
-        },
-        {
-          "label": "Window to lift that limit",
-          "value": "24.7 KB",
-          "note": "the bandwidth-delay product at the other ceiling"
-        },
-        {
-          "label": "Data in flight at the ceiling",
-          "value": "24.7 KB"
+          "label": "To fill the link",
+          "value": "1.00 Gbit/s",
+          "note": "A window of at least 29.80 MB, and loss below 0.00000033%, about one packet in 310 million."
         }
       ]
     }
@@ -146,43 +293,78 @@
       "rtt": 2,
       "loss": 0.001,
       "window": 64,
+      "link": 1000,
       "mss": 1460,
       "sweep": "rtt"
     },
     "match": "subset",
-    "why": "The ceilings and which one binds are the assertion; the chart and the table are the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
-    "fieldCount": 6,
+    "why": "The ceilings and which one binds are the assertion; the chart is the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "One connection tops out at 262.14 Mbit/s, 26% of the link",
+      "columns": [
+        {
+          "label": "Limit"
+        },
+        {
+          "label": "Ceiling",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Status"
+        }
+      ],
+      "rows": [
+        [
+          "Receive window",
+          {
+            "text": "262.14 Mbit/s",
+            "mono": true
+          },
+          "Sets the limit"
+        ],
+        [
+          "Link",
+          {
+            "text": "1.00 Gbit/s",
+            "mono": true
+          },
+          "Next"
+        ],
+        [
+          "Packet loss",
+          {
+            "text": "2.26 Gbit/s",
+            "mono": true
+          },
+          ""
+        ]
+      ]
+    }
+  },
+  {
+    "name": "a clean local path: the window binds and the fix is a bigger one: what fixing it buys",
+    "input": {
+      "rtt": 2,
+      "loss": 0.001,
+      "window": 64,
+      "link": 1000,
+      "mss": 1460,
+      "sweep": "rtt"
+    },
+    "match": "subset",
+    "why": "The same computation as the case above; what fixing it buys is the same formulas solved the other way: the window for a rate is its bandwidth-delay product, and the loss is Mathis solved for p.",
+    "fieldCount": 1,
     "expect": {
       "kind": "fields",
+      "role": "answer",
       "fields": [
         {
-          "label": "Throughput ceiling",
-          "value": "262.14 Mbit/s",
-          "note": "one connection, window limited",
-          "tone": "normal"
-        },
-        {
-          "label": "What binds it",
-          "value": "Receive window"
-        },
-        {
-          "label": "Window allows",
-          "value": "262.14 Mbit/s",
-          "note": "64.0 KB in flight per 2.00 ms"
-        },
-        {
-          "label": "Loss allows",
-          "value": "2.26 Gbit/s",
-          "note": "at 0.0010% loss"
-        },
-        {
-          "label": "Window to lift that limit",
-          "value": "552.2 KB",
-          "note": "the bandwidth-delay product at the other ceiling"
-        },
-        {
-          "label": "Data in flight at the ceiling",
-          "value": "64.0 KB"
+          "label": "Raise the window to 244.1 KB",
+          "value": "1.00 Gbit/s",
+          "note": "Then the link is the limit."
         }
       ]
     }
@@ -193,44 +375,141 @@
       "rtt": 100,
       "loss": 0.1,
       "window": 8192,
+      "link": 1000,
       "mss": 8960,
       "sweep": "rtt"
     },
     "match": "subset",
-    "why": "The ceilings and which one binds are the assertion; the chart and the table are the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
-    "fieldCount": 6,
+    "why": "The ceilings and which one binds are the assertion; the chart is the same two numbers swept. Values computed independently from Mathis (MSS x sqrt(3/2) / (RTT x sqrt(p))) and from window/RTT, not from this implementation.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "One connection tops out at 27.76 Mbit/s, 2.8% of the link",
+      "columns": [
+        {
+          "label": "Limit"
+        },
+        {
+          "label": "Ceiling",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Status"
+        }
+      ],
+      "rows": [
+        [
+          "Packet loss",
+          {
+            "text": "27.76 Mbit/s",
+            "mono": true
+          },
+          "Sets the limit"
+        ],
+        [
+          "Receive window",
+          {
+            "text": "671.09 Mbit/s",
+            "mono": true
+          },
+          "Next"
+        ],
+        [
+          "Link",
+          {
+            "text": "1.00 Gbit/s",
+            "mono": true
+          },
+          ""
+        ]
+      ]
+    }
+  },
+  {
+    "name": "jumbo frames raise the loss ceiling in proportion to the segment: what fixing it buys",
+    "input": {
+      "rtt": 100,
+      "loss": 0.1,
+      "window": 8192,
+      "link": 1000,
+      "mss": 8960,
+      "sweep": "rtt"
+    },
+    "match": "subset",
+    "why": "The same computation as the case above; what fixing it buys is the same formulas solved the other way: the window for a rate is its bandwidth-delay product, and the loss is Mathis solved for p.",
+    "fieldCount": 2,
     "expect": {
       "kind": "fields",
+      "role": "answer",
       "fields": [
         {
-          "label": "Throughput ceiling",
-          "value": "27.76 Mbit/s",
-          "note": "one connection, loss limited",
-          "tone": "warn"
-        },
-        {
-          "label": "What binds it",
-          "value": "Packet loss"
-        },
-        {
-          "label": "Window allows",
+          "label": "Cut loss below 0.00017%",
           "value": "671.09 Mbit/s",
-          "note": "8.00 MB in flight per 100.00 ms"
+          "note": "Then the receive window is the limit."
         },
         {
-          "label": "Loss allows",
-          "value": "27.76 Mbit/s",
-          "note": "at 0.1000% loss"
-        },
-        {
-          "label": "Window to lift that limit",
-          "value": "338.9 KB",
-          "note": "the bandwidth-delay product at the other ceiling"
-        },
-        {
-          "label": "Data in flight at the ceiling",
-          "value": "338.9 KB"
+          "label": "To fill the link",
+          "value": "1.00 Gbit/s",
+          "note": "A window of at least 11.92 MB, and loss below 0.000077%, about one packet in 1.3 million."
         }
+      ]
+    }
+  },
+  {
+    "name": "a short clean path with a big window fills the link, so there is nothing to fix",
+    "input": {
+      "rtt": 2,
+      "loss": 0,
+      "window": 4096,
+      "link": 100,
+      "mss": 1460,
+      "sweep": "rtt"
+    },
+    "match": "subset",
+    "why": "Values derived from the published formulas, window x 8 / RTT and Mathis's MSS x 8 x sqrt(3/2) / (RTT x sqrt(p)), independently of this implementation; subset because the chart is the same numbers swept.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "One connection can fill the 100.00 Mbit/s link",
+      "columns": [
+        {
+          "label": "Limit"
+        },
+        {
+          "label": "Ceiling",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Status"
+        }
+      ],
+      "rows": [
+        [
+          "Link",
+          {
+            "text": "100.00 Mbit/s",
+            "mono": true
+          },
+          "Sets the limit"
+        ],
+        [
+          "Receive window",
+          {
+            "text": "16.78 Gbit/s",
+            "mono": true
+          },
+          ""
+        ],
+        [
+          "Packet loss",
+          {
+            "text": "unbounded",
+            "mono": true
+          },
+          ""
+        ]
       ]
     }
   },
@@ -240,6 +519,7 @@
       "rtt": 0,
       "loss": 0.1,
       "window": 64,
+      "link": 1000,
       "mss": 1460,
       "sweep": "rtt"
     },
@@ -255,6 +535,7 @@
       "rtt": 80,
       "loss": 100,
       "window": 64,
+      "link": 1000,
       "mss": 1460,
       "sweep": "rtt"
     },
@@ -270,6 +551,7 @@
       "rtt": 80,
       "loss": 0.1,
       "window": 0,
+      "link": 1000,
       "mss": 1460,
       "sweep": "rtt"
     },
@@ -285,6 +567,7 @@
       "rtt": 80,
       "loss": 0.1,
       "window": 64,
+      "link": 1000,
       "mss": 0,
       "sweep": "rtt"
     },

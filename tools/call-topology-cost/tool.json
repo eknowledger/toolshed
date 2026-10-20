@@ -1,9 +1,9 @@
 {
-  "sdk": 4,
+  "sdk": 7,
   "id": "call-topology-cost",
   "name": "Call topology cost",
-  "blurb": "Pick a call size and see where the cost lands for mesh, an SFU, an MCU and a server that is the other peer: each client's upload and download, the server's traffic, and its work every frame.",
-  "version": "1.0.0",
+  "blurb": "Pick a call size and see where a voice call's cost lands for mesh, an SFU, an MCU and a server that is the other peer, with real packet sizes, and what would make it cheaper.",
+  "version": "3.0.0",
   "capabilities": [
     "pure"
   ],
@@ -14,12 +14,13 @@
   "kinds": [
     "group",
     "fields",
-    "series",
     "table",
+    "graph",
     "error"
   ],
   "card": "live",
   "cardFields": 4,
+  "autoRun": false,
   "inputs": [
     {
       "id": "participants",
@@ -35,8 +36,8 @@
     {
       "id": "pattern",
       "type": "select",
-      "label": "Show the fields for",
-      "description": "The chart and the table always show all four.",
+      "label": "Draw the traffic for",
+      "description": "The tables always compare all four.",
       "primary": true,
       "default": "sfu",
       "options": [
@@ -69,11 +70,40 @@
       "step": 1
     },
     {
+      "id": "codec",
+      "type": "select",
+      "label": "Codec",
+      "description": "Fills in the bitrate and frame length. Change either and this shows Custom.",
+      "default": "opus32",
+      "options": [
+        {
+          "value": "opus32",
+          "label": "Opus at 32 kb/s, 20 ms frames",
+          "sets": {
+            "bitrate": 32,
+            "frame": "20"
+          }
+        },
+        {
+          "value": "g711",
+          "label": "G.711 at 64 kb/s, 20 ms frames",
+          "sets": {
+            "bitrate": 64,
+            "frame": "20"
+          }
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
       "id": "bitrate",
       "type": "number",
-      "label": "Opus bitrate",
+      "label": "Codec bitrate",
       "unit": "kb/s",
-      "description": "Constant bitrate. 32 kb/s in 20 ms frames is post 1's 80-byte payload.",
+      "description": "Constant bitrate. 32 kb/s in 20 ms frames is post 1's 80 bytes of sound; G.711 is always 64.",
       "default": 32,
       "min": 6,
       "max": 510,
@@ -105,15 +135,81 @@
       ]
     },
     {
+      "id": "packet",
+      "type": "select",
+      "label": "Packet",
+      "description": "Fills in the IP version, the SRTP tag and the header extensions below. Change any of them and this shows Custom.",
+      "default": "bare",
+      "options": [
+        {
+          "value": "bare",
+          "label": "RTP over IPv4 and nothing else, as post 1 counts",
+          "sets": {
+            "ip": "4",
+            "srtp": "0",
+            "ext": "none"
+          }
+        },
+        {
+          "value": "post4",
+          "label": "SRTP and post 4's two extensions, over IPv4",
+          "sets": {
+            "ip": "4",
+            "srtp": "10",
+            "ext": "level-mid"
+          }
+        },
+        {
+          "value": "post4v6",
+          "label": "SRTP and post 4's two extensions, over IPv6",
+          "sets": {
+            "ip": "6",
+            "srtp": "10",
+            "ext": "level-mid"
+          }
+        },
+        {
+          "value": "gcm4ext",
+          "label": "AES-GCM and four extensions, over IPv6",
+          "sets": {
+            "ip": "6",
+            "srtp": "16",
+            "ext": "level-mid-twcc-abs"
+          }
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
+      "id": "ip",
+      "type": "select",
+      "label": "IP version",
+      "description": "The IP header on every packet: 20 B for IPv4 without options, 40 B for IPv6.",
+      "default": "4",
+      "options": [
+        {
+          "value": "4",
+          "label": "IPv4, 20 B"
+        },
+        {
+          "value": "6",
+          "label": "IPv6, 40 B"
+        }
+      ]
+    },
+    {
       "id": "srtp",
       "type": "select",
       "label": "SRTP tag",
-      "description": "The authentication tag encryption adds to every packet.",
+      "description": "The authentication tag encryption adds to every packet. WebRTC always encrypts, so leaving the tag out changes only the packet size.",
       "default": "0",
       "options": [
         {
           "value": "0",
-          "label": "None, as post 1 counts"
+          "label": "Left out, as post 1 counts"
         },
         {
           "value": "10",
@@ -126,11 +222,33 @@
       ]
     },
     {
-      "id": "level",
-      "type": "toggle",
-      "label": "Audio-level extension",
-      "description": "RFC 6464's one byte of loudness, 8 B on the wire with its extension header.",
-      "default": false
+      "id": "ext",
+      "type": "select",
+      "label": "Header extensions",
+      "description": "RTP header extensions in RFC 8285's one-byte form: a 4-byte header, a byte per extension plus its data, padded to 4 bytes.",
+      "default": "none",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "level",
+          "label": "Audio level, 8 B"
+        },
+        {
+          "value": "level-mid",
+          "label": "Audio level and MID, 8 B"
+        },
+        {
+          "value": "level-mid-twcc",
+          "label": "Audio level, MID and transport-wide sequence number, 12 B"
+        },
+        {
+          "value": "level-mid-twcc-abs",
+          "label": "Those three and abs-send-time, 16 B"
+        }
+      ]
     }
   ],
   "samples": [
@@ -140,10 +258,13 @@
         "participants": 3,
         "pattern": "sfu",
         "loudest": 0,
+        "codec": "opus32",
         "bitrate": 32,
         "frame": "20",
+        "packet": "bare",
+        "ip": "4",
         "srtp": "0",
-        "level": false
+        "ext": "none"
       }
     },
     {
@@ -152,10 +273,13 @@
         "participants": 10,
         "pattern": "sfu",
         "loudest": 0,
+        "codec": "opus32",
         "bitrate": 32,
         "frame": "20",
+        "packet": "bare",
+        "ip": "4",
         "srtp": "0",
-        "level": false
+        "ext": "none"
       }
     },
     {
@@ -164,10 +288,28 @@
         "participants": 10,
         "pattern": "sfu",
         "loudest": 3,
+        "codec": "opus32",
         "bitrate": 32,
         "frame": "20",
+        "packet": "bare",
+        "ip": "4",
         "srtp": "0",
-        "level": false
+        "ext": "none"
+      }
+    },
+    {
+      "label": "Ten people in a mesh",
+      "input": {
+        "participants": 10,
+        "pattern": "mesh",
+        "loudest": 0,
+        "codec": "opus32",
+        "bitrate": 32,
+        "frame": "20",
+        "packet": "bare",
+        "ip": "4",
+        "srtp": "0",
+        "ext": "none"
       }
     },
     {
@@ -176,10 +318,28 @@
         "participants": 3,
         "pattern": "sfu",
         "loudest": 0,
+        "codec": "opus32",
         "bitrate": 32,
         "frame": "20",
+        "packet": "custom",
+        "ip": "4",
         "srtp": "10",
-        "level": true
+        "ext": "level"
+      }
+    },
+    {
+      "label": "Real packets: AES-GCM, IPv6, four extensions",
+      "input": {
+        "participants": 10,
+        "pattern": "sfu",
+        "loudest": 0,
+        "codec": "opus32",
+        "bitrate": 32,
+        "frame": "20",
+        "packet": "gcm4ext",
+        "ip": "6",
+        "srtp": "16",
+        "ext": "level-mid-twcc-abs"
       }
     },
     {
@@ -188,10 +348,13 @@
         "participants": 5,
         "pattern": "sfu",
         "loudest": 0,
+        "codec": "custom",
         "bitrate": 16,
         "frame": "20",
+        "packet": "bare",
+        "ip": "4",
         "srtp": "0",
-        "level": false
+        "ext": "none"
       }
     },
     {
@@ -200,10 +363,13 @@
         "participants": 2,
         "pattern": "peer",
         "loudest": 0,
+        "codec": "opus32",
         "bitrate": 32,
         "frame": "20",
+        "packet": "custom",
+        "ip": "4",
         "srtp": "10",
-        "level": false
+        "ext": "none"
       }
     }
   ],
@@ -220,8 +386,32 @@
       "href": "https://www.rfc-editor.org/rfc/rfc7667"
     },
     {
+      "label": "RFC 8285: the one-byte header extension form",
+      "href": "https://www.rfc-editor.org/rfc/rfc8285"
+    },
+    {
       "label": "RFC 6464: client-to-mixer audio level",
       "href": "https://www.rfc-editor.org/rfc/rfc6464"
+    },
+    {
+      "label": "RFC 3711: SRTP and its authentication tag",
+      "href": "https://www.rfc-editor.org/rfc/rfc3711"
+    },
+    {
+      "label": "RFC 7714: AES-GCM for SRTP, a 16-byte tag",
+      "href": "https://www.rfc-editor.org/rfc/rfc7714"
+    },
+    {
+      "label": "Transport-wide congestion control: the 16-bit sequence number",
+      "href": "https://datatracker.ietf.org/doc/html/draft-holmer-rmcat-transport-wide-cc-extensions-01"
+    },
+    {
+      "label": "abs-send-time: a 3-byte timestamp",
+      "href": "https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-send-time/README.md"
+    },
+    {
+      "label": "RFC 3551: G.711 at 64 kb/s",
+      "href": "https://www.rfc-editor.org/rfc/rfc3551"
     }
   ]
 }

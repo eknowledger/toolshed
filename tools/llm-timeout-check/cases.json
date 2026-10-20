@@ -1,0 +1,225 @@
+[
+	{
+		"name": "the Python SDK defaults, a 10-turn loop, two minutes to answer",
+		"input": {
+			"stack": "python",
+			"read": 600,
+			"retries": 2,
+			"deadline": 0,
+			"turns": 10,
+			"maxtokens": 4096,
+			"patience": 120
+		},
+		"match": "subset",
+		"fieldCount": 1,
+		"why": "The banner is the assertion: over the wait the reader set, so it is one bad field with the setting as its note. Hand-derived: silent is 3 x 600 s + 0.5 + 1 s of backoff = 1,801.5 s a call, x 10 = 5.0 h; trickling is 4,096 tokens / 2 per s = 2,048 s, not retried because it returns 200, x 10 = 20,480 s = 5.7 h; overloaded is the two backoffs, 1.5 s, x 10 = 15 s. To fit 120 s: (120 - 10 x 1.5) / (3 x 10) = 3.5 s per attempt, so 3 s.",
+		"expect": {
+			"kind": "fields",
+			"role": "verdict",
+			"fields": [
+				{
+					"label": "Over your 2 min wait",
+					"role": "verdict",
+					"value": "Up to 5.7 h for one 10-turn task",
+					"note": "Set an attempt deadline of 3 s or less.",
+					"tone": "bad"
+				}
+			]
+		}
+	},
+	{
+		"name": "a 30 s attempt deadline still overruns two minutes",
+		"input": {
+			"stack": "python",
+			"read": 600,
+			"retries": 2,
+			"deadline": 30,
+			"turns": 10,
+			"maxtokens": 4096,
+			"patience": 120
+		},
+		"match": "subset",
+		"fieldCount": 1,
+		"why": "Hand-derived: each attempt ends at 30 s, 3 x 30 + 1.5 = 91.5 s a call, x 10 = 915 s = 15.3 min for both silent and trickling; silent is listed first and wins the tie.",
+		"expect": {
+			"kind": "fields",
+			"role": "verdict",
+			"fields": [
+				{
+					"label": "Over your 2 min wait",
+					"role": "verdict",
+					"value": "Up to 15.3 min for one 10-turn task",
+					"note": "Set an attempt deadline of 3 s or less.",
+					"tone": "bad"
+				}
+			]
+		}
+	},
+	{
+		"name": "tuned for a chat: everything fits a minute, so a quiet answer and no banner",
+		"input": {
+			"stack": "custom",
+			"read": 10,
+			"retries": 1,
+			"deadline": 3,
+			"turns": 4,
+			"maxtokens": 1024,
+			"patience": 60
+		},
+		"match": "subset",
+		"fieldCount": 1,
+		"why": "Hand-derived: 2 x 3 s + 0.5 s = 6.5 s a call, x 4 = 26 s, under 60 s.",
+		"expect": {
+			"kind": "fields",
+			"role": "answer",
+			"fields": [
+				{
+					"label": "Worst case for one task",
+					"value": "26 s",
+					"note": "A model that sends nothing can keep a 4-turn task running this long, inside the 1 min you can wait."
+				}
+			]
+		}
+	},
+	{
+		"name": "the default trickle, step by step: one attempt, one call and one task for each failure",
+		"input": {
+			"stack": "python",
+			"read": 600,
+			"retries": 2,
+			"deadline": 0,
+			"turns": 10,
+			"maxtokens": 4096,
+			"patience": 120
+		},
+		"match": "subset",
+		"why": "The comparison table. Trickling: one attempt is 4,096 tokens / 2 per s = 2,048 s = 34.1 min, the call is the same because a 200 is not retried, and 10 turns make 5.7 h. Silent: 600 s, 3 x 600 + 1.5 = 1,801.5 s = 30 min, 5 h. Overloaded: refused at once, 1.5 s of backoff, 15 s. Only the two over 2 min are toned.",
+		"expect": {
+			"kind": "table",
+			"role": "comparison",
+			"caption": "Each failure, for one task of up to 10 turns, worst first",
+			"columns": [
+				{
+					"label": "Failure"
+				},
+				{
+					"label": "Attempt",
+					"align": "end",
+					"mono": true
+				},
+				{
+					"label": "Call",
+					"align": "end",
+					"mono": true
+				},
+				{
+					"label": "Task",
+					"align": "end",
+					"mono": true
+				},
+				{
+					"label": "Stopped by"
+				}
+			],
+			"rows": [
+				[
+					"Trickling",
+					{
+						"text": "34.1 min",
+						"mono": true
+					},
+					{
+						"text": "34.1 min",
+						"mono": true
+					},
+					{
+						"text": "5.7 h",
+						"mono": true,
+						"tone": "bad"
+					},
+					"max_tokens only"
+				],
+				[
+					"Silent",
+					{
+						"text": "10 min",
+						"mono": true
+					},
+					{
+						"text": "30 min",
+						"mono": true
+					},
+					{
+						"text": "5 h",
+						"mono": true,
+						"tone": "bad"
+					},
+					"read timeout, then retries"
+				],
+				[
+					"Overloaded",
+					{
+						"text": "0 s",
+						"mono": true
+					},
+					{
+						"text": "1.5 s",
+						"mono": true
+					},
+					{
+						"text": "15 s",
+						"mono": true
+					},
+					"retry limit"
+				]
+			]
+		}
+	},
+	{
+		"name": "the default trickle's cost, with what the check assumes, last",
+		"input": {
+			"stack": "python",
+			"read": 600,
+			"retries": 2,
+			"deadline": 0,
+			"turns": 10,
+			"maxtokens": 4096,
+			"patience": 120
+		},
+		"match": "subset",
+		"fieldCount": 2,
+		"why": "The method part. Cost: 10 x (4,700 x $4 + 4,096 x $20) / 1e6 = $1.0072; every call finishes, so both bounds agree.",
+		"expect": {
+			"kind": "fields",
+			"role": "method",
+			"fields": [
+				{
+					"label": "Assumes",
+					"value": "A trickle of 2 tokens a second, and a loop that starts another turn after a failed call."
+				},
+				{
+					"label": "Cost of the worst-case trickle",
+					"value": "$1.01",
+					"note": "10 calls of 4,700 input tokens, at $4 and $20 per million tokens, Claude Opus 5.5's list prices on 2026-10-11."
+				}
+			]
+		}
+	},
+	{
+		"name": "a retry count that is not whole",
+		"input": {
+			"stack": "python",
+			"read": 600,
+			"retries": 1.5,
+			"deadline": 0,
+			"turns": 10,
+			"maxtokens": 4096,
+			"patience": 120
+		},
+		"expect": {
+			"kind": "error",
+			"message": "Retries are a whole number.",
+			"input": "retries"
+		}
+	}
+]

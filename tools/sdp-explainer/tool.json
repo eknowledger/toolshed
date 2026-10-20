@@ -1,9 +1,9 @@
 {
-  "sdk": 4,
+  "sdk": 5,
   "id": "sdp-explainer",
   "name": "SDP explainer",
   "blurb": "Paste a WebRTC offer or answer and see every line: what it sets, which phase of the call reads it, and what breaks a rule, with the RFC for each.",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "capabilities": [
     "pure"
   ],
@@ -14,12 +14,12 @@
   "kinds": [
     "group",
     "fields",
-    "series",
     "table",
     "error"
   ],
   "card": "live",
   "cardFields": 4,
+  "autoRun": false,
   "inputs": [
     {
       "id": "sdp",
@@ -46,7 +46,7 @@
       "id": "show",
       "type": "select",
       "label": "Lines",
-      "description": "The chart and the problem list always cover every line.",
+      "description": "The problem list always covers every line.",
       "default": "all",
       "options": [
         {
@@ -94,6 +94,14 @@
       "input": {
         "sdp": "v=0\no=- 4962303333179871722 1 IN IP4 0.0.0.0\ns=-\nt=0 0\na=ice-options:trickle ice2\na=group:BUNDLE a1 v1\na=group:LS a1 v1\nm=audio 10100 UDP/TLS/RTP/SAVPF 96 0 8 97 98\nc=IN IP4 203.0.113.100\na=mid:a1\na=sendrecv\na=rtpmap:96 opus/48000/2\na=rtpmap:0 PCMU/8000\na=rtpmap:8 PCMA/8000\na=rtpmap:97 telephone-event/8000\na=rtpmap:98 telephone-event/48000\na=fmtp:97 0-15\na=fmtp:98 0-15\na=maxptime:120\na=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid\na=extmap:2 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=msid:47017fee-b6c1-4162-929c-a25110252400\na=ice-ufrag:ETEn\na=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl\na=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2\na=setup:actpass\na=tls-id:91bbf309c0990a6bec11e38ba2933cee\na=rtcp:10101 IN IP4 203.0.113.100\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host\na=candidate:1 2 udp 2113929470 203.0.113.100 10101 typ host\na=end-of-candidates\nm=video 10102 UDP/TLS/RTP/SAVPF 100 101 102 103\nc=IN IP4 203.0.113.100\na=mid:v1\na=sendrecv\na=rtpmap:100 VP8/90000\na=rtpmap:101 H264/90000\na=fmtp:101 packetization-mode=1;profile-level-id=42e01f\na=rtpmap:102 rtx/90000\na=fmtp:102 apt=100\na=rtpmap:103 rtx/90000\na=fmtp:103 apt=101\na=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid\na=extmap:3 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id\na=rtcp-fb:100 ccm fir\na=rtcp-fb:100 nack\na=rtcp-fb:100 nack pli\na=msid:47017fee-b6c1-4162-929c-a25110252400\na=ice-ufrag:BGKk\na=ice-pwd:mqyWsAjvtKwTGnvhPztQ9mIf\na=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2\na=setup:actpass\na=tls-id:91bbf309c0990a6bec11e38ba2933cee\na=rtcp:10103 IN IP4 203.0.113.100\na=rtcp-mux\na=rtcp-rsize\na=candidate:1 1 udp 2113929471 203.0.113.100 10102 typ host\na=candidate:1 2 udp 2113929470 203.0.113.100 10103 typ host\na=end-of-candidates",
         "other": ""
+      }
+    },
+    {
+      "label": "Simulcast video and a data channel",
+      "input": {
+        "sdp": "v=0\no=- 7801521040212355121 2 IN IP4 127.0.0.1\ns=-\nt=0 0\na=group:BUNDLE 0 1\na=extmap-allow-mixed\na=msid-semantic: WMS\nm=video 9 UDP/TLS/RTP/SAVPF 96 97\nc=IN IP4 0.0.0.0\na=rtcp:9 IN IP4 0.0.0.0\na=ice-ufrag:Ab3d\na=ice-pwd:x7YtlvDqK2u9mFg8Zq1pTwRs\na=ice-options:trickle\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=mid:0\na=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid\na=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id\na=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id\na=sendonly\na=msid:- camera-track\na=rtcp-mux\na=rtcp-rsize\na=rtpmap:96 VP8/90000\na=rtcp-fb:96 nack\na=rtcp-fb:96 nack pli\na=rtcp-fb:96 transport-cc\na=rtpmap:97 rtx/90000\na=fmtp:97 apt=96\na=rid:q send\na=rid:h send\na=rid:f send\na=simulcast:send q;h;f\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\nc=IN IP4 0.0.0.0\na=ice-ufrag:Ab3d\na=ice-pwd:x7YtlvDqK2u9mFg8Zq1pTwRs\na=ice-options:trickle\na=fingerprint:sha-256 A9:5C:8D:BA:4C:00:E3:59:80:B8:8E:45:F1:DA:8E:5C:5D:01:AB:C7:32:0C:89:69:94:EE:DC:72:61:A1:00:DD\na=setup:actpass\na=mid:1\na=sctp-port:5000\na=max-message-size:262144",
+        "other": "",
+        "show": "all"
       }
     },
     {

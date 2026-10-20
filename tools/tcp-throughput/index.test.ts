@@ -17,8 +17,8 @@ import { describe, it } from "node:test";
 import type { Output } from "@toolbench/sdk";
 import tool from "./index.ts";
 
-type Values = { mss: number; rtt: number; loss: number; window: number; sweep: string };
-const defaults: Values = { mss: 1460, rtt: 80, loss: 0.1, window: 64, sweep: "loss" };
+type Values = { mss: number; rtt: number; loss: number; window: number; link: number; sweep: string };
+const defaults: Values = { mss: 1460, rtt: 80, loss: 0.1, window: 64, link: 1000, sweep: "loss" };
 
 /*
  * ⚠️ Called with ONE argument, unlike the other tools' tests, and the type system insists.
@@ -39,12 +39,28 @@ function run(values: Partial<Values>): Output[] {
 	return out.kind === "group" ? out.parts : [];
 }
 
-const value = (parts: Output[], label: string) => {
-	for (const part of parts.filter((p): p is Extract<Output, { kind: "fields" }> => p.kind === "fields")) {
-		const hit = part.fields.find((f) => f.label === label);
-		if (hit) return hit.value;
+const text = (cell: unknown) => (typeof cell === "object" && cell !== null ? (cell as { text: string }).text : String(cell));
+const limitsOf = (parts: Output[]) => {
+	const table = parts[0];
+	assert.ok(table?.kind === "table" && table.role === "comparison", "the limits table comes first");
+	return table;
+};
+/**
+ * What the reader reads, by what they would call it: a limit's ceiling from the table, "Throughput ceiling" from
+ * the caption that answers the question, and "What binds it" from the row marked as setting the limit.
+ */
+const value = (parts: Output[], label: string): string => {
+	const table = limitsOf(parts);
+	if (label === "Throughput ceiling") {
+		const hit = / at (.+?), /.exec(table.caption ?? "");
+		assert.ok(hit, `the caption gives no ceiling: ${table.caption}`);
+		return hit[1]!;
 	}
-	throw new Error(`no field labelled "${label}"`);
+	if (label === "What binds it") return text(table.rows.find((r) => text(r[2]) === "Sets the limit")?.[0]);
+	const name = { "Window allows": "Receive window", "Loss allows": "Packet loss", Link: "Link" }[label];
+	const row = table.rows.find((r) => text(r[0]) === name);
+	assert.ok(row, `no limit called "${label}"`);
+	return text(row[1]);
 };
 /** "5.65 Mbit/s" and "226.18 Mbit/s" and "unbounded" all come back comparable, in bits per second. */
 const rate = (text: string): number => {
@@ -189,3 +205,56 @@ describe("the shape of the output", () => {
 		assert.ok(chart.series.every((s) => s.axis === undefined));
 	});
 });
+
+describe("the answer and what fixing it buys", () => {
+	it("leads with the limits side by side, then what fixing them buys, then the curve", () => {
+		const parts = run({});
+		assert.deepEqual(
+			parts.map((p) => `${p.kind}${p.role ? `:${p.role}` : ""}`),
+			["table:comparison", "fields:answer", "series", "fields:method"],
+		);
+	});
+
+	it("says one connection fills the link only when both ceilings clear it, and offers no changes then", () => {
+		const filled = run({ rtt: 2, loss: 0, window: 4096, link: 100 });
+		assert.equal(limitsOf(filled).caption, "One connection can fill the 100.00 Mbit/s link");
+		assert.equal(value(filled, "What binds it"), "Link");
+		assert.ok(!filled.some((p) => p.role === "answer"), "nothing to change is not a row");
+		assert.match(limitsOf(run({ link: 10 })).caption ?? "", /^One connection tops out at 5\.65 Mbit\/s/);
+	});
+
+	it("carries no tone, because a modelled ceiling is not a measured fault", () => {
+		const parts = run({});
+		const cells = limitsOf(parts).rows.flat();
+		assert.ok(cells.every((c) => typeof c !== "object" || !("tone" in c)));
+		assert.ok(parts.every((p) => p.kind !== "fields" || p.fields.every((f) => f.tone === undefined)));
+	});
+
+	it("sizes the first fix to the next limit, so fixing loss on the defaults buys only the window's 6.55", () => {
+		const changes = run({})[1];
+		assert.ok(changes?.kind === "fields");
+		assert.equal(changes.fields[0]?.value, value(run({}), "Window allows"));
+		assert.match(changes.fields[0]?.label ?? "", /^Cut loss below/);
+		assert.equal(changes.fields[1]?.label, "To fill the link");
+	});
+
+	it("asks for a loss rate that, put back in, fills the link exactly", () => {
+		/*
+		 * The action solves Mathis for p. Running the tool at that loss, with a window big enough not to bind, must
+		 * give a loss ceiling of the link speed, to the rounding of the printed percentage.
+		 */
+		for (const [rtt, link] of [
+			[80, 1000],
+			[250, 100],
+			[10, 10000],
+		] as const) {
+			const changes = run({ rtt, link, window: 1_048_576 })[1];
+			assert.ok(changes?.kind === "fields");
+			const pct = Number(/below ([\d.e-]+)%/.exec(changes.fields[0]?.label ?? "")?.[1]);
+			const reached = rate(value(run({ rtt, link, window: 1_048_576, loss: pct }), "Loss allows"));
+			// Two significant figures of p is up to 2.5% in p, so 1.3% in the rate, which sqrt halves.
+			assert.ok(Math.abs(reached / (link * 1e6) - 1) < 0.015, `${rtt} ms, ${link} Mbit/s: ${pct}% gives ${reached}`);
+		}
+	});
+});
+

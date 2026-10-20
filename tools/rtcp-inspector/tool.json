@@ -1,20 +1,33 @@
 {
-  "sdk": 4,
+  "sdk": 5,
   "id": "rtcp-inspector",
   "name": "RTP / RTCP inspector",
-  "blurb": "Paste a packet as hex and see the header fields marked on the bytes themselves, not just listed beside them.",
-  "version": "1.2.0",
-  "capabilities": ["pure"],
-  "runtime": { "entry": "index.ts", "thread": "main" },
-  "kinds": ["group", "fields", "table", "series", "bytes", "error"],
+  "blurb": "Paste an RTP or RTCP packet as hex and see what it says: each field marked on the bytes, the loss and round trip in its reports, and the NACK, PLI, FIR, REMB and TWCC feedback WebRTC sends.",
+  "version": "3.0.0",
+  "capabilities": [
+    "pure"
+  ],
+  "runtime": {
+    "entry": "index.ts",
+    "thread": "main"
+  },
+  "kinds": [
+    "group",
+    "fields",
+    "table",
+    "series",
+    "bytes",
+    "error"
+  ],
   "card": "live",
   "cardFields": 5,
+  "autoRun": false,
   "inputs": [
     {
       "id": "packet",
       "type": "textarea",
       "label": "Packet",
-      "description": "Hex, however you copied it. Offsets at the start of a line and an ASCII gutter are both stripped.",
+      "description": "Hex, however you copied it: a Wireshark or tcpdump dump, offsets, text column and all, or a log line. A whole frame's Ethernet, IP and UDP headers are stripped.",
       "primary": true,
       "dir": "ltr",
       "rows": 4,
@@ -28,8 +41,43 @@
       "description": "The byte view marks every field in place. Turn it off for a long packet.",
       "default": "all",
       "options": [
-        { "value": "all", "label": "Fields and bytes" },
-        { "value": "fields", "label": "Fields only" }
+        {
+          "value": "all",
+          "label": "Fields and bytes"
+        },
+        {
+          "value": "fields",
+          "label": "Fields only"
+        }
+      ]
+    },
+    {
+      "id": "clock",
+      "type": "select",
+      "label": "RTP clock rate",
+      "description": "Optional. The signalling sets it, not the packet. With it, RTP timestamps read as seconds and jitter as milliseconds.",
+      "default": "0",
+      "options": [
+        {
+          "value": "0",
+          "label": "Not given"
+        },
+        {
+          "value": "48000",
+          "label": "48 kHz: Opus"
+        },
+        {
+          "value": "8000",
+          "label": "8 kHz: PCMU, PCMA, G.722"
+        },
+        {
+          "value": "16000",
+          "label": "16 kHz: wideband audio"
+        },
+        {
+          "value": "90000",
+          "label": "90 kHz: every video codec"
+        }
       ]
     },
     {
@@ -48,7 +96,8 @@
       "input": {
         "packet": "806f03f2000025801f2e3d4c4b411098fe7eb5246000b41fa06177c378b7d770cbed5ce56a269e1dc8543518d2b7f7cb6adf8b0761dceac805ce3ec4caf1a6813262eafa0b85f09400e1613c00000000000000000000000000000000",
         "view": "all",
-        "arrival": ""
+        "arrival": "",
+        "clock": "48000"
       }
     },
     {
@@ -56,7 +105,8 @@
       "input": {
         "packet": "92e003e800015f9011223344aaaa0001aaaa0002bede0002103021aabb0000000102",
         "view": "all",
-        "arrival": ""
+        "arrival": "",
+        "clock": "0"
       }
     },
     {
@@ -64,7 +114,8 @@
       "input": {
         "packet": "a008000700001f40010203041122000003",
         "view": "all",
-        "arrival": ""
+        "arrival": "",
+        "clock": "0"
       }
     },
     {
@@ -72,7 +123,8 @@
       "input": {
         "packet": "81cb0004111111110874656172646f776e000000",
         "view": "fields",
-        "arrival": ""
+        "arrival": "",
+        "clock": "0"
       }
     },
     {
@@ -80,7 +132,8 @@
       "input": {
         "packet": "80 c8 00 06 1f 2e 3d 4c ee 69 d8 f0 40 00 00 00 00 02 ee 00 00 00 00 c8 00 00 3e 80 81 ca 00 06 1f 2e 3d 4c 01 10 4b 39 67 47 79 58 38 4f 41 4b 38 61 48 38 4d 79 00 00",
         "view": "all",
-        "arrival": ""
+        "arrival": "",
+        "clock": "48000"
       }
     },
     {
@@ -88,7 +141,44 @@
       "input": {
         "packet": "81 c9 00 07 7a 3b 9c 5d 1f 2e 3d 4c 06 00 00 06 00 00 04 e1 00 00 00 82 d8 f0 40 00 00 00 fd 70 81 ca 00 06 7a 3b 9c 5d 01 10 73 2b 72 4e 4d 30 4d 37 4d 62 55 6c 49 31 45 44 00 00",
         "view": "all",
-        "arrival": "d8f1:4ccc"
+        "arrival": "d8f1:4ccc",
+        "clock": "48000"
+      }
+    },
+    {
+      "label": "NACK",
+      "input": {
+        "packet": "81cd0003 7a3b9c5d 1f2e3d4c 00640005",
+        "view": "all",
+        "arrival": "",
+        "clock": "0"
+      }
+    },
+    {
+      "label": "Keyframe request (RR + PLI)",
+      "input": {
+        "packet": "80c90001 7a3b9c5d 81ce0002 7a3b9c5d 1f2e3d4c",
+        "view": "all",
+        "arrival": "",
+        "clock": "0"
+      }
+    },
+    {
+      "label": "REMB",
+      "input": {
+        "packet": "8fce0005 7a3b9c5d 00000000 52454d42 010edc6c 1f2e3d4c",
+        "view": "all",
+        "arrival": "",
+        "clock": "0"
+      }
+    },
+    {
+      "label": "Transport-wide feedback",
+      "input": {
+        "packet": "8fcd0007 7a3b9c5d 1f2e3d4c 00640008 0003e805 2005a800 50505054 50584c00",
+        "view": "all",
+        "arrival": "",
+        "clock": "0"
       }
     },
     {
@@ -96,15 +186,50 @@
       "input": {
         "packet": "8000002a0000",
         "view": "all",
-        "arrival": ""
+        "arrival": "",
+        "clock": "0"
       }
     }
   ],
   "help": "README.md",
-  "tags": ["rtp", "rtcp", "webrtc", "networking"],
+  "tags": [
+    "rtp",
+    "rtcp",
+    "webrtc",
+    "networking"
+  ],
   "links": [
-    { "label": "RFC 3550: RTP", "href": "https://www.rfc-editor.org/rfc/rfc3550" },
-    { "label": "RFC 3550 section 6.4.1: the sender report, and the round trip", "href": "https://www.rfc-editor.org/rfc/rfc3550#section-6.4.1" },
-    { "label": "RFC 8285: header extensions", "href": "https://www.rfc-editor.org/rfc/rfc8285" }
+    {
+      "label": "RFC 3550: RTP",
+      "href": "https://www.rfc-editor.org/rfc/rfc3550"
+    },
+    {
+      "label": "RFC 3550 section 6.4.1: the sender report, and the round trip",
+      "href": "https://www.rfc-editor.org/rfc/rfc3550#section-6.4.1"
+    },
+    {
+      "label": "RFC 8285: header extensions",
+      "href": "https://www.rfc-editor.org/rfc/rfc8285"
+    },
+    {
+      "label": "RFC 4585 section 6: feedback messages, NACK and PLI",
+      "href": "https://www.rfc-editor.org/rfc/rfc4585#section-6"
+    },
+    {
+      "label": "RFC 5104 section 4.3.1: FIR",
+      "href": "https://www.rfc-editor.org/rfc/rfc5104#section-4.3.1"
+    },
+    {
+      "label": "draft-alvestrand-rmcat-remb-03: REMB",
+      "href": "https://datatracker.ietf.org/doc/html/draft-alvestrand-rmcat-remb-03"
+    },
+    {
+      "label": "draft-holmer-rmcat-transport-wide-cc-extensions-01: TWCC",
+      "href": "https://datatracker.ietf.org/doc/html/draft-holmer-rmcat-transport-wide-cc-extensions-01"
+    },
+    {
+      "label": "RFC 8888: congestion control feedback",
+      "href": "https://www.rfc-editor.org/rfc/rfc8888"
+    }
   ]
 }

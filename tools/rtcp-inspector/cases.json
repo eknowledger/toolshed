@@ -10,18 +10,34 @@
     "fieldCount": 8,
     "expect": {
       "kind": "fields",
+      "role": "decoded",
+      "id": "fields",
       "fields": [
         {
           "label": "Protocol",
-          "value": "RTP"
+          "value": "RTP",
+          "note": "second byte is 0"
+        },
+        {
+          "label": "V / P / X / CC",
+          "value": "2 / 0 / 0 / 0"
         },
         {
           "label": "Payload type",
           "value": "0 (PCMU)"
         },
         {
+          "label": "Marker",
+          "value": "clear"
+        },
+        {
           "label": "Sequence",
           "value": "42"
+        },
+        {
+          "label": "Timestamp",
+          "value": "160",
+          "note": "the clock rate is not in the packet: choose one to read this in seconds"
         },
         {
           "label": "SSRC",
@@ -29,7 +45,8 @@
         },
         {
           "label": "Payload",
-          "value": "4 bytes"
+          "value": "4 bytes",
+          "note": "not decoded; the payload type says how"
         }
       ]
     }
@@ -45,7 +62,14 @@
     "fieldCount": 14,
     "expect": {
       "kind": "fields",
+      "role": "decoded",
+      "id": "fields",
       "fields": [
+        {
+          "label": "Protocol",
+          "value": "RTP",
+          "note": "second byte is 224"
+        },
         {
           "label": "V / P / X / CC",
           "value": "2 / 0 / 1 / 2"
@@ -60,6 +84,23 @@
           "value": "set"
         },
         {
+          "label": "Sequence",
+          "value": "1000"
+        },
+        {
+          "label": "Timestamp",
+          "value": "90000",
+          "note": "the clock rate is not in the packet: choose one to read this in seconds"
+        },
+        {
+          "label": "SSRC",
+          "value": "0x11223344"
+        },
+        {
+          "label": "CSRC 1",
+          "value": "0xAAAA0001"
+        },
+        {
           "label": "CSRC 2",
           "value": "0xAAAA0002"
         },
@@ -67,6 +108,23 @@
           "label": "Extension profile",
           "value": "0xBEDE",
           "note": "one-byte form (RFC 8285)"
+        },
+        {
+          "label": "Extension length",
+          "value": "2 words"
+        },
+        {
+          "label": "Extension ID 1",
+          "value": "1 byte"
+        },
+        {
+          "label": "Extension ID 2",
+          "value": "2 bytes"
+        },
+        {
+          "label": "Payload",
+          "value": "2 bytes",
+          "note": "not decoded; the payload type says how"
         }
       ]
     }
@@ -140,7 +198,8 @@
             "mono": true
           }
         ]
-      ]
+      ],
+      "role": "decoded"
     }
   },
   {
@@ -154,10 +213,38 @@
     "fieldCount": 9,
     "expect": {
       "kind": "fields",
+      "role": "decoded",
+      "id": "fields",
       "fields": [
+        {
+          "label": "Protocol",
+          "value": "RTP",
+          "note": "second byte is 8"
+        },
         {
           "label": "V / P / X / CC",
           "value": "2 / 1 / 0 / 0"
+        },
+        {
+          "label": "Payload type",
+          "value": "8 (PCMA)"
+        },
+        {
+          "label": "Marker",
+          "value": "clear"
+        },
+        {
+          "label": "Sequence",
+          "value": "7"
+        },
+        {
+          "label": "Timestamp",
+          "value": "8000",
+          "note": "the clock rate is not in the packet: choose one to read this in seconds"
+        },
+        {
+          "label": "SSRC",
+          "value": "0x01020304"
         },
         {
           "label": "Padding",
@@ -180,34 +267,84 @@
     },
     "match": "subset",
     "why": "pins the compound walk: finding the second sub-packet at all depends on reading the length field as words-minus-one, which is the classic RTCP off-by-one",
-    "fieldCount": 16,
+    "fieldCount": 14,
     "expect": {
       "kind": "fields",
+      "role": "decoded",
+      "id": "fields",
       "fields": [
         {
           "label": "Protocol",
-          "value": "RTCP"
+          "value": "RTCP",
+          "note": "second byte is 200",
+          "group": "Packet"
         },
         {
-          "label": "Sub-packets",
-          "value": "2",
-          "note": "SR + SDES"
+          "label": "V / P / count",
+          "value": "2 / 0 / 1",
+          "group": "SR #1"
         },
         {
-          "label": "#1 Length",
-          "value": "12 (52 bytes)"
+          "label": "Packet type",
+          "value": "200 SR (sender report)",
+          "group": "SR #1"
         },
         {
-          "label": "#1 Packets sent",
-          "value": "5000"
+          "label": "Length",
+          "value": "12 (52 bytes)",
+          "group": "SR #1"
         },
         {
-          "label": "#1 Octets sent",
-          "value": "800000"
+          "label": "Sender SSRC",
+          "value": "0x11111111",
+          "group": "SR #1"
         },
         {
-          "label": "#2 CNAME",
-          "value": "alice@example.com"
+          "label": "NTP timestamp",
+          "value": "3900000000.287445 s",
+          "group": "SR #1",
+          "note": "2023-08-02T21:20:00.287Z"
+        },
+        {
+          "label": "RTP timestamp",
+          "value": "3600000",
+          "group": "SR #1",
+          "note": "the clock rate is not in the packet: choose one to read this in seconds"
+        },
+        {
+          "label": "Packets sent",
+          "value": "5000",
+          "group": "SR #1"
+        },
+        {
+          "label": "Octets sent",
+          "value": "800000",
+          "group": "SR #1"
+        },
+        {
+          "label": "V / P / count",
+          "value": "2 / 0 / 1",
+          "group": "SDES #2"
+        },
+        {
+          "label": "Packet type",
+          "value": "202 SDES (source description)",
+          "group": "SDES #2"
+        },
+        {
+          "label": "Length",
+          "value": "6 (28 bytes)",
+          "group": "SDES #2"
+        },
+        {
+          "label": "SDES SSRC 1",
+          "value": "0x11111111",
+          "group": "SDES #2"
+        },
+        {
+          "label": "CNAME",
+          "value": "alice@example.com",
+          "group": "SDES #2"
         }
       ]
     }
@@ -219,27 +356,23 @@
       "view": "fields"
     },
     "match": "subset",
-    "why": "0x1a is 26, and 26/256 is 10.16%, which rounds to 10.2%. The tone is bad because that is above the 10% threshold, so the fixture pins the derivation and the judgement together",
+    "why": "0x1a is 26, and 26/256 is 10.16%, shown as the 256ths it is sent in, since a rounded 10.2% beside a 10% threshold cannot be checked. The tone is bad because that is above the 10% where the loss-based rule browsers use cuts the rate, so the fixture pins the derivation and the judgement together",
     "expect": {
       "kind": "table",
-      "caption": "SR #1: 1 report block",
+      "role": "decoded",
+      "caption": "SR #1 reports on 1 stream, lost since its last report. Over 10% lost: the loss-based rule browsers use cuts the sending rate",
       "columns": [
         {
-          "label": "Source SSRC",
+          "label": "Reports on",
           "mono": true
         },
         {
-          "label": "Fraction lost",
+          "label": "Lost (interval)",
           "align": "end",
           "mono": true
         },
         {
-          "label": "Cumulative lost",
-          "align": "end",
-          "mono": true
-        },
-        {
-          "label": "Highest seq",
+          "label": "Cum. lost",
           "align": "end",
           "mono": true
         },
@@ -249,14 +382,8 @@
           "mono": true
         },
         {
-          "label": "LSR",
-          "align": "end",
-          "mono": true
-        },
-        {
-          "label": "DLSR",
-          "align": "end",
-          "mono": true
+          "label": "RTT",
+          "align": "end"
         }
       ],
       "rows": [
@@ -266,7 +393,7 @@
             "mono": true
           },
           {
-            "text": "10.2%",
+            "text": "26/256 = 10.16%",
             "mono": true,
             "tone": "bad"
           },
@@ -275,20 +402,12 @@
             "mono": true
           },
           {
-            "text": "1500",
+            "text": "40 units",
             "mono": true
           },
           {
-            "text": "40",
-            "mono": true
-          },
-          {
-            "text": "0xAABBCCDD",
-            "mono": true
-          },
-          {
-            "text": "12345",
-            "mono": true
+            "text": "needs arrival time",
+            "tone": "muted"
           }
         ]
       ]
@@ -302,22 +421,490 @@
     },
     "match": "subset",
     "why": "finding the reason depends on comparing the cursor against the length field rather than the end of the packet, since the chunk is null-padded past it",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "id": "answer",
+      "fields": [
+        {
+          "label": "Packet",
+          "value": "RTCP, 20 bytes: BYE"
+        },
+        {
+          "label": "Leaving",
+          "value": "0x11111111",
+          "note": "because \"teardown\""
+        }
+      ]
+    }
+  },
+  {
+    "name": "a NACK: PID 100 with BLP 0b101 asks again for 100, 101 and 103 (RFC 4585 6.2.1)",
+    "input": {
+      "packet": "81cd0003 7a3b9c5d 1f2e3d4c 00640005",
+      "view": "fields",
+      "arrival": ""
+    },
+    "match": "subset",
+    "why": "Built by hand from the layout in the spec the name cites, so the decode is checked against what was encoded. Subset because the result is a group; the field count pins the part.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "id": "answer",
+      "fields": [
+        {
+          "label": "Packet",
+          "value": "RTCP, 16 bytes: NACK"
+        },
+        {
+          "label": "Asks again for",
+          "value": "3 packets: 100, 101 and 103",
+          "note": "On stream 0x1F2E3D4C. Resend them if they are still in the send buffer; otherwise the receiver conceals the gap."
+        }
+      ]
+    }
+  },
+  {
+    "name": "a PLI inside the RR compound RFC 3550 requires: a keyframe request (RFC 4585 6.3.1)",
+    "input": {
+      "packet": "80c90001 7a3b9c5d 81ce0002 7a3b9c5d 1f2e3d4c",
+      "view": "fields",
+      "arrival": ""
+    },
+    "match": "subset",
+    "why": "Built by hand from the layout in the spec the name cites, so the decode is checked against what was encoded. Subset because the result is a group; the field count pins the part.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "id": "answer",
+      "fields": [
+        {
+          "label": "Packet",
+          "value": "RTCP compound, 20 bytes: RR from 0x7A3B9C5D, then PLI"
+        },
+        {
+          "label": "Asks for",
+          "value": "a keyframe on 0x1F2E3D4C",
+          "note": "A picture loss indication: the receiver lost video it needs, and its picture is frozen or broken until a keyframe arrives."
+        }
+      ]
+    }
+  },
+  {
+    "name": "a FIR names the stream and its command sequence number (RFC 5104 4.3.1)",
+    "input": {
+      "packet": "84ce0004 7a3b9c5d 00000000 1f2e3d4c 07000000",
+      "view": "fields",
+      "arrival": ""
+    },
+    "match": "subset",
+    "why": "Built by hand from the layout in the spec the name cites, so the decode is checked against what was encoded. Subset because the result is a group; the field count pins the part.",
     "fieldCount": 8,
     "expect": {
       "kind": "fields",
+      "role": "decoded",
+      "id": "fields",
       "fields": [
         {
-          "label": "Leaving because",
-          "value": "teardown",
-          "group": "BYE"
+          "label": "Protocol",
+          "value": "RTCP",
+          "note": "second byte is 206",
+          "group": "Packet"
         },
         {
-          "label": "#1 BYE SSRC 1",
-          "value": "0x11111111"
+          "label": "V / P / FMT",
+          "value": "2 / 0 / 4",
+          "group": "FIR #1",
+          "note": "FMT 4 under type 206 is FIR"
         },
         {
-          "label": "#1 BYE reason",
-          "value": "teardown"
+          "label": "Packet type",
+          "value": "206 PSFB (payload feedback)",
+          "group": "FIR #1"
+        },
+        {
+          "label": "Length",
+          "value": "4 (20 bytes)",
+          "group": "FIR #1"
+        },
+        {
+          "label": "Sender SSRC",
+          "value": "0x7A3B9C5D",
+          "group": "FIR #1"
+        },
+        {
+          "label": "Media source SSRC",
+          "value": "0x00000000",
+          "group": "FIR #1",
+          "note": "0: the message names its streams inside"
+        },
+        {
+          "label": "FIR SSRC 1",
+          "value": "0x1F2E3D4C",
+          "group": "FIR #1",
+          "note": "the stream asked for a keyframe"
+        },
+        {
+          "label": "FIR sequence 1",
+          "value": "7",
+          "group": "FIR #1",
+          "note": "the same number twice is a repeat of the same request"
+        }
+      ]
+    }
+  },
+  {
+    "name": "REMB: mantissa 187500 x 2^3 is 1.50 Mbit/s (draft-alvestrand-rmcat-remb-03 2.2)",
+    "input": {
+      "packet": "8fce0005 7a3b9c5d 00000000 52454d42 010edc6c 1f2e3d4c",
+      "view": "fields",
+      "arrival": ""
+    },
+    "match": "subset",
+    "why": "Built by hand from the layout in the spec the name cites, so the decode is checked against what was encoded. Subset because the result is a group; the field count pins the part.",
+    "fieldCount": 10,
+    "expect": {
+      "kind": "fields",
+      "role": "decoded",
+      "id": "fields",
+      "fields": [
+        {
+          "label": "Protocol",
+          "value": "RTCP",
+          "note": "second byte is 206",
+          "group": "Packet"
+        },
+        {
+          "label": "V / P / FMT",
+          "value": "2 / 0 / 15",
+          "group": "REMB #1",
+          "note": "FMT 15 under type 206 is REMB"
+        },
+        {
+          "label": "Packet type",
+          "value": "206 PSFB (payload feedback)",
+          "group": "REMB #1"
+        },
+        {
+          "label": "Length",
+          "value": "5 (24 bytes)",
+          "group": "REMB #1"
+        },
+        {
+          "label": "Sender SSRC",
+          "value": "0x7A3B9C5D",
+          "group": "REMB #1"
+        },
+        {
+          "label": "Media source SSRC",
+          "value": "0x00000000",
+          "group": "REMB #1",
+          "note": "0: the message names its streams inside"
+        },
+        {
+          "label": "Identifier",
+          "value": "REMB",
+          "group": "REMB #1"
+        },
+        {
+          "label": "SSRC count",
+          "value": "1",
+          "group": "REMB #1"
+        },
+        {
+          "label": "Bitrate",
+          "value": "1.50 Mbit/s",
+          "group": "REMB #1",
+          "note": "mantissa 187500 x 2^3 = 1500000 bit/s"
+        },
+        {
+          "label": "REMB SSRC 1",
+          "value": "0x1F2E3D4C",
+          "group": "REMB #1"
+        }
+      ]
+    }
+  },
+  {
+    "name": "TWCC: a run chunk, a one-bit vector and seven deltas, one packet lost (draft-holmer-rmcat-transport-wide-cc-extensions-01 3.1)",
+    "input": {
+      "packet": "8fcd0007 7a3b9c5d 1f2e3d4c 00640008 0003e805 2005a800 50505054 50584c00",
+      "view": "fields",
+      "arrival": ""
+    },
+    "match": "subset",
+    "why": "Built by hand from the layout in the spec the name cites, so the decode is checked against what was encoded. Subset because the result is a group; the field count pins the part.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "id": "answer",
+      "fields": [
+        {
+          "label": "Packet",
+          "value": "RTCP, 32 bytes: TWCC"
+        },
+        {
+          "label": "Lost",
+          "value": "1 of 8",
+          "note": "from transport-wide sequence 100"
+        }
+      ]
+    }
+  },
+  {
+    "name": "TWCC: the header in ms, the reference time in 64 ms steps",
+    "input": {
+      "packet": "8fcd0007 7a3b9c5d 1f2e3d4c 00640008 0003e805 2005a800 50505054 50584c00",
+      "view": "fields",
+      "arrival": ""
+    },
+    "match": "subset",
+    "why": "Built by hand from the layout in the spec the name cites, so the decode is checked against what was encoded. Subset because the result is a group; the field count pins the part.",
+    "fieldCount": 14,
+    "expect": {
+      "kind": "fields",
+      "role": "decoded",
+      "id": "fields",
+      "fields": [
+        {
+          "label": "Protocol",
+          "value": "RTCP",
+          "note": "second byte is 205",
+          "group": "Packet"
+        },
+        {
+          "label": "V / P / FMT",
+          "value": "2 / 0 / 15",
+          "group": "TWCC #1",
+          "note": "FMT 15 under type 205 is TWCC"
+        },
+        {
+          "label": "Packet type",
+          "value": "205 RTPFB (transport feedback)",
+          "group": "TWCC #1"
+        },
+        {
+          "label": "Length",
+          "value": "7 (32 bytes)",
+          "group": "TWCC #1"
+        },
+        {
+          "label": "Sender SSRC",
+          "value": "0x7A3B9C5D",
+          "group": "TWCC #1"
+        },
+        {
+          "label": "Media source SSRC",
+          "value": "0x1F2E3D4C",
+          "group": "TWCC #1",
+          "note": "the stream this feedback is about"
+        },
+        {
+          "label": "Base sequence",
+          "value": "100",
+          "group": "TWCC #1",
+          "note": "the first packet this message reports on"
+        },
+        {
+          "label": "Packet status count",
+          "value": "8",
+          "group": "TWCC #1"
+        },
+        {
+          "label": "Reference time",
+          "value": "64000 ms",
+          "group": "TWCC #1",
+          "note": "1000 x 64 ms, on the receiver's clock"
+        },
+        {
+          "label": "Feedback count",
+          "value": "5",
+          "group": "TWCC #1",
+          "note": "counts these messages, so a lost one shows as a gap"
+        },
+        {
+          "label": "Run chunk 1",
+          "value": "5 x small delta",
+          "group": "TWCC #1"
+        },
+        {
+          "label": "Vector chunk 2",
+          "value": "3 one-bit statuses",
+          "group": "TWCC #1"
+        },
+        {
+          "label": "Receive deltas",
+          "value": "7 deltas, 7 bytes",
+          "group": "TWCC #1",
+          "note": "250 microsecond steps"
+        },
+        {
+          "label": "Padding",
+          "value": "1 byte",
+          "group": "TWCC #1",
+          "note": "to the next 32-bit boundary"
+        }
+      ]
+    }
+  },
+  {
+    "name": "RFC 8888 congestion control feedback: two arrived, one with ECN CE, one lost (RFC 8888 3.1)",
+    "input": {
+      "packet": "8bcd0006 7a3b9c5d 1f2e3d4c 00640003 8100e200 00000000 d8f14ccc",
+      "view": "fields",
+      "arrival": "",
+      "clock": "0"
+    },
+    "match": "subset",
+    "why": "Built by hand from the layout in the spec the name cites, and checked field by field in index.test.ts. Subset because the result is a group; the field count pins the part.",
+    "fieldCount": 3,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "id": "answer",
+      "fields": [
+        {
+          "label": "Packet",
+          "value": "RTCP, 28 bytes: CCFB"
+        },
+        {
+          "label": "Lost",
+          "value": "1 of 3",
+          "note": "reported on 1 stream"
+        },
+        {
+          "label": "Marked congested",
+          "value": "1 of 2",
+          "note": "ECN CE: a router queue is filling, and set the mark instead of dropping the packet."
+        }
+      ]
+    }
+  },
+  {
+    "name": "the server's receiver report at 48 kHz: 130 units of jitter is 2.708 ms",
+    "input": {
+      "packet": "81 c9 00 07 7a 3b 9c 5d 1f 2e 3d 4c 06 00 00 06 00 00 04 e1 00 00 00 82 d8 f0 40 00 00 00 fd 70 81 ca 00 06 7a 3b 9c 5d 01 10 73 2b 72 4e 4d 30 4d 37 4d 62 55 6c 49 31 45 44 00 00",
+      "view": "fields",
+      "arrival": "d8f1:4ccc",
+      "clock": "48000"
+    },
+    "match": "subset",
+    "why": "Jitter is RTP timestamp units, so the clock rate turns it into time: 130 / 48000 s, shown beside the units in the report table. A table has no subset form, so it is matched exactly",
+    "expect": {
+      "kind": "table",
+      "role": "decoded",
+      "caption": "RR #1 reports on 1 stream, lost since its last report",
+      "columns": [
+        {
+          "label": "Reports on",
+          "mono": true
+        },
+        {
+          "label": "Lost (interval)",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Cum. lost",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Jitter",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "RTT",
+          "align": "end"
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "0x1F2E3D4C",
+            "mono": true
+          },
+          {
+            "text": "6/256 = 2.34%",
+            "mono": true
+          },
+          {
+            "text": "6",
+            "mono": true
+          },
+          {
+            "text": "130 = 2.708 ms",
+            "mono": true
+          },
+          {
+            "text": "59.998 ms",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "a Wireshark hex dump of a whole Ethernet frame: the text column and the headers are not the packet",
+    "input": {
+      "packet": "0000   02 42 ac 11 00 02 02 42 ac 11 00 03 08 00 45 00   .B.....B......E.\n0010   00 2c 1c 46 40 00 40 11 c6 4b c0 a8 01 2a c0 00   .,.F@.@..K...*..\n0020   02 0a c3 54 d4 31 00 18 00 00 80 6f 03 f2 00 00   ...T.1.....o....\n0030   25 80 1f 2e 3d 4c de ad be ef                     %...=L....",
+      "view": "fields",
+      "arrival": "",
+      "clock": "48000"
+    },
+    "match": "subset",
+    "why": "The frame is built by hand: Ethernet type 0x0800, IPv4 protocol 17, UDP 50004 to 54321 of length 24, around a 16-byte RTP packet, in Wireshark's Copy as Hex Dump layout. Subset because the result is a group.",
+    "fieldCount": 9,
+    "expect": {
+      "kind": "fields",
+      "role": "decoded",
+      "id": "fields",
+      "fields": [
+        {
+          "label": "Protocol",
+          "value": "RTP",
+          "note": "second byte is 111"
+        },
+        {
+          "label": "Stripped first",
+          "value": "Ethernet, IPv4 and UDP headers",
+          "note": "UDP port 50004 to 54321; the offsets below count from the UDP payload"
+        },
+        {
+          "label": "V / P / X / CC",
+          "value": "2 / 0 / 0 / 0"
+        },
+        {
+          "label": "Payload type",
+          "value": "111",
+          "note": "dynamic; only the signalling says what it is"
+        },
+        {
+          "label": "Marker",
+          "value": "clear"
+        },
+        {
+          "label": "Sequence",
+          "value": "1010"
+        },
+        {
+          "label": "Timestamp",
+          "value": "9600",
+          "note": "0.200 s at 48 kHz; only the difference between two packets means anything"
+        },
+        {
+          "label": "SSRC",
+          "value": "0x1F2E3D4C"
+        },
+        {
+          "label": "Payload",
+          "value": "4 bytes",
+          "note": "not decoded; the payload type says how"
         }
       ]
     }
@@ -382,40 +969,85 @@
       "arrival": ""
     },
     "match": "subset",
-    "fieldCount": 15,
+    "fieldCount": 14,
     "why": "Post 5's SR, from rtcp_reports.py: \"NTP 0xee69d8f040000000 = 3999914224 s + 0.25 s since 1900\", sent at 07:17:04.250 UTC. The fraction is 0x40000000 / 2^32 = 0.25 s. Version 1.1 printed the fraction as a raw integer, 3999914224.1073741824, and dropped it from the date, 07:17:04.000Z",
     "expect": {
       "kind": "fields",
+      "role": "decoded",
+      "id": "fields",
       "fields": [
         {
-          "label": "Sub-packets",
-          "value": "2",
-          "note": "SR + SDES"
+          "label": "Protocol",
+          "value": "RTCP",
+          "note": "second byte is 200",
+          "group": "Packet"
         },
         {
-          "label": "#1 Sender SSRC",
-          "value": "0x1F2E3D4C"
+          "label": "V / P / count",
+          "value": "2 / 0 / 0",
+          "group": "SR #1"
         },
         {
-          "label": "#1 NTP timestamp",
+          "label": "Packet type",
+          "value": "200 SR (sender report)",
+          "group": "SR #1"
+        },
+        {
+          "label": "Length",
+          "value": "6 (28 bytes)",
+          "group": "SR #1"
+        },
+        {
+          "label": "Sender SSRC",
+          "value": "0x1F2E3D4C",
+          "group": "SR #1"
+        },
+        {
+          "label": "NTP timestamp",
           "value": "3999914224.250000 s",
+          "group": "SR #1",
           "note": "2026-10-02T07:17:04.250Z"
         },
         {
-          "label": "#1 RTP timestamp",
-          "value": "192000"
+          "label": "RTP timestamp",
+          "value": "192000",
+          "group": "SR #1",
+          "note": "the clock rate is not in the packet: choose one to read this in seconds"
         },
         {
-          "label": "#1 Packets sent",
-          "value": "200"
+          "label": "Packets sent",
+          "value": "200",
+          "group": "SR #1"
         },
         {
-          "label": "#1 Octets sent",
-          "value": "16000"
+          "label": "Octets sent",
+          "value": "16000",
+          "group": "SR #1"
         },
         {
-          "label": "#2 CNAME",
-          "value": "K9gGyX8OAK8aH8My"
+          "label": "V / P / count",
+          "value": "2 / 0 / 1",
+          "group": "SDES #2"
+        },
+        {
+          "label": "Packet type",
+          "value": "202 SDES (source description)",
+          "group": "SDES #2"
+        },
+        {
+          "label": "Length",
+          "value": "6 (28 bytes)",
+          "group": "SDES #2"
+        },
+        {
+          "label": "SDES SSRC 1",
+          "value": "0x1F2E3D4C",
+          "group": "SDES #2"
+        },
+        {
+          "label": "CNAME",
+          "value": "K9gGyX8OAK8aH8My",
+          "group": "SDES #2"
         }
       ]
     }
@@ -432,6 +1064,8 @@
     "why": "rtcp_reports.py: \"its middle 32 bits, which the server will echo as LSR: 0xd8f04000 = 0xd8f0:4000 (55536.250000 s)\". 0xd8f0 is 55536 s and 0x4000 / 65536 = 0.25 s",
     "expect": {
       "kind": "fields",
+      "role": "method",
+      "id": "timing",
       "fields": [
         {
           "group": "SR #1",
@@ -449,15 +1083,85 @@
       "view": "fields"
     },
     "match": "subset",
-    "fieldCount": 16,
+    "fieldCount": 14,
     "why": "By hand: 0xe8754700 = 3900000000 s and 0x499602d2 = 1234567890, which is 1234567890 / 2^32 = 0.2874452 s; 3900000000 - 2208988800 = 1691011200 s after 1970, 2023-08-02T21:20:00Z. Version 1.1 printed 3900000000.1234567890, which reads as 0.123 s",
     "expect": {
       "kind": "fields",
+      "role": "decoded",
+      "id": "fields",
       "fields": [
         {
-          "label": "#1 NTP timestamp",
+          "label": "Protocol",
+          "value": "RTCP",
+          "note": "second byte is 200",
+          "group": "Packet"
+        },
+        {
+          "label": "V / P / count",
+          "value": "2 / 0 / 1",
+          "group": "SR #1"
+        },
+        {
+          "label": "Packet type",
+          "value": "200 SR (sender report)",
+          "group": "SR #1"
+        },
+        {
+          "label": "Length",
+          "value": "12 (52 bytes)",
+          "group": "SR #1"
+        },
+        {
+          "label": "Sender SSRC",
+          "value": "0x11111111",
+          "group": "SR #1"
+        },
+        {
+          "label": "NTP timestamp",
           "value": "3900000000.287445 s",
+          "group": "SR #1",
           "note": "2023-08-02T21:20:00.287Z"
+        },
+        {
+          "label": "RTP timestamp",
+          "value": "3600000",
+          "group": "SR #1",
+          "note": "the clock rate is not in the packet: choose one to read this in seconds"
+        },
+        {
+          "label": "Packets sent",
+          "value": "5000",
+          "group": "SR #1"
+        },
+        {
+          "label": "Octets sent",
+          "value": "800000",
+          "group": "SR #1"
+        },
+        {
+          "label": "V / P / count",
+          "value": "2 / 0 / 1",
+          "group": "SDES #2"
+        },
+        {
+          "label": "Packet type",
+          "value": "202 SDES (source description)",
+          "group": "SDES #2"
+        },
+        {
+          "label": "Length",
+          "value": "6 (28 bytes)",
+          "group": "SDES #2"
+        },
+        {
+          "label": "SDES SSRC 1",
+          "value": "0x11111111",
+          "group": "SDES #2"
+        },
+        {
+          "label": "CNAME",
+          "value": "alice@example.com",
+          "group": "SDES #2"
         }
       ]
     }
@@ -474,12 +1178,14 @@
     "why": "rtcp_reports.py: fraction lost 6 = 2.34%; LSR 0xd8f0:4000 (55536.250000 s); DLSR 0x0000:fd70, 64880 units, 0.990 s; A 0xd8f1:4ccc; \"round trip = A - LSR - DLSR = 3932 / 65536 s = 59.998 ms\"",
     "expect": {
       "kind": "fields",
+      "role": "method",
+      "id": "timing",
       "fields": [
         {
           "group": "RR #1, block 1",
-          "label": "Fraction lost",
-          "value": "6/256 = 2.34%",
-          "note": "truncated to 256ths: the true share is at least this, and less than 1/256 more"
+          "label": "Highest sequence",
+          "value": "1249",
+          "note": "the extended highest sequence number received"
         },
         {
           "group": "RR #1, block 1",
@@ -490,7 +1196,7 @@
         {
           "group": "RR #1, block 1",
           "label": "DLSR",
-          "value": "0.990 s",
+          "value": "990.0 ms",
           "note": "64880 / 65536 s, 0x0000:FD70: how long the receiver held the SR before replying"
         },
         {
@@ -514,7 +1220,27 @@
     "why": "A is the one number that is not in the packet: it is when Alice received it, on her own clock",
     "expect": {
       "kind": "fields",
+      "role": "method",
+      "id": "timing",
       "fields": [
+        {
+          "group": "RR #1, block 1",
+          "label": "Highest sequence",
+          "value": "1249",
+          "note": "the extended highest sequence number received"
+        },
+        {
+          "group": "RR #1, block 1",
+          "label": "LSR",
+          "value": "0xD8F0:4000",
+          "note": "55536.250000 s, the middle 32 bits of the SR this answers"
+        },
+        {
+          "group": "RR #1, block 1",
+          "label": "DLSR",
+          "value": "990.0 ms",
+          "note": "64880 / 65536 s, 0x0000:FD70: how long the receiver held the SR before replying"
+        },
         {
           "group": "RR #1, block 1",
           "label": "Round trip",
@@ -535,24 +1261,20 @@
     "why": "rtcp_reports.py's report block 1f 2e 3d 4c 06 00 00 06 00 00 04 e1 00 00 00 82 d8 f0 40 00 00 00 fd 70: SSRC 0x1F2E3D4C, fraction 6, cumulative 6, highest 0x04e1 = 1249, jitter 0x82 = 130, LSR 0xd8f04000, DLSR 0xfd70 = 64880. A table has no subset form, so the table part is matched exactly",
     "expect": {
       "kind": "table",
-      "caption": "RR #1: 1 report block",
+      "role": "decoded",
+      "caption": "RR #1 reports on 1 stream, lost since its last report",
       "columns": [
         {
-          "label": "Source SSRC",
+          "label": "Reports on",
           "mono": true
         },
         {
-          "label": "Fraction lost",
+          "label": "Lost (interval)",
           "align": "end",
           "mono": true
         },
         {
-          "label": "Cumulative lost",
-          "align": "end",
-          "mono": true
-        },
-        {
-          "label": "Highest seq",
+          "label": "Cum. lost",
           "align": "end",
           "mono": true
         },
@@ -562,14 +1284,8 @@
           "mono": true
         },
         {
-          "label": "LSR",
-          "align": "end",
-          "mono": true
-        },
-        {
-          "label": "DLSR",
-          "align": "end",
-          "mono": true
+          "label": "RTT",
+          "align": "end"
         }
       ],
       "rows": [
@@ -579,7 +1295,7 @@
             "mono": true
           },
           {
-            "text": "2.3%",
+            "text": "6/256 = 2.34%",
             "mono": true
           },
           {
@@ -587,20 +1303,12 @@
             "mono": true
           },
           {
-            "text": "1249",
+            "text": "130 units",
             "mono": true
           },
           {
-            "text": "130",
-            "mono": true
-          },
-          {
-            "text": "0xD8F04000",
-            "mono": true
-          },
-          {
-            "text": "64880",
-            "mono": true
+            "text": "needs arrival time",
+            "tone": "muted"
           }
         ]
       ]
@@ -618,7 +1326,27 @@
     "why": "RFC 3550 section 6.4.1, Figure 2: A 0xb710:8000, LSR 0xb705:2000, DLSR 0x0005:4000, so the delay is 0x0006:2000 = 401408 / 65536 = 6.125 s. The packet is an RR built around those three values; its other fields are placeholders",
     "expect": {
       "kind": "fields",
+      "role": "method",
+      "id": "timing",
       "fields": [
+        {
+          "group": "RR #1, block 1",
+          "label": "Highest sequence",
+          "value": "0",
+          "note": "the extended highest sequence number received"
+        },
+        {
+          "group": "RR #1, block 1",
+          "label": "LSR",
+          "value": "0xB705:2000",
+          "note": "46853.125000 s, the middle 32 bits of the SR this answers"
+        },
+        {
+          "group": "RR #1, block 1",
+          "label": "DLSR",
+          "value": "5250.0 ms",
+          "note": "344064 / 65536 s, 0x0005:4000: how long the receiver held the SR before replying"
+        },
         {
           "group": "RR #1, block 1",
           "label": "Round trip",

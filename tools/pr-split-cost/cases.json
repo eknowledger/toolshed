@@ -1,0 +1,642 @@
+[
+  {
+    "name": "an elasticity given, no PRs: 8 pieces one after another wait 8^0.57 = 3.27 times as long",
+    "input": {
+      "pairs": "",
+      "source": "given",
+      "elasticity": 0.43,
+      "lines": 800,
+      "split": 8,
+      "review": "serial"
+    },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "table",
+          "role": "comparison",
+          "caption": "8 PRs instead of one of 800 lines: the wait for a first review, as a multiple of the one PR's",
+          "columns": [
+            {
+              "label": "Reviewed"
+            },
+            {
+              "label": "At e = 0.43",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "If size does not matter",
+              "align": "end",
+              "mono": true
+            }
+          ],
+          "rows": [
+            [
+              {
+                "text": "One after another (your pick)",
+                "tone": "normal"
+              },
+              {
+                "text": "3.27x",
+                "mono": true,
+                "tone": "normal"
+              },
+              {
+                "text": "8x",
+                "mono": true,
+                "tone": "normal"
+              }
+            ],
+            [
+              {
+                "text": "In one sitting",
+                "tone": "muted"
+              },
+              {
+                "text": "0.41x",
+                "mono": true,
+                "tone": "muted"
+              },
+              {
+                "text": "1x",
+                "mono": true,
+                "tone": "muted"
+              }
+            ],
+            [
+              {
+                "text": "Side by side",
+                "tone": "normal"
+              },
+              {
+                "text": "Paste PRs",
+                "mono": true,
+                "tone": "normal"
+              },
+              {
+                "text": "Paste PRs",
+                "mono": true,
+                "tone": "normal"
+              }
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "e = 0.43, typed in rather than fitted, so nothing here says how well size predicts the wait."
+        },
+        {
+          "kind": "fields",
+          "role": "metrics",
+          "fields": [
+            {
+              "label": "Doubling a PR",
+              "value": "1.35x the wait"
+            }
+          ]
+        },
+        {
+          "kind": "series",
+          "chart": {
+            "xLabel": "Split into k PRs",
+            "yLabel": "Waiting for a first review, against one PR",
+            "x": [
+              1,
+              2,
+              3,
+              4,
+              6,
+              8,
+              12,
+              16
+            ],
+            "series": [
+              {
+                "label": "One after another",
+                "shape": "line",
+                "markers": true,
+                "points": [
+                  1,
+                  1.485,
+                  1.871,
+                  2.204,
+                  2.777,
+                  3.272,
+                  4.122,
+                  4.857
+                ]
+              },
+              {
+                "label": "In one sitting",
+                "shape": "line",
+                "markers": true,
+                "points": [
+                  1,
+                  0.742,
+                  0.624,
+                  0.551,
+                  0.463,
+                  0.409,
+                  0.344,
+                  0.304
+                ]
+              }
+            ],
+            "thresholds": [
+              {
+                "y": 1,
+                "label": "one PR"
+              }
+            ],
+            "annotations": [
+              {
+                "x": 8,
+                "label": "8 PRs"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "fields",
+          "role": "method",
+          "fields": [
+            {
+              "label": "One after another",
+              "value": "Each piece waits for its own first review, and the next opens when the last one merges.",
+              "group": "What each way assumes"
+            },
+            {
+              "label": "Side by side",
+              "value": "All the pieces open at once and are picked up independently, so the change waits for the slowest.",
+              "group": "What each way assumes"
+            },
+            {
+              "label": "In one sitting",
+              "value": "One reviewer takes them all together, as soon as they would start one small piece. That is an assumption about how they work, not a measurement.",
+              "group": "What each way assumes"
+            },
+            {
+              "label": "Measured",
+              "value": "Hours from ready for review to the first review by someone else. Not the time to merge.",
+              "group": "What it counts"
+            }
+          ]
+        },
+        {
+          "kind": "code",
+          "lang": "markdown",
+          "source": "**Splitting a change of 800 lines into 8 PRs** (e = 0.43, as given)\n\n| Reviewed | If size drives the pickup | If size has no effect |\n|---|---|---|\n| One after another | 3.27x | 8x |\n| Side by side | needs PRs | needs PRs |\n| In one sitting | 0.41x | 1x |\n\nExpected waiting for a first review, against one PR of the whole change. A correlation, not a cause. In one sitting assumes one reviewer takes every piece together."
+        }
+      ]
+    }
+  },
+  {
+    "name": "PRs that lie exactly on wait = 2 x size^0.5: e is 0.5, every residual is 1, so side by side equals one sitting",
+    "input": {
+      "pairs": "1,2\n4,4\n9,6\n16,8\n25,10\n36,12\n49,14\n64,16\n81,18\n100,20\n400,40",
+      "source": "fit",
+      "elasticity": 0.25,
+      "lines": 100,
+      "split": 4,
+      "review": "parallel"
+    },
+    "match": "subset",
+    "why": "By hand: the log-log fit of y = 2x^0.5 has slope 0.5 and r = 1, so every residual is 1. With no scatter the slowest of 4 pickups is just one pickup of a quarter-size PR, 4^-0.5 = 0.5. If size has no effect, the change waits for the largest of 4 draws from the eleven waits 2, 4, ..., 20 and 40, whose expectation over their mean is 1.78.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "4 PRs instead of one of 100 lines: the wait for a first review, as a multiple of the one PR's",
+      "columns": [
+        {
+          "label": "Reviewed"
+        },
+        {
+          "label": "Fit says",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "If size does not matter",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "One after another",
+            "tone": "normal"
+          },
+          {
+            "text": "2x",
+            "mono": true,
+            "tone": "normal"
+          },
+          {
+            "text": "4x",
+            "mono": true,
+            "tone": "normal"
+          }
+        ],
+        [
+          {
+            "text": "Side by side (your pick)",
+            "tone": "normal"
+          },
+          {
+            "text": "0.50x",
+            "mono": true,
+            "tone": "normal"
+          },
+          {
+            "text": "1.78x",
+            "mono": true,
+            "tone": "normal"
+          }
+        ],
+        [
+          {
+            "text": "In one sitting",
+            "tone": "muted"
+          },
+          {
+            "text": "0.50x",
+            "mono": true,
+            "tone": "muted"
+          },
+          {
+            "text": "1x",
+            "mono": true,
+            "tone": "muted"
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "the same PRs' stats: e = 0.50 with no spread, and one PR of 100 lines waits 2 x 10 = 20 h, mean and median alike",
+    "input": {
+      "pairs": "1,2\n4,4\n9,6\n16,8\n25,10\n36,12\n49,14\n64,16\n81,18\n100,20\n400,40",
+      "source": "fit",
+      "elasticity": 0.25,
+      "lines": 100,
+      "split": 4,
+      "review": "parallel"
+    },
+    "match": "subset",
+    "fieldCount": 3,
+    "why": "Every bootstrap resample of points on one line gives the same slope, 0.50, and r = 1. One PR of 100 lines sits on the line at 2 x 100^0.5 = 20 h, and with every residual 1 the median and the mean agree, so nothing pulls the mean up.",
+    "expect": {
+      "kind": "fields",
+      "role": "metrics",
+      "fields": [
+        {
+          "label": "Elasticity e",
+          "value": "0.50",
+          "note": "95% bootstrap range 0.50 to 0.50"
+        },
+        {
+          "label": "Doubling a PR",
+          "value": "1.41x the wait"
+        },
+        {
+          "label": "Median wait, one PR of 100 lines",
+          "value": "20.0 h",
+          "note": "mean 20.0 h"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the same PRs one after another: 4^(1 - 0.5) = 2, and with no effect of size, 4",
+    "input": {
+      "pairs": "1,2\n4,4\n9,6\n16,8\n25,10\n36,12\n49,14\n64,16\n81,18\n100,20\n400,40",
+      "source": "fit",
+      "elasticity": 0.25,
+      "lines": 100,
+      "split": 4,
+      "review": "serial"
+    },
+    "match": "subset",
+    "why": "k^(1-e) with k = 4 and e = 0.5 is 2, and the bootstrap range collapses to the same number. If size had no effect, four pickups in a row would be four ordinary pickups: 4.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "4 PRs instead of one of 100 lines: the wait for a first review, as a multiple of the one PR's",
+      "columns": [
+        {
+          "label": "Reviewed"
+        },
+        {
+          "label": "Fit says",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "If size does not matter",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "One after another (your pick)",
+            "tone": "normal"
+          },
+          {
+            "text": "2x",
+            "mono": true,
+            "tone": "normal"
+          },
+          {
+            "text": "4x",
+            "mono": true,
+            "tone": "normal"
+          }
+        ],
+        [
+          {
+            "text": "Side by side",
+            "tone": "normal"
+          },
+          {
+            "text": "0.50x",
+            "mono": true,
+            "tone": "normal"
+          },
+          {
+            "text": "1.78x",
+            "mono": true,
+            "tone": "normal"
+          }
+        ],
+        [
+          {
+            "text": "In one sitting",
+            "tone": "muted"
+          },
+          {
+            "text": "0.50x",
+            "mono": true,
+            "tone": "muted"
+          },
+          {
+            "text": "1x",
+            "mono": true,
+            "tone": "muted"
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "the three ways for those PRs, slowest first: 2, then 0.5 side by side, then 0.5 in one sitting, which is muted, not green",
+    "input": {
+      "pairs": "1,2\n4,4\n9,6\n16,8\n25,10\n36,12\n49,14\n64,16\n81,18\n100,20\n400,40",
+      "source": "fit",
+      "elasticity": 0.25,
+      "lines": 100,
+      "split": 4,
+      "review": "serial"
+    },
+    "match": "subset",
+    "why": "Subset only to reach the one table inside the group; a table is then compared exactly. The waits are the cases above at k = 4, and ties keep the order one after another, side by side, in one sitting.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "4 PRs instead of one of 100 lines: the wait for a first review, as a multiple of the one PR's",
+      "columns": [
+        {
+          "label": "Reviewed"
+        },
+        {
+          "label": "Fit says",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "If size does not matter",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "One after another (your pick)",
+            "tone": "normal"
+          },
+          {
+            "text": "2x",
+            "mono": true,
+            "tone": "normal"
+          },
+          {
+            "text": "4x",
+            "mono": true,
+            "tone": "normal"
+          }
+        ],
+        [
+          {
+            "text": "Side by side",
+            "tone": "normal"
+          },
+          {
+            "text": "0.50x",
+            "mono": true,
+            "tone": "normal"
+          },
+          {
+            "text": "1.78x",
+            "mono": true,
+            "tone": "normal"
+          }
+        ],
+        [
+          {
+            "text": "In one sitting",
+            "tone": "muted"
+          },
+          {
+            "text": "0.50x",
+            "mono": true,
+            "tone": "muted"
+          },
+          {
+            "text": "1x",
+            "mono": true,
+            "tone": "muted"
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "in one sitting is shown muted, because it rests on an assumption about the reviewer, even when it is the shortest wait",
+    "input": {
+      "pairs": "1,2\n4,4\n9,6\n16,8\n25,10\n36,12\n49,14\n64,16\n81,18\n100,20\n400,40",
+      "source": "fit",
+      "elasticity": 0.25,
+      "lines": 100,
+      "split": 4,
+      "review": "sitting"
+    },
+    "match": "subset",
+    "why": "4^-0.5 = 0.5 on the fit, and one ordinary pickup if size has no effect. The tone is muted rather than good on purpose.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "4 PRs instead of one of 100 lines: the wait for a first review, as a multiple of the one PR's",
+      "columns": [
+        {
+          "label": "Reviewed"
+        },
+        {
+          "label": "Fit says",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "If size does not matter",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "One after another",
+            "tone": "normal"
+          },
+          {
+            "text": "2x",
+            "mono": true,
+            "tone": "normal"
+          },
+          {
+            "text": "4x",
+            "mono": true,
+            "tone": "normal"
+          }
+        ],
+        [
+          {
+            "text": "Side by side",
+            "tone": "normal"
+          },
+          {
+            "text": "0.50x",
+            "mono": true,
+            "tone": "normal"
+          },
+          {
+            "text": "1.78x",
+            "mono": true,
+            "tone": "normal"
+          }
+        ],
+        [
+          {
+            "text": "In one sitting (your pick)",
+            "tone": "muted"
+          },
+          {
+            "text": "0.50x",
+            "mono": true,
+            "tone": "muted"
+          },
+          {
+            "text": "1x",
+            "mono": true,
+            "tone": "muted"
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "a line that isn't two numbers is pointed at",
+    "input": {
+      "pairs": "size,wait_hours\n120,3.5\n40 h,1",
+      "source": "fit",
+      "elasticity": 0.25,
+      "lines": 100,
+      "split": 4,
+      "review": "parallel"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Line 3 isn't two numbers: \"40 h,1\".",
+      "input": "pairs",
+      "at": 24,
+      "len": 6
+    }
+  },
+  {
+    "name": "too few PRs to fit a line",
+    "input": {
+      "pairs": "1,2\n3,4",
+      "source": "fit",
+      "elasticity": 0.25,
+      "lines": 100,
+      "split": 4,
+      "review": "parallel"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Paste at least 10 PRs to fit; there are 2.",
+      "input": "pairs"
+    }
+  },
+  {
+    "name": "every PR the same size has no slope",
+    "input": {
+      "pairs": "50,1\n50,2\n50,1\n50,2\n50,1\n50,2\n50,1\n50,2\n50,1\n50,2",
+      "source": "fit",
+      "elasticity": 0.25,
+      "lines": 100,
+      "split": 4,
+      "review": "parallel"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Every PR is the same size, so there is no slope to fit.",
+      "input": "pairs"
+    }
+  },
+  {
+    "name": "zero pieces is not a split",
+    "input": {
+      "pairs": "1,2\n4,4\n9,6\n16,8\n25,10\n36,12\n49,14\n64,16\n81,18\n100,20\n400,40",
+      "source": "fit",
+      "elasticity": 0.25,
+      "lines": 100,
+      "split": 0,
+      "review": "parallel"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Split into a whole number of PRs, from 1 to 50.",
+      "input": "split"
+    }
+  },
+  {
+    "name": "an elasticity above 1 would mean bigger PRs wait more than in proportion, which the rule here doesn't model",
+    "input": {
+      "pairs": "1,2\n4,4\n9,6\n16,8\n25,10\n36,12\n49,14\n64,16\n81,18\n100,20\n400,40",
+      "source": "given",
+      "elasticity": 1.5,
+      "lines": 100,
+      "split": 4,
+      "review": "parallel"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "An elasticity between 0 and 1, please.",
+      "input": "elasticity"
+    }
+  }
+]

@@ -18,10 +18,10 @@
   "additionalProperties": false,
   "properties": {
     "sdk": {
-      "description": "Contract version this manifest is written against. 4 is current.",
+      "description": "Contract version this manifest is written against. 7 is current: 5 adds role and the muted tone, 6 adds select presets (sets) and textarea lang, 7 adds the graph kind and textarea grammar.",
       "type": "integer",
       "minimum": 1,
-      "maximum": 4
+      "maximum": 7
     },
     "id": {
       "description": "Directory name, and the id every route and relation uses.",
@@ -88,7 +88,8 @@
           "pie",
           "radar",
           "treemap",
-          "venn"
+          "venn",
+          "graph"
         ]
       },
       "minItems": 1,
@@ -295,6 +296,11 @@
                       },
                       "label": {
                         "type": "string"
+                      },
+                      "sets": {
+                        "description": "Contract 6: the values this option writes into other inputs when chosen, a preset.",
+                        "type": "object",
+                        "minProperties": 1
                       }
                     }
                   }
@@ -367,6 +373,44 @@
                 "maxLength": {
                   "type": "integer",
                   "minimum": 1
+                },
+                "lang": {
+                  "description": "Contract 6: the language the host's highlight hook paints what the reader types in.",
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_+-]+$"
+                },
+                "grammar": {
+                  "description": "Contract 7: a small grammar the runtime paints with when no host hook knows the lang.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "keywords": {
+                      "type": "array",
+                      "maxItems": 64,
+                      "items": {
+                        "type": "string",
+                        "maxLength": 32,
+                        "pattern": "^[A-Za-z0-9_]+$"
+                      }
+                    },
+                    "comment": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4
+                    },
+                    "operators": {
+                      "type": "array",
+                      "maxItems": 32,
+                      "items": {
+                        "type": "string",
+                        "maxLength": 4
+                      }
+                    },
+                    "strings": {
+                      "type": "string",
+                      "maxLength": 4
+                    }
+                  }
                 }
               }
             }

@@ -29,7 +29,7 @@ const SPEC: [RegExp, string][] = [
 	[/^[vost]=/, "Session"],
 	[/^(c=|a=(group|ice-options|ice-ufrag|ice-pwd|ice-lite|candidate|end-of-candidates)(:|$))/, "ICE (path)"],
 	[/^a=(fingerprint|setup|tls-id)(:|$)/, "DTLS (keys)"],
-	[/^(m=|a=(mid|msid|msid-semantic|ssrc|ssrc-group|extmap|extmap-allow-mixed|sendrecv|sendonly|recvonly|inactive)(:|$))/, "RTP (streams)"],
+	[/^(m=|a=(mid|msid|msid-semantic|ssrc|ssrc-group|extmap|extmap-allow-mixed|sendrecv|sendonly|recvonly|inactive|rid|simulcast|bundle-only|sctp-port|max-message-size)(:|$))/, "RTP (streams)"],
 	[/^a=(rtpmap|fmtp|ptime|maxptime)(:|$)/, "Codec"],
 	[/^a=(rtcp|rtcp-mux|rtcp-mux-only|rtcp-rsize|rtcp-fb)(:|$)/, "RTCP (feedback)"],
 ];
@@ -58,14 +58,9 @@ describe("sdp-explainer", () => {
 			const lines = sdp.split(/\r?\n/).filter((l) => l.trim()).length;
 			const total = [...PHASES, "Other" as const].reduce((n, p) => n + m.counts[p], 0);
 			assert.equal(total, lines, label);
-			const chart = parts(tool.run({ sdp, other: "", show: "all" })).find((p) => p.kind === "series");
-			assert.ok(chart?.kind === "series");
-			assert.equal(
-				chart.chart.series.reduce((n, s) => n + (s.points[0] ?? 0), 0),
-				lines,
-				`${label}: the bar is as long as the SDP`,
-			);
-			assert.ok(chart.chart.series.every((s) => s.stack === "phase" && s.shape === "bar"));
+			const method = parts(tool.run({ sdp, other: "", show: "all" })).find((p) => p.role === "method");
+			assert.ok(method?.kind === "fields");
+			assert.equal(method.fields.find((f) => f.label === "Lines")?.value, String(lines), `${label}: the count is the SDP's`);
 		}
 	});
 
@@ -123,12 +118,13 @@ describe("sdp-explainer", () => {
 		const out = parts(tool.run({ sdp, other: "", show: "all" }));
 		const table = out.find((p) => p.kind === "table" && p.caption?.startsWith("Every line"));
 		assert.ok(table?.kind === "table");
-		assert.match(table.caption ?? "", /SRTP has no line: its keys come from DTLS, and the only trace in the SDP is the profile name UDP\/TLS\/RTP\/SAVPF and the fingerprint/);
+		const method = out.find((p) => p.role === "method");
+		assert.ok(method?.kind === "fields");
+		assert.match(method.fields.find((f) => f.label === "SRTP")?.note ?? "", /its keys come from DTLS; the only trace is the profile UDP\/TLS\/RTP\/SAVPF and the fingerprint/);
 		const last = table.rows.at(-1)!;
 		assert.equal(cellText(last[3]), "Other");
 		assert.match(cellText(last[2]), /does not guess/);
-		const chart = out.find((p) => p.kind === "series");
-		assert.ok(chart?.kind === "series" && chart.chart.series.some((s) => s.label === "Other" && s.points[0] === 1));
+		assert.match(method.fields.find((f) => f.label === "Lines")?.note ?? "", /Other 1$/);
 	});
 
 	it("filters to the lines with a problem, and draws no empty table", () => {
@@ -140,9 +136,80 @@ describe("sdp-explainer", () => {
 			["5", "7", "17", "23"],
 		);
 		const clean = parts(tool.run({ sdp: sample("Alice's offer"), other: "", show: "problems" }));
+		// What this SDP is, and how it was read: no line table and no empty list of problems.
 		assert.deepEqual(
-			clean.map((p) => p.kind),
-			["fields", "series"],
+			clean.map((p) => p.role),
+			["answer", "method"],
 		);
+	});
+});
+
+describe("rules real stacks follow, and offers they really send", () => {
+	const offer = sample("Simulcast video and a data channel");
+	const problems = (sdp: string) => explain(sdp).problems.map((p) => `${p.severity}: ${p.message}`);
+
+	it("a missing a=tls-id is one note for the description, not a warning on every section", () => {
+		const found = problems(offer).filter((p) => p.includes("tls-id"));
+		assert.equal(found.length, 1, "two sections, one note");
+		assert.ok(found[0]!.startsWith("note:"));
+		assert.deepEqual(problems(sample("Alice's offer")).filter((p) => p.includes("tls-id")), [], "and nothing when a section has one");
+	});
+
+	it("a data channel section is held to RFC 8841, not to the audio rules", () => {
+		assert.deepEqual(problems(offer).filter((p) => !p.includes("tls-id")), []);
+		const broken = offer.replace("UDP/DTLS/SCTP webrtc-datachannel", "UDP/TLS/RTP/SAVPF webrtc-datachannel");
+		assert.ok(problems(broken).some((p) => p.includes("not UDP/DTLS/SCTP")));
+	});
+
+	it("a bundle-only section's port 0 is not a missing candidate", () => {
+		const bundled = offer.replace("m=application 9 UDP/DTLS/SCTP", "m=application 0 UDP/DTLS/SCTP").replace("a=sctp-port:5000", "a=bundle-only\na=sctp-port:5000");
+		assert.deepEqual(problems(bundled).filter((p) => p.includes("port 9")), []);
+		// Port 0 without bundle-only is a rejected section, and the placeholder rule still applies.
+		assert.ok(problems(offer.replace("m=application 9 UDP/DTLS/SCTP", "m=application 0 UDP/DTLS/SCTP")).some((p) => p.includes("port 9")));
+	});
+
+	it("every name a=simulcast lists needs an a=rid line in the same direction", () => {
+		const undeclared = problems(offer.replace("a=rid:f send\n", ""));
+		assert.ok(undeclared.some((p) => p.startsWith("error:") && p.includes("names rid f")));
+		const wrongWay = problems(offer.replace("a=rid:f send", "a=rid:f recv"));
+		assert.ok(wrongWay.some((p) => p.startsWith("error:") && p.includes("rid f is declared recv")));
+		// A paused encoding, ~f, is still the encoding f.
+		assert.deepEqual(problems(offer.replace("send q;h;f", "send q;h;~f")).filter((p) => p.includes("rid")), []);
+	});
+
+	it("explains simulcast and the legacy SIM group", () => {
+		const what = (line: string) => explain(`v=0\nm=video 9 UDP/TLS/RTP/SAVPF 96\n${line}`).lines.at(-1)!.what;
+		assert.match(what("a=simulcast:send q;h;~f"), /send 3 encodings, q, h, f, with f paused/);
+		assert.match(what("a=rid:h send max-width=640"), /rid h, one encoding this side will send, limited to max-width=640/);
+		assert.match(what("a=ssrc-group:SIM 1 2 3"), /^Legacy simulcast: SSRCs 1, 2, 3/);
+	});
+
+	it("leads with the problems when there are any to fix, otherwise with what the SDP sets up", () => {
+		for (const { label, sdp } of SAMPLES) {
+			const out = parts(tool.run({ sdp, other: "", show: "all" }));
+			const roles = out.map((p) => p.role ?? p.kind);
+			const fixable = explain(sdp).problems.some((p) => p.severity !== "note");
+			assert.deepEqual(roles.slice(0, 2), fixable ? ["findings", "answer"] : ["answer", roles[1]], label);
+			for (const gone of ["verdict", "stats", "actions", "series"]) assert.ok(!roles.includes(gone), `${label}: ${roles.join(",")}`);
+			// A description that parses is not good news: the summary carries no tone, the problems carry theirs.
+			const answer = out.find((p) => p.role === "answer");
+			assert.ok(answer?.kind === "fields" && answer.fields.every((f) => f.tone === undefined), label);
+		}
+	});
+
+	it("leads a pair with what the two settle between them", () => {
+		const out = parts(tool.run({ sdp: sample("Alice's offer"), other: sample("The assistant's answer"), show: "all" }));
+		assert.equal(out[0]?.id, "pair");
+		assert.ok(out[0]?.kind === "fields");
+		assert.deepEqual([out[0].fields[0]?.label, out[0].fields[0]?.value], ["These two", "settle a call"]);
+	});
+
+	it("shows every line whole, however long", () => {
+		const out = parts(tool.run({ sdp: sample("RFC 9429's example offer, unwrapped"), other: "", show: "all" }));
+		const table = out.find((p) => p.kind === "table" && p.caption?.startsWith("Every line"));
+		assert.ok(table?.kind === "table");
+		const longest = sample("RFC 9429's example offer, unwrapped").split("\n").reduce((a, l) => Math.max(a, l.trim().length), 0);
+		assert.ok(longest > 72);
+		assert.ok(table.rows.some((r) => cellText(r[1]).length === longest), "the longest line is in the table whole");
 	});
 });

@@ -12,14 +12,15 @@
  *     MUST broken, a warning for a SHOULD or a value real stacks accept anyway, a note for a decoded oddity.
  *  3. **Read two descriptions as a pair**: who controls ICE, who sends the DTLS ClientHello, which codec both list.
  *
- * The rules are the reference model's (`tool_reference.py`, beside the post), and the fixtures are its output.
- * Candidate priorities are decoded the way the ICE pair ranker decodes them, and never recomputed: they are what
+ * The fixtures were first the output of a reference model written beside the post; the rules have moved on since
+ * (simulcast, data channels, bundle-only sections, and the tls-id rule real stacks ignore), each with its own
+ * fixture and test. Candidate priorities are decoded the way the ICE pair ranker decodes them, and never recomputed: they are what
  * the agent sent.
  *
  * What it deliberately cannot do: check a fingerprint against a certificate. It has no certificate, so it can only
  * say one is present and whether the two sides' differ. The DTLS handshake does the real check.
  */
-import type { Cell, Field, Output, Series, Tool, Tone } from "@toolbench/sdk";
+import type { Cell, Field, Output, TextTone, Tool } from "@toolbench/sdk";
 
 type Input = { sdp: string; other: string; show: string };
 
@@ -63,6 +64,11 @@ const ATTR_PHASE: Record<string, Phase> = {
 	"msid-semantic": "RTP (streams)",
 	ssrc: "RTP (streams)",
 	"ssrc-group": "RTP (streams)",
+	rid: "RTP (streams)",
+	simulcast: "RTP (streams)",
+	"bundle-only": "RTP (streams)",
+	"sctp-port": "RTP (streams)",
+	"max-message-size": "RTP (streams)",
 	extmap: "RTP (streams)",
 	"extmap-allow-mixed": "RTP (streams)",
 	sendrecv: "RTP (streams)",
@@ -181,6 +187,33 @@ function parseCandidate(value: string, at: number): Candidate | null {
 }
 
 /**
+ * RFC 8853's simulcast: `a=simulcast:send h;m;l` names the encodings a sender offers, and each name must be declared by
+ * an `a=rid:<name> send` line in the same section (RFC 8853 section 5.1; RFC 8851 section 4). A `~` before a name pauses
+ * that encoding, and `,` separates alternatives for one encoding.
+ */
+function checkSimulcast(lines: string[], m: number[], i: number, add: (s: Severity, message: string, at: number) => void): void {
+	const rids = new Map(attrs(lines, m, "rid").map((r) => {
+		const [id, dir] = r.value.split(/\s+/);
+		return [id ?? "", dir ?? ""] as const;
+	}));
+	for (const sim of attrs(lines, m, "simulcast")) {
+		const f = sim.value.trim().split(/\s+/);
+		for (let k = 0; k + 1 < f.length; k += 2) {
+			const dir = f[k]!;
+			if (dir !== "send" && dir !== "recv") {
+				add("error", `m= section ${i}: a=simulcast direction "${dir}" is not send or recv (RFC 8853 section 5.1)`, sim.at);
+				continue;
+			}
+			for (const name of f[k + 1]!.split(/[;,]/).map((x) => x.replace(/^~/, ""))) {
+				const declared = rids.get(name);
+				if (declared === undefined) add("error", `m= section ${i}: a=simulcast names rid ${name}, which no a=rid line in this section declares (RFC 8853 section 5.1)`, sim.at);
+				else if (declared !== dir) add("error", `m= section ${i}: rid ${name} is declared ${declared} but a=simulcast lists it to ${dir} (RFC 8853 section 5.1)`, sim.at);
+			}
+		}
+	}
+}
+
+/**
  * Reads one description. Exported for the tests, which check its properties over every sample.
  *
  * Lines are trimmed and blank ones dropped, so CRLF, LF and a description copied with an RFC's indentation all
@@ -221,6 +254,7 @@ export function explain(text: string, input = "sdp"): Model {
 	const codecs: string[] = [];
 	const fingerprints: string[] = [];
 	let rtcpMux = mediaBlocks.length > 0;
+	let hasTlsId = false;
 	mediaBlocks.forEach((m, k) => {
 		const i = k + 1;
 		const mAt = m[0]!;
@@ -230,14 +264,22 @@ export function explain(text: string, input = "sdp"): Model {
 		if (mline.length < 4 || !/^\d+$/.test(mline[1] ?? "")) {
 			add("error", `m= section ${i}: the m= line is not <media> <port> <proto> <fmt> (RFC 8866 section 5.14)`, mAt);
 		}
-		if (proto !== "UDP/TLS/RTP/SAVPF") add("error", `m= section ${i}: proto ${proto}, not UDP/TLS/RTP/SAVPF (RFC 9429 section 5.1.2)`, mAt);
+		/*
+		 * A data channel is an m=application section of SCTP over DTLS, RFC 8841, and has no RTP: no RTP profile, no
+		 * rtcp-mux, no codecs. Holding it to the audio rules flagged every offer with a data channel as broken.
+		 */
+		const data = mline[0] === "application";
+		if (data ? !/^(UDP|TCP)\/DTLS\/SCTP$/.test(proto) : proto !== "UDP/TLS/RTP/SAVPF") {
+			add("error", `m= section ${i}: proto ${proto}, not ${data ? "UDP/DTLS/SCTP (RFC 8841 section 4.2)" : "UDP/TLS/RTP/SAVPF (RFC 9429 section 5.1.2)"}`, mAt);
+		}
+		const bundleOnly = port === 0 && attrs(lines, m, "bundle-only").length > 0;
 		const cLines = m.filter((j) => lines[j]!.startsWith("c="));
 		const c = cLines.length ? cLines : sessionBlock.filter((j) => lines[j]!.startsWith("c="));
 		const cAddr = c.length ? (lines[c[0]!]!.split(/\s+/)[2] ?? "") : "";
 		if (!c.length) add("error", `m= section ${i}: no c= line (RFC 8866 section 5.7)`, mAt);
 		const mid = attrs(lines, m, "mid");
 		mids.push(...mid.map((x) => x.value));
-		media.push(`${mline[0]} mid ${mid[0]?.value ?? "?"}`);
+		media.push(mid[0]?.value === undefined ? `${mline[0]}, no mid` : `${mline[0]} mid ${mid[0].value}`);
 		if (!mid.length) add("error", `m= section ${i}: no a=mid (RFC 9429 section 5.2.1)`, mAt);
 
 		const ufrag = anyAttr(m, "ice-ufrag")[0];
@@ -256,8 +298,8 @@ export function explain(text: string, input = "sdp"): Model {
 		const fp = anyAttr(m, "fingerprint");
 		fingerprints.push(...fp.map((x) => x.value));
 		if (!fp.length) add("error", `m= section ${i}: no a=fingerprint, so negotiation fails (RFC 9429 section 5.1.2)`, mAt);
-		if (!anyAttr(m, "tls-id").length) add("warning", `m= section ${i}: no a=tls-id (RFC 8842 sections 5.2 and 5.3)`, mAt);
-		if (!attrs(lines, m, "rtcp-mux").length) {
+		if (anyAttr(m, "tls-id").length) hasTlsId = true;
+		if (!data && !attrs(lines, m, "rtcp-mux").length) {
 			rtcpMux = false;
 			add("error", `m= section ${i}: no a=rtcp-mux (RFC 5761; RFC 8834 section 4.5)`, mAt);
 		}
@@ -294,12 +336,22 @@ export function explain(text: string, input = "sdp"): Model {
 		if (cands.length && c.length && !cands.some((x) => x.address === cAddr && x.port === port)) {
 			add("warning", `m= section ${i}: m= port and c= address match no candidate (RFC 8839 section 4.2.1.2)`, mAt);
 		}
-		if (!cands.length && c.length && !(port === 9 && cAddr === "0.0.0.0")) {
+		// A bundle-only section has port 0 on purpose: it is carried on the bundle's transport (RFC 9143 section 6).
+		if (!cands.length && c.length && !bundleOnly && !(port === 9 && cAddr === "0.0.0.0")) {
 			add("warning", `m= section ${i}: no candidates, so port 9 and IN IP4 0.0.0.0 expected (RFC 9429 section 5.2.1)`, mAt);
 		}
+		checkSimulcast(lines, m, i, add);
 		const notHost = cands.find((x) => x.type !== "host");
 		if (lite && notHost) add("error", "ICE-lite agents only use host candidates (RFC 8445 section 2.5)", notHost.at);
 	});
+	/*
+	 * ⚠️ Once per description, and a note, not a warning on every section. RFC 8842 sections 5.2 and 5.3 do ask for
+	 * a=tls-id, but libwebrtc (Chrome, Safari), Firefox and aiortc never write one, and every one of them accepts a
+	 * description without it. A warning on every section of every browser's offer is noise that hides real problems.
+	 */
+	if (mediaBlocks.length && !hasTlsId) {
+		add("note", "no a=tls-id: RFC 8842 asks for one, but Chrome, Firefox and aiortc never send it, and all of them accept a description without it", mediaBlocks[0]![0]!);
+	}
 	const groups = sessionBlock.filter((j) => lines[j]!.startsWith("a=group:BUNDLE"));
 	for (const g of groups) {
 		for (const mid of lines[g]!.split(/\s+/).slice(1)) {
@@ -441,7 +493,10 @@ function describe(line: string, ctx: { kind: Model["kind"]; setup: string; lite:
 			const proto =
 				f[2] === "UDP/TLS/RTP/SAVPF"
 					? "UDP/TLS/RTP/SAVPF, which is RTP with feedback, protected by SRTP whose keys come from DTLS, over UDP"
-					: `profile ${f[2]}`;
+					: f[2] === "UDP/DTLS/SCTP"
+						? "UDP/DTLS/SCTP, a data channel: SCTP messages inside the DTLS connection, over UDP"
+						: `profile ${f[2]}`;
+			if (f[3] === "webrtc-datachannel") return `Starts a data channel section on ${port}: SCTP messages inside the DTLS connection, over ${f[2]?.startsWith("TCP") ? "TCP" : "UDP"} (RFC 8841 section 4.2).`;
 			const fmts = f.slice(3);
 			return `Starts ${/^[aeiou]/.test(f[0] ?? "") ? "an" : "a"} ${f[0]} section on ${port}, ${proto}, offering payload type${fmts.length === 1 ? "" : "s"} ${fmts.join(", ")} (RFC 8866 section 5.14).`;
 		}
@@ -505,7 +560,28 @@ function describe(line: string, ctx: { kind: Model["kind"]; setup: string; lite:
 				? `SSRC ${ssrc}, the id in every RTP packet of this stream, with canonical name ${aval} (RFC 5576).`
 				: `SSRC ${ssrc}'s "${aname}"${aval ? ` is ${aval}` : ""} (RFC 5576).`;
 		}
+		case "rid": {
+			const [id, dir, ...rest] = vf;
+			const limits = rest.join(" ");
+			return `Declares rid ${id}, one encoding this side will ${dir === "recv" ? "receive" : "send"}${limits ? `, limited to ${limits}` : ""}; a=simulcast lists these, and each packet names its encoding in the rtp-stream-id header extension (RFC 8851).`;
+		}
+		case "simulcast": {
+			const pieces: string[] = [];
+			for (let k = 0; k + 1 < vf.length; k += 2) {
+				const names = vf[k + 1]!.split(";");
+				const paused = names.filter((x) => x.startsWith("~")).map((x) => x.slice(1));
+				pieces.push(`${vf[k] === "recv" ? "receive" : "send"} ${names.length} encoding${names.length === 1 ? "" : "s"}, ${names.map((x) => x.replace(/^~/, "")).join(", ")}${paused.length ? `, with ${paused.join(", ")} paused for now` : ""}`);
+			}
+			return `Simulcast: this side will ${pieces.join(", and ")}, each one a separate copy of the same source at its own resolution or bitrate, so a server can forward each viewer the one that fits (RFC 8853).`;
+		}
+		case "bundle-only":
+			return "This section has no transport of its own: it only works if the other side bundles it, which is why its port is 0 (RFC 9143 section 6).";
+		case "sctp-port":
+			return `The data channel's SCTP port, ${v}, inside the DTLS connection, not a UDP port (RFC 8841 section 5).`;
+		case "max-message-size":
+			return `The largest data channel message this side can take, ${v} bytes${v === "0" ? ", where 0 means no limit" : ""} (RFC 8841 section 6).`;
 		case "ssrc-group":
+			if (vf[0] === "SIM") return `Legacy simulcast: SSRCs ${vf.slice(1).join(", ")} are the same source at different qualities. Chrome's older way of saying what a=simulcast and a=rid now say, a semantics no RFC registers (RFC 8853 replaces it).`;
 			return vf[0] === "FID"
 				? `Pairs SSRC ${vf[1]} with ${vf.slice(2).join(", ")}, its retransmission stream (RFC 5576, RFC 4588).`
 				: `Groups SSRCs ${vf.slice(1).join(", ")} under the semantics "${vf[0]}" (RFC 5576).`;
@@ -580,39 +656,65 @@ function describe(line: string, ctx: { kind: Model["kind"]; setup: string; lite:
 // ---------------------------------------------------------------------------------------------------------------
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
-const MAX_LINE = 72;
-const SRTP_POINT = "SRTP has no line: its keys come from DTLS, and the only trace in the SDP is the profile name UDP/TLS/RTP/SAVPF and the fingerprint.";
 
 function problemCounts(problems: Problem[]) {
 	const n = (s: Severity) => problems.filter((p) => p.severity === s).length;
 	return { errors: n("error"), warnings: n("warning"), notes: n("note") };
 }
 
-function summary(m: Model): Field[] {
+/** "an offer", "an answer", as the start of a sentence or after a label. */
+const kindName = (m: Model) => (m.kind === "unknown" ? "Neither offer nor answer" : m.kind === "offer" ? "Offer" : "Answer");
+
+/**
+ * What this SDP sets up, as a spec sheet: the path, the keys and the media, under their own headings. No tone: a
+ * description that parses is not good news, and a problem is toned on its own row in the findings.
+ */
+function summary(m: Model, problems: Problem[]): Field[] {
 	const byType = new Map<string, number>();
 	for (const c of m.candidates) byType.set(c.type, (byType.get(c.type) ?? 0) + 1);
 	const types = [...byType].sort(([a], [b]) => (a < b ? -1 : 1));
 	const algs = [...new Set(m.fingerprints.map((f) => f.split(/\s+/)[0]!))].sort();
-	const p = problemCounts(m.problems);
-	const tone: Tone = p.errors ? "bad" : p.warnings ? "warn" : "good";
-	const phaseNote = [...PHASES, "Other" as const]
-		.filter((ph) => m.counts[ph] > 0)
-		.map((ph) => `${SHORT[ph]} ${m.counts[ph]}`)
-		.join(", ");
+	const p = problemCounts(problems);
+	const found = [p.errors ? plural(p.errors, "error") : "", p.warnings ? plural(p.warnings, "warning") : ""].filter(Boolean);
+	const verdict = found.length
+		? `${found.join(" and ")} found by these checks${p.errors ? ": a WebRTC stack may refuse it" : ""}.`
+		: `No problems found by these checks${p.notes ? `, and ${plural(p.notes, "note")}` : ""}.`;
 	return [
-		{ label: "Type", value: m.kind + (m.setup ? ` (a=setup:${m.setup})` : ""), note: "from a=setup: actpass is an offer, active or passive an answer" },
-		{ label: "ICE", value: `${m.lite ? "lite" : "full"}, ufrag ${m.ufrag}` },
-		{ label: "Candidates", value: `${types.map(([t, n]) => `${n} ${t}`).join(", ") || "0"}; ${m.trickle}` },
-		{ label: "DTLS role", value: ROLE[m.setup] ?? "not stated" },
 		{
-			label: "Fingerprints",
-			value: m.fingerprints.length ? `${m.fingerprints.length}: ${algs.join(", ")}` : "0: none",
-			note: "present or not; only the DTLS handshake can check one against the certificate",
+			label: "This SDP",
+			value: `${kindName(m)}${m.setup ? ` (a=setup:${m.setup})` : ""}, ${plural(m.media.length, "media section")}`,
+			note: verdict,
 		},
-		{ label: "Media", value: m.media.join("; ") || "none" },
-		{ label: "Codecs", value: m.codecs.join(", ") || "none", note: plural(m.codecs.length, "payload type") },
-		{ label: "Lines", value: String(m.lines.length), note: phaseNote },
-		{ label: "Problems", value: `${plural(p.errors, "error")}, ${plural(p.warnings, "warning")}, ${plural(p.notes, "note")}`, tone },
+		{ group: "Transport", label: "ICE", value: `${m.lite ? "lite" : "full"}, ufrag ${m.ufrag}` },
+		types.length
+			? { group: "Transport", label: "Candidates", value: types.map(([t, n]) => `${n} ${t}`).join(", "), note: m.trickle }
+			: { group: "Transport", label: "Candidates", value: m.trickle },
+		{ group: "Transport", label: "BUNDLE", value: m.bundle?.length ? `mid ${m.bundle.join(" ")}` : "none" },
+		{ group: "Security", label: "DTLS role", value: ROLE[m.setup] ?? "not stated" },
+		{
+			group: "Security",
+			label: "Fingerprints",
+			value: m.fingerprints.length ? algs.join(", ") : "none",
+			...(m.fingerprints.length > 1 ? { note: plural(m.fingerprints.length, "fingerprint") } : {}),
+		},
+		{ group: "Media", label: "Sections", value: m.media.join("; ") || "none" },
+		{ group: "Media", label: "Codecs", value: m.codecs.join(", ") || "none", note: plural(m.codecs.length, "payload type") },
+		{ group: "Media", label: "rtcp-mux", value: m.rtcpMux ? "yes" : "no" },
+	];
+}
+
+/** How the reading was done: what decides offer or answer, what was counted, and what the SDP cannot show. */
+function method(sides: Model[]): Field[] {
+	const lines = (m: Model) =>
+		[...PHASES, "Other" as const]
+			.filter((ph) => m.counts[ph] > 0)
+			.map((ph) => `${SHORT[ph]} ${m.counts[ph]}`)
+			.join(", ");
+	return [
+		{ label: "Offer or answer", value: "from a=setup", note: "actpass is an offer, active or passive an answer" },
+		...sides.map((m, i) => ({ label: sides.length > 1 ? (i === 0 ? "Lines, this SDP" : "Lines, the other side") : "Lines", value: String(m.lines.length), note: lines(m) })),
+		{ label: "Severity", value: "error, warning, note", note: "an error is a MUST broken, a warning a SHOULD or a value real stacks accept anyway, a note a decoded oddity" },
+		{ label: "Fingerprints", value: "present or not", note: "only the DTLS handshake can check one against the certificate" },
 		{ label: "SRTP", value: "no line of its own", note: "its keys come from DTLS; the only trace is the profile UDP/TLS/RTP/SAVPF and the fingerprint" },
 	];
 }
@@ -625,9 +727,9 @@ function pair(a: Model, b: Model): Field[] {
 	const who = (s: "a" | "b") => (s === "a" ? "this side" : "the other side");
 	out.push(
 		offerer === "a"
-			? { group, label: "Offer and answer", value: "this SDP offers, the other answers", tone: "good" }
+			? { group, label: "Offer and answer", value: "this SDP offers, the other answers" }
 			: offerer === "b"
-				? { group, label: "Offer and answer", value: "the other side offers, this SDP answers", tone: "good" }
+				? { group, label: "Offer and answer", value: "the other side offers, this SDP answers" }
 				: a.kind === "offer" && b.kind === "offer"
 					? { group, label: "Offer and answer", value: "both are offers (a=setup:actpass twice)", tone: "bad", note: "an answer must say active or passive (RFC 9429 section 5.3.1)" }
 					: a.kind === "answer" && b.kind === "answer"
@@ -637,12 +739,12 @@ function pair(a: Model, b: Model): Field[] {
 
 	if (a.lite !== b.lite) {
 		const full = a.lite ? "b" : "a";
-		out.push({ group, label: "ICE roles", value: `${who(full)} controls`, note: "full against lite: the full agent controls (RFC 8445 section 6.1.1)", tone: "good" });
+		out.push({ group, label: "ICE roles", value: `${who(full)} controls`, note: "full against lite: the full agent controls (RFC 8445 section 6.1.1)" });
 	} else {
 		const both = a.lite ? "both lite" : "both full";
 		out.push(
 			offerer
-				? { group, label: "ICE roles", value: `${who(offerer)} controls`, note: `${both}: the offerer controls (RFC 8445 section 6.1.1)`, tone: "good" }
+				? { group, label: "ICE roles", value: `${who(offerer)} controls`, note: `${both}: the offerer controls (RFC 8445 section 6.1.1)` }
 				: { group, label: "ICE roles", value: "not settled", note: `${both}: the offerer controls, and neither is the one offer (RFC 8445 section 6.1.1)`, tone: "bad" },
 		);
 	}
@@ -653,13 +755,13 @@ function pair(a: Model, b: Model): Field[] {
 	if (sa === "actpass" && sb === "actpass") {
 		hello = { group, label: "ClientHello sent by", value: "not settled: both are offers (actpass twice), so no DTLS role can be settled", tone: "bad" };
 	} else if (sb === "active" && (sa === "actpass" || sa === "passive")) {
-		hello = { group, label: "ClientHello sent by", value: "the other side (a=setup:active)", tone: "good" };
+		hello = { group, label: "ClientHello sent by", value: "the other side (a=setup:active)" };
 	} else if (sa === "active" && (sb === "actpass" || sb === "passive")) {
-		hello = { group, label: "ClientHello sent by", value: "this side (a=setup:active)", tone: "good" };
+		hello = { group, label: "ClientHello sent by", value: "this side (a=setup:active)" };
 	} else if (sb === "passive" && sa === "actpass") {
-		hello = { group, label: "ClientHello sent by", value: "this side (actpass against passive)", tone: "good" };
+		hello = { group, label: "ClientHello sent by", value: "this side (actpass against passive)" };
 	} else if (sa === "passive" && sb === "actpass") {
-		hello = { group, label: "ClientHello sent by", value: "the other side (actpass against passive)", tone: "good" };
+		hello = { group, label: "ClientHello sent by", value: "the other side (actpass against passive)" };
 	} else {
 		hello = { group, label: "ClientHello sent by", value: `not settled: a=setup:${sa || "none"} against a=setup:${sb || "none"}`, tone: "bad" };
 	}
@@ -670,7 +772,7 @@ function pair(a: Model, b: Model): Field[] {
 	const agreed = a.codecs.filter((c) => theirs.has(c.toLowerCase()));
 	out.push(
 		agreed.length
-			? { group, label: "Codec agreed", value: agreed.join(", "), note: "payload type and encoding both list", tone: "good" }
+			? { group, label: "Codec agreed", value: agreed.join(", "), note: "payload type and encoding both list" }
 			: { group, label: "Codec agreed", value: "none in common", note: "no payload type with the same encoding on both sides", tone: "bad" },
 	);
 
@@ -678,7 +780,7 @@ function pair(a: Model, b: Model): Field[] {
 	const bb = b.bundle?.join(" ");
 	out.push(
 		ba !== undefined && ba === bb
-			? { group, label: "BUNDLE", value: `mid ${ba}, on both`, tone: "good" }
+			? { group, label: "BUNDLE", value: `mid ${ba}, on both` }
 			: ba === undefined && bb === undefined
 				? { group, label: "BUNDLE", value: "neither side bundles", tone: "warn" }
 				: { group, label: "BUNDLE", value: `this side ${ba ?? "none"}, the other ${bb ?? "none"}`, note: "the same mids should be grouped on both sides (RFC 9143)", tone: "warn" },
@@ -686,7 +788,7 @@ function pair(a: Model, b: Model): Field[] {
 
 	out.push(
 		a.rtcpMux && b.rtcpMux
-			? { group, label: "rtcp-mux", value: "on both", tone: "good" }
+			? { group, label: "rtcp-mux", value: "on both" }
 			: { group, label: "rtcp-mux", value: `missing on ${a.rtcpMux ? "the other side" : b.rtcpMux ? "this side" : "both"}`, note: "RFC 8834 section 4.5", tone: "bad" },
 	);
 
@@ -697,40 +799,62 @@ function pair(a: Model, b: Model): Field[] {
 			? { group, label: "Fingerprints", value: `missing on ${a.fingerprints.length ? "the other side" : b.fingerprints.length ? "this side" : "both"}`, tone: "bad" }
 			: shared
 				? { group, label: "Fingerprints", value: "present on both, the same certificate", note: "two peers with one certificate, or one SDP pasted twice", tone: "warn" }
-				: { group, label: "Fingerprints", value: "present on both, different certificates", note: "only the DTLS handshake can check either against its certificate", tone: "good" },
+				: { group, label: "Fingerprints", value: "present on both, different certificates", note: "only the DTLS handshake can check either against its certificate" },
 	);
 	return out;
 }
 
-function lineTable(m: Model, key: string, onlyProblems: boolean, caption: string): Output | null {
-	const byLine = new Map<number, Problem[]>();
-	for (const p of m.problems) byLine.set(p.at, [...(byLine.get(p.at) ?? []), p]);
+/** Every line, whole: a cut line hides the attribute value a reader came to check. */
+function lineTable(m: Model, onlyProblems: boolean, caption: string): Output | null {
+	const flagged = new Set(m.problems.map((p) => p.at));
 	const rows: Cell[][] = [];
-	let cut = false;
 	m.lines.forEach((l, i) => {
-		const ps = byLine.get(i) ?? [];
-		if (onlyProblems && !ps.length) return;
-		const tone: Tone = ps.some((p) => p.severity === "error") ? "bad" : ps.some((p) => p.severity === "warning") ? "warn" : "normal";
-		if (l.text.length > MAX_LINE) cut = true;
-		rows.push([
-			{ text: String(l.n), mono: true },
-			{ text: l.text.length > MAX_LINE ? `${l.text.slice(0, MAX_LINE - 1)}…` : l.text, mono: true },
-			l.what,
-			l.phase,
-			ps.length ? { text: ps.map((p) => `${p.severity}: ${p.message}`).join("; "), tone } : "ok",
-		]);
+		if (onlyProblems && !flagged.has(i)) return;
+		rows.push([{ text: String(l.n), mono: true, tone: "muted" }, { text: l.text, mono: true }, l.what, l.phase]);
 	});
 	if (!rows.length) return null;
 	return {
 		kind: "table",
-		caption: `${caption}${cut ? ` Lines over ${MAX_LINE} characters are cut here; the input has them whole.` : ""}`,
-		columns: [{ label: "#", align: "end", mono: true }, { label: "Line", mono: true }, { label: "What it sets" }, { label: "Read by" }, { label: "Check" }],
+		role: "decoded",
+		caption,
+		columns: [{ label: "#", align: "end", mono: true }, { label: "Line", mono: true }, { label: "What it sets" }, { label: "Read by" }],
 		rows,
-		link: { chart: "phases", keys: rows.map(() => key) },
 	};
 }
 
-const SEVERITY_TONE: Record<Severity, Tone> = { error: "bad", warning: "warn", note: "normal" };
+const SEVERITY_TONE: Record<Severity, TextTone> = { error: "bad", warning: "warn", note: "muted" };
+const SEVERITY_ORDER: Severity[] = ["error", "warning", "note"];
+
+/**
+ * Whether two descriptions settle a call, as the first field of the pair readout. A failed rule between them, or
+ * an error on either side, means they do not, and that is the one place a tone is earned without a reader's limit.
+ */
+function pairVerdict(pairFields: Field[], problems: Problem[]): Field {
+	const p = problemCounts(problems);
+	const reasons = pairFields.filter((f) => f.tone === "bad").map((f) => UNSETTLED[f.label] ?? `${f.label} is not agreed`);
+	if (p.errors) reasons.push(`${plural(p.errors, "error")} break${p.errors === 1 ? "s" : ""} a rule a WebRTC stack enforces`);
+	if (reasons.length) {
+		const joined = reasons.length === 1 ? reasons[0]! : `${reasons.slice(0, -1).join(", ")} and ${reasons.at(-1)}`;
+		return { label: "These two", value: "do not settle a call", note: `${joined[0]!.toUpperCase()}${joined.slice(1)}.`, tone: "bad" };
+	}
+	const ice = pairFields.find((f) => f.label === "ICE roles")?.value ?? "";
+	const hello = pairFields.find((f) => f.label === "ClientHello sent by")?.value.replace(/ \(.*\)$/, "") ?? "";
+	const [enc = "", , pt = ""] = (pairFields.find((f) => f.label === "Codec agreed")?.value.split(",")[0] ?? "").split(" ");
+	const name = enc.split("/")[0] ?? "";
+	const codec = `${name.toLowerCase() === "opus" ? "Opus" : name} as payload type ${pt}`;
+	const said = `${ice[0]!.toUpperCase()}${ice.slice(1)} ICE, ${hello} sends the DTLS ClientHello, and both list ${codec}.`;
+	return { label: "These two", value: "settle a call", note: p.warnings ? `${said} ${plural(p.warnings, "warning")} worth a look.` : said };
+}
+
+/** What each unsettled pair field means for the call, in a clause the verdict can join. */
+const UNSETTLED: Record<string, string> = {
+	"Offer and answer": "they are not one offer and one answer",
+	"ICE roles": "neither side is known to control ICE",
+	"ClientHello sent by": "no side is set to start the DTLS handshake",
+	"Codec agreed": "they list no codec in common",
+	"rtcp-mux": "rtcp-mux is missing on a side",
+	Fingerprints: "a side has no certificate fingerprint",
+};
 
 export default {
 	run(input: Input) {
@@ -738,47 +862,47 @@ export default {
 			const a = explain(input.sdp ?? "", "sdp");
 			const b = (input.other ?? "").trim() ? explain(input.other, "other") : null;
 			const onlyProblems = input.show === "problems";
-			const keyA = `This SDP${a.kind === "unknown" ? "" : ` (${a.kind})`}`;
-			const keyB = b ? `The other side${b.kind === "unknown" ? "" : ` (${b.kind})`}` : "";
 			const sides = b ? [a, b] : [a];
-			const x = b ? [keyA, keyB] : [keyA];
 
-			const phases = [...PHASES, ...(sides.some((s) => s.counts.Other > 0) ? (["Other"] as const) : [])];
-			const series: Series[] = phases.map((p) => ({ label: p, unit: "lines", shape: "bar", stack: "phase", points: sides.map((s) => s.counts[p]) }));
+			// Worst first, then in line order, since that is the order to fix them in.
+			const problems = (b ? ([[a, "this SDP, "], [b, "the other side, "]] as const) : ([[a, ""]] as const)).flatMap(([m, where]) =>
+				m.problems.map((p) => ({
+					p,
+					n: m.lines[p.at]!.n,
+					row: [{ text: p.severity, tone: SEVERITY_TONE[p.severity] }, { text: `${where}line ${m.lines[p.at]!.n}`, mono: true }, p.message] as Cell[],
+				})),
+			);
+			const problemRows = problems.sort((x, y) => SEVERITY_ORDER.indexOf(x.p.severity) - SEVERITY_ORDER.indexOf(y.p.severity) || x.n - y.n).map((x) => x.row);
+			const all = sides.flatMap((m) => m.problems);
+			const pairFields = b ? pair(a, b) : [];
 
-			const problemRows: Cell[][] = [];
-			for (const [m, where] of b ? ([[a, "this SDP"], [b, "the other side"]] as const) : ([[a, ""]] as const)) {
-				for (const p of m.problems) {
-					problemRows.push([{ text: p.severity, tone: SEVERITY_TONE[p.severity] }, `${where ? `${where}, ` : ""}line ${m.lines[p.at]!.n}`, p.message]);
-				}
-			}
-
-			const parts: Output[] = [{ kind: "fields", fields: summary(a) }];
-			if (b) parts.push({ kind: "fields", fields: pair(a, b) });
-			parts.push({
-				kind: "series",
-				chart: {
-					id: "phases",
-					xLabel: "SDP",
-					yLabel: "Lines",
-					orientation: "horizontal",
-					x,
-					series,
-				},
-			});
-			if (problemRows.length) {
-				parts.push({
-					kind: "table",
-					caption: "Problems: an error is a MUST broken, a warning a SHOULD or a value real stacks accept anyway, a note a decoded oddity",
-					columns: [{ label: "Severity" }, { label: "Where" }, { label: "Problem" }],
-					rows: problemRows,
-				});
-			}
+			/*
+			 * The answer in the form the input asks for. Two descriptions lead with what they settle between them; one
+			 * leads with what it sets up, unless it breaks a rule, when the problems lead, located by line. A table of
+			 * notes only is something to know, not to fix, so it follows the summary. Each part has an id.
+			 */
+			const fixable = all.some((p) => p.severity !== "note");
+			const findings: Output | null = problemRows.length
+				? {
+						kind: "table",
+						role: "findings",
+						id: "problems",
+						caption: fixable ? "What to fix, worst first" : "Worth knowing, nothing to fix",
+						columns: [{ label: "Severity" }, { label: "Where" }, { label: "Problem" }],
+						rows: problemRows,
+					}
+				: null;
+			const parts: Output[] = [];
+			if (b) parts.push({ kind: "fields", role: "answer", id: "pair", fields: [pairVerdict(pairFields, all), ...pairFields] });
+			if (findings && fixable) parts.push(findings);
+			parts.push({ kind: "fields", role: b ? "decoded" : "answer", id: "summary", fields: summary(a, b ? a.problems : all) });
+			if (findings && !fixable) parts.push(findings);
 			const what = onlyProblems ? "The lines with a problem" : "Every line";
-			const tableA = lineTable(a, keyA, onlyProblems, `${what} of this SDP, and the phase that reads it. ${SRTP_POINT}`);
+			const tableA = lineTable(a, onlyProblems, `${what} of this SDP, and the phase that reads it`);
 			if (tableA) parts.push(tableA);
-			const tableB = b ? lineTable(b, keyB, onlyProblems, `${what} of the other side's SDP.`) : null;
+			const tableB = b ? lineTable(b, onlyProblems, `${what} of the other side's SDP`) : null;
 			if (tableB) parts.push(tableB);
+			parts.push({ kind: "fields", role: "method", id: "method", fields: method(sides) });
 			return { kind: "group", parts };
 		} catch (error) {
 			if (error instanceof InputError) return { kind: "error", message: error.message, input: error.input };

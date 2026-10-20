@@ -1,0 +1,1304 @@
+[
+  {
+    "name": "the shop's sale: every policy at the same numbers, yours first",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "fifo"
+    },
+    "match": "subset",
+    "why": "The post's comparison: the same capacity and spike, and only the policy changes. Answered and p50 are the post's numbers from shed_sim.py; back to normal is the first 10 s window after the spike from which every window answers 90% or more; served to nobody is work finished after its client gave up. The three outcome shares per policy are pinned in index.test.ts, since a chart fixture checks its frame and not its data.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
+      "columns": [
+        {
+          "label": "Policy"
+        },
+        {
+          "label": "Answered",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "p50",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Recovery",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Wasted",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "Unbounded queue (yours)",
+          "8.4%",
+          "1125 ms",
+          "90 s",
+          "14,309"
+        ],
+        [
+          "Skip the abandoned",
+          "19.5%",
+          "1961 ms",
+          "at once",
+          "4,466"
+        ],
+        [
+          "Bounded queue",
+          "67.1%",
+          "550 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Bounded, orders first",
+          "67.1%",
+          "549 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Queue timeout (CoDel)",
+          "64.4%",
+          "98 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Newest first (LIFO + CoDel)",
+          "64.3%",
+          "81 ms",
+          "at once",
+          "0"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "the shop's sale, unbounded queue: what to change",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "fifo"
+    },
+    "match": "subset",
+    "why": "The suggested policy's numbers are its row in the comparison, which shed_sim.py prints for every policy; 13 workers is the fewest over 150/s at 80 ms.",
+    "expect": {
+      "kind": "table",
+      "role": "actions",
+      "caption": "What to change, the worst problem first",
+      "columns": [
+        {
+          "label": "Change"
+        },
+        {
+          "label": "What it does at these numbers"
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "Switch to bounded queue."
+          },
+          {
+            "text": "67.1% answered instead of 8.4%, and 0.0% wait for nothing instead of 91.6%. Back to normal: at once."
+          }
+        ],
+        [
+          {
+            "text": "Or add workers for the spike."
+          },
+          {
+            "text": "13 workers is the fewest whose capacity is over the 150/s spike. The capacity planner sizes them for a wait target."
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "the shop's sale, unbounded queue: 8.4% answered, 90 s to recover: can a spike leave it stuck, and did it",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "fifo"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Once everyone times out",
+          "value": "70/s of tries against 100/s",
+          "note": "70/s times 1 try within 10 s. It drains, so a spike cannot leave it stuck."
+        },
+        {
+          "label": "This run",
+          "value": "recovered 90 s after the spike"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the shop's sale, unbounded queue: 8.4% answered, 90 s to recover: the service's numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "fifo"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 5,
+    "expect": {
+      "kind": "fields",
+      "role": "metrics",
+      "fields": [
+        {
+          "label": "Capacity",
+          "value": "100.0/s",
+          "note": "8 workers at 80 ms each"
+        },
+        {
+          "label": "Spike against capacity",
+          "value": "150%",
+          "note": "150/s for 60 s"
+        },
+        {
+          "label": "Answered, p99",
+          "value": "1982 ms",
+          "note": "From the first try, retries included"
+        },
+        {
+          "label": "Orders answered",
+          "value": "8.4%",
+          "note": "20% of requests are orders"
+        },
+        {
+          "label": "Tries per person",
+          "value": "1.00"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the same sale with the derived bound of 50: two thirds answered, nobody waits for nothing: can a spike leave it stuck, and did it",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "bounded"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Longest wait in the queue",
+          "value": "500 ms",
+          "note": "The bound, 50, is that much work: under the 2 s timeout, so a spike cannot leave it stuck."
+        },
+        {
+          "label": "This run",
+          "value": "recovered at once"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the same sale with the derived bound of 50: two thirds answered, nobody waits for nothing: the service's numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "bounded"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 5,
+    "expect": {
+      "kind": "fields",
+      "role": "metrics",
+      "fields": [
+        {
+          "label": "Capacity",
+          "value": "100.0/s",
+          "note": "8 workers at 80 ms each"
+        },
+        {
+          "label": "Spike against capacity",
+          "value": "150%",
+          "note": "150/s for 60 s"
+        },
+        {
+          "label": "Answered, p99",
+          "value": "894 ms",
+          "note": "From the first try, retries included"
+        },
+        {
+          "label": "Orders answered",
+          "value": "68.4%",
+          "note": "20% of requests are orders"
+        },
+        {
+          "label": "Tries per person",
+          "value": "1.00"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the same sale with the derived bound of 50: two thirds answered, nobody waits for nothing: every policy at the same numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "bounded"
+    },
+    "match": "subset",
+    "why": "Answered, p50, recovery and wasted work for every policy, with the reader's first, at these numbers. Printed first by shed_sim.py, the same simulation draw for draw.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
+      "columns": [
+        {
+          "label": "Policy"
+        },
+        {
+          "label": "Answered",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "p50",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Recovery",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Wasted",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "Bounded queue (yours)",
+          "67.1%",
+          "550 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Unbounded queue",
+          "8.4%",
+          "1125 ms",
+          "90 s",
+          "14,309"
+        ],
+        [
+          "Skip the abandoned",
+          "19.5%",
+          "1961 ms",
+          "at once",
+          "4,466"
+        ],
+        [
+          "Bounded, orders first",
+          "67.1%",
+          "549 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Queue timeout (CoDel)",
+          "64.4%",
+          "98 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Newest first (LIFO + CoDel)",
+          "64.3%",
+          "81 ms",
+          "at once",
+          "0"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "orders first: the same total, every order answered: can a spike leave it stuck, and did it",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "priority"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Longest wait in the queue",
+          "value": "500 ms",
+          "note": "The bound, 50, is that much work: under the 2 s timeout, so a spike cannot leave it stuck."
+        },
+        {
+          "label": "This run",
+          "value": "recovered at once"
+        }
+      ]
+    }
+  },
+  {
+    "name": "orders first: the same total, every order answered: the service's numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "priority"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 5,
+    "expect": {
+      "kind": "fields",
+      "role": "metrics",
+      "fields": [
+        {
+          "label": "Capacity",
+          "value": "100.0/s",
+          "note": "8 workers at 80 ms each"
+        },
+        {
+          "label": "Spike against capacity",
+          "value": "150%",
+          "note": "150/s for 60 s"
+        },
+        {
+          "label": "Answered, p99",
+          "value": "892 ms",
+          "note": "From the first try, retries included"
+        },
+        {
+          "label": "Orders answered",
+          "value": "100.0%",
+          "note": "20% of requests are orders"
+        },
+        {
+          "label": "Tries per person",
+          "value": "1.00"
+        }
+      ]
+    }
+  },
+  {
+    "name": "orders first: the same total, every order answered: every policy at the same numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "priority"
+    },
+    "match": "subset",
+    "why": "Answered, p50, recovery and wasted work for every policy, with the reader's first, at these numbers. Printed first by shed_sim.py, the same simulation draw for draw.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
+      "columns": [
+        {
+          "label": "Policy"
+        },
+        {
+          "label": "Answered",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "p50",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Recovery",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Wasted",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "Bounded, orders first (yours)",
+          "67.1%",
+          "549 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Unbounded queue",
+          "8.4%",
+          "1125 ms",
+          "90 s",
+          "14,309"
+        ],
+        [
+          "Skip the abandoned",
+          "19.5%",
+          "1961 ms",
+          "at once",
+          "4,466"
+        ],
+        [
+          "Bounded queue",
+          "67.1%",
+          "550 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Queue timeout (CoDel)",
+          "64.4%",
+          "98 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Newest first (LIFO + CoDel)",
+          "64.3%",
+          "81 ms",
+          "at once",
+          "0"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "the unbounded queue with 3 retries: could be stuck, and is: 280/s of tries against 100/s: can a spike leave it stuck, and did it",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 3,
+      "policy": "fifo"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Once everyone times out",
+          "value": "280/s of tries against 100/s",
+          "tone": "bad",
+          "note": "70/s times 4 tries within 10 s. Retries alone fill it, so a spike can leave it stuck."
+        },
+        {
+          "label": "This run",
+          "value": "stuck to the end",
+          "tone": "bad",
+          "note": "Still failing 180 s after the spike."
+        }
+      ]
+    }
+  },
+  {
+    "name": "the unbounded queue with 3 retries: could be stuck, and is: 280/s of tries against 100/s: the service's numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 3,
+      "policy": "fifo"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 5,
+    "expect": {
+      "kind": "fields",
+      "role": "metrics",
+      "fields": [
+        {
+          "label": "Capacity",
+          "value": "100.0/s",
+          "note": "8 workers at 80 ms each"
+        },
+        {
+          "label": "Spike against capacity",
+          "value": "150%",
+          "note": "150/s for 60 s"
+        },
+        {
+          "label": "Answered, p99",
+          "value": "1982 ms",
+          "note": "From the first try, retries included"
+        },
+        {
+          "label": "Orders answered",
+          "value": "8.4%",
+          "note": "20% of requests are orders"
+        },
+        {
+          "label": "Tries per person",
+          "value": "3.73"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the unbounded queue with 3 retries: could be stuck, and is: 280/s of tries against 100/s: every policy at the same numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 3,
+      "policy": "fifo"
+    },
+    "match": "subset",
+    "why": "Answered, p50, recovery and wasted work for every policy, with the reader's first, at these numbers. Printed first by shed_sim.py, the same simulation draw for draw.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
+      "columns": [
+        {
+          "label": "Policy"
+        },
+        {
+          "label": "Answered",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "p50",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Recovery",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Wasted",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "Unbounded queue (yours)",
+          "8.4%",
+          "1125 ms",
+          "over 180 s",
+          "82,460"
+        ],
+        [
+          "Skip the abandoned",
+          "10.5%",
+          "1417 ms",
+          "over 180 s",
+          "22,565"
+        ],
+        [
+          "Bounded queue",
+          "69.0%",
+          "1500 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Bounded, orders first",
+          "68.8%",
+          "718 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Queue timeout (CoDel)",
+          "68.6%",
+          "1191 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Newest first (LIFO + CoDel)",
+          "68.5%",
+          "1161 ms",
+          "at once",
+          "0"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "the queue timeout, set on arrival as Fail at Scale does, at the sale: can a spike leave it stuck, and did it",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "codel"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Longest wait in the queue",
+          "value": "100 ms",
+          "note": "The queue timeout, under the 2 s timeout, so a spike cannot leave it stuck."
+        },
+        {
+          "label": "This run",
+          "value": "recovered at once"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the queue timeout, set on arrival as Fail at Scale does, at the sale: the service's numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "codel"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 5,
+    "expect": {
+      "kind": "fields",
+      "role": "metrics",
+      "fields": [
+        {
+          "label": "Capacity",
+          "value": "100.0/s",
+          "note": "8 workers at 80 ms each"
+        },
+        {
+          "label": "Spike against capacity",
+          "value": "150%",
+          "note": "150/s for 60 s"
+        },
+        {
+          "label": "Answered, p99",
+          "value": "402 ms",
+          "note": "From the first try, retries included"
+        },
+        {
+          "label": "Orders answered",
+          "value": "66.8%",
+          "note": "20% of requests are orders"
+        },
+        {
+          "label": "Tries per person",
+          "value": "1.00"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the queue timeout, set on arrival as Fail at Scale does, at the sale: every policy at the same numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "codel"
+    },
+    "match": "subset",
+    "why": "Answered, p50, recovery and wasted work for every policy, with the reader's first, at these numbers. Printed first by shed_sim.py, the same simulation draw for draw.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
+      "columns": [
+        {
+          "label": "Policy"
+        },
+        {
+          "label": "Answered",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "p50",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Recovery",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Wasted",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "Queue timeout (CoDel, yours)",
+          "64.4%",
+          "98 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Unbounded queue",
+          "8.4%",
+          "1125 ms",
+          "90 s",
+          "14,309"
+        ],
+        [
+          "Skip the abandoned",
+          "19.5%",
+          "1961 ms",
+          "at once",
+          "4,466"
+        ],
+        [
+          "Bounded queue",
+          "67.1%",
+          "550 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Bounded, orders first",
+          "67.1%",
+          "549 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Newest first (LIFO + CoDel)",
+          "64.3%",
+          "81 ms",
+          "at once",
+          "0"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "the queue timeout turns away 1.7% even at normal load: can a spike leave it stuck, and did it",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 70,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "codel"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Longest wait in the queue",
+          "value": "100 ms",
+          "note": "The queue timeout, under the 2 s timeout, so a spike cannot leave it stuck."
+        },
+        {
+          "label": "This run",
+          "value": "recovered at once"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the queue timeout turns away 1.7% even at normal load: the service's numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 70,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "codel"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 5,
+    "expect": {
+      "kind": "fields",
+      "role": "metrics",
+      "fields": [
+        {
+          "label": "Capacity",
+          "value": "100.0/s",
+          "note": "8 workers at 80 ms each"
+        },
+        {
+          "label": "Spike against capacity",
+          "value": "70%",
+          "note": "70/s for 60 s"
+        },
+        {
+          "label": "Answered, p99",
+          "value": "359 ms",
+          "note": "From the first try, retries included"
+        },
+        {
+          "label": "Orders answered",
+          "value": "98.2%",
+          "note": "20% of requests are orders"
+        },
+        {
+          "label": "Tries per person",
+          "value": "1.00"
+        }
+      ]
+    }
+  },
+  {
+    "name": "the queue timeout turns away 1.7% even at normal load: every policy at the same numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 70,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "codel"
+    },
+    "match": "subset",
+    "why": "Answered, p50, recovery and wasted work for every policy, with the reader's first, at these numbers. Printed first by shed_sim.py, the same simulation draw for draw.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
+      "columns": [
+        {
+          "label": "Policy"
+        },
+        {
+          "label": "Answered",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "p50",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Recovery",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Wasted",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "Queue timeout (CoDel, yours)",
+          "98.3%",
+          "64 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Unbounded queue",
+          "100.0%",
+          "67 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Skip the abandoned",
+          "100.0%",
+          "67 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Bounded queue",
+          "100.0%",
+          "67 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Bounded, orders first",
+          "100.0%",
+          "67 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Newest first (LIFO + CoDel)",
+          "98.5%",
+          "62 ms",
+          "at once",
+          "0"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "newest first at twice capacity with a 1 s timeout and one retry: can a spike leave it stuck, and did it",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 200,
+      "timeout": 1,
+      "retries": 1,
+      "policy": "lifo"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "fields": [
+        {
+          "label": "Longest wait in the queue",
+          "value": "100 ms",
+          "note": "The queue timeout, under the 1 s timeout, so a spike cannot leave it stuck."
+        },
+        {
+          "label": "This run",
+          "value": "recovered at once"
+        }
+      ]
+    }
+  },
+  {
+    "name": "newest first at twice capacity with a 1 s timeout and one retry: the service's numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 200,
+      "timeout": 1,
+      "retries": 1,
+      "policy": "lifo"
+    },
+    "match": "subset",
+    "why": "The fields are the assertion. Every share, wait and count was printed first by shed_sim.py in mainlog-code (backpressure/), a separate Python implementation of the same model with the same mulberry32 draws, and this tool reproduces it to the last digit; the chart and the table draw the same runs.",
+    "fieldCount": 5,
+    "expect": {
+      "kind": "fields",
+      "role": "metrics",
+      "fields": [
+        {
+          "label": "Capacity",
+          "value": "100.0/s",
+          "note": "8 workers at 80 ms each"
+        },
+        {
+          "label": "Spike against capacity",
+          "value": "200%",
+          "note": "200/s for 60 s"
+        },
+        {
+          "label": "Answered, p99",
+          "value": "1751 ms",
+          "note": "From the first try, retries included"
+        },
+        {
+          "label": "Orders answered",
+          "value": "50.7%",
+          "note": "20% of requests are orders"
+        },
+        {
+          "label": "Tries per person",
+          "value": "1.70"
+        }
+      ]
+    }
+  },
+  {
+    "name": "newest first at twice capacity with a 1 s timeout and one retry: every policy at the same numbers",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 200,
+      "timeout": 1,
+      "retries": 1,
+      "policy": "lifo"
+    },
+    "match": "subset",
+    "why": "Answered, p50, recovery and wasted work for every policy, with the reader's first, at these numbers. Printed first by shed_sim.py, the same simulation draw for draw.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
+      "columns": [
+        {
+          "label": "Policy"
+        },
+        {
+          "label": "Answered",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "p50",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Recovery",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Wasted",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "Newest first (LIFO + CoDel, yours)",
+          "50.3%",
+          "172 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Unbounded queue",
+          "1.7%",
+          "626 ms",
+          "over 180 s",
+          "48,502"
+        ],
+        [
+          "Skip the abandoned",
+          "3.8%",
+          "994 ms",
+          "10 s",
+          "6,281"
+        ],
+        [
+          "Bounded queue",
+          "50.7%",
+          "416 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Bounded, orders first",
+          "50.6%",
+          "344 ms",
+          "at once",
+          "0"
+        ],
+        [
+          "Queue timeout (CoDel)",
+          "50.4%",
+          "217 ms",
+          "at once",
+          "0"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "no workers is an error that names the input",
+    "input": {
+      "workers": 0,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "fifo"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Workers must be greater than zero.",
+      "input": "workers"
+    }
+  },
+  {
+    "name": "a run too large for a page is refused before it starts",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 5000,
+      "spike": 5000,
+      "timeout": 2,
+      "retries": 10,
+      "policy": "fifo"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "That is about 16,500,000 attempts to simulate, over the 2,000,000 this runs in a page. Scale the rates and the workers down together: the shares depend on their ratio.",
+      "input": "spike"
+    }
+  },
+  {
+    "name": "the timeline's frame: answered per 10 s by when people first tried, the spike marked",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 0,
+      "policy": "fifo"
+    },
+    "match": "subset",
+    "why": "A chart in subset mode asserts its frame; its points are the runs the fields already pin.",
+    "expect": {
+      "kind": "series",
+      "chart": {
+        "xLabel": "First tried at",
+        "xUnit": "s",
+        "yLabel": "Answered",
+        "yUnit": "%",
+        "annotations": [
+          {
+            "x": 60,
+            "label": "spike"
+          },
+          {
+            "x": 120,
+            "label": "spike ends"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the unbounded queue with 3 retries: retry less, worst first",
+    "input": {
+      "workers": 8,
+      "service": 80,
+      "base": 70,
+      "spike": 150,
+      "timeout": 2,
+      "retries": 3,
+      "policy": "fifo"
+    },
+    "match": "subset",
+    "why": "70/s times 4 tries is 280/s against 100/s, so fewer retries come first; the bounded queue's 69.0% is its row in the comparison.",
+    "expect": {
+      "kind": "table",
+      "role": "actions",
+      "caption": "What to change, the worst problem first",
+      "columns": [
+        {
+          "label": "Change"
+        },
+        {
+          "label": "What it does at these numbers"
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "Do not retry, or bound the queue so nothing waits past the timeout."
+          },
+          {
+            "text": "When everyone is timing out, each person sends 4 tries in 10 s: 70/s times 4 is 280/s against 100/s, so the queue cannot drain. In this run it did not."
+          }
+        ],
+        [
+          {
+            "text": "Switch to bounded queue."
+          },
+          {
+            "text": "69.0% answered instead of 8.4%, and 0.0% wait for nothing instead of 91.6%. Back to normal: at once."
+          }
+        ],
+        [
+          {
+            "text": "Or add workers for the spike."
+          },
+          {
+            "text": "13 workers is the fewest whose capacity is over the 150/s spike. The capacity planner sizes them for a wait target."
+          }
+        ]
+      ]
+    }
+  }
+]

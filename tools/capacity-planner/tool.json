@@ -1,14 +1,27 @@
 {
-  "sdk": 3,
+  "sdk": 5,
   "id": "capacity-planner",
   "name": "Queueing capacity planner",
-  "blurb": "Requests at a rate, work that takes a while, and a target for how often anyone waits. Erlang C answers how many servers, and draws the cliff.",
-  "version": "1.0.0",
-  "capabilities": ["pure"],
-  "runtime": { "entry": "index.ts", "thread": "worker" },
-  "kinds": ["fields", "series", "table", "group", "error"],
+  "blurb": "Requests at a rate, work that takes a while, and a target for how many may wait, at all or longer than a limit. Erlang C answers how many servers, shows what one fewer would cost, and draws the cliff.",
+  "version": "3.0.0",
+  "capabilities": [
+    "pure"
+  ],
+  "runtime": {
+    "entry": "index.ts",
+    "thread": "worker"
+  },
+  "kinds": [
+    "fields",
+    "text",
+    "series",
+    "table",
+    "group",
+    "error"
+  ],
   "card": "live",
   "cardFields": 5,
+  "autoRun": false,
   "timeoutMs": 15000,
   "inputs": [
     {
@@ -37,12 +50,24 @@
       "id": "target",
       "primary": true,
       "type": "number",
-      "label": "Target wait chance",
-      "description": "The percentage of arrivals allowed to queue at all.",
+      "label": "Target",
+      "description": "The percentage of requests allowed to wait at all, or to wait longer than the wait limit when one is set.",
       "default": 5,
       "min": 0.01,
       "max": 99,
       "step": 0.5
+    },
+    {
+      "id": "limit",
+      "type": "number",
+      "label": "Wait limit",
+      "unit": "ms",
+      "description": "0 sizes for no wait at all. Set it to size for waits longer than this instead, such as 50 for a 50 ms queueing budget.",
+      "primary": true,
+      "default": 0,
+      "min": 0,
+      "max": 600000,
+      "step": 1
     },
     {
       "id": "mode",
@@ -51,8 +76,14 @@
       "description": "Simulating runs a seeded Monte Carlo of the same queue, so the formula has something to disagree with.",
       "default": "closed",
       "options": [
-        { "value": "closed", "label": "Formula only" },
-        { "value": "simulate", "label": "Formula and simulation" }
+        {
+          "value": "closed",
+          "label": "Formula only"
+        },
+        {
+          "value": "simulate",
+          "label": "Formula and simulation"
+        }
       ]
     },
     {
@@ -72,7 +103,8 @@
       "input": {
         "rate": 500,
         "service": 20,
-        "target": 1
+        "target": 1,
+        "limit": 0
       }
     },
     {
@@ -80,7 +112,17 @@
       "input": {
         "rate": 10,
         "service": 100,
-        "target": 10
+        "target": 10,
+        "limit": 0
+      }
+    },
+    {
+      "label": "1% may wait over 10 ms",
+      "input": {
+        "rate": 500,
+        "service": 20,
+        "target": 1,
+        "limit": 10
       }
     },
     {
@@ -92,9 +134,24 @@
     }
   ],
   "help": "README.md",
-  "tags": ["queueing", "capacity", "performance", "erlang"],
+  "tags": [
+    "queueing",
+    "capacity",
+    "performance",
+    "erlang"
+  ],
   "links": [
-    { "label": "Erlang C, and where it comes from", "href": "https://en.wikipedia.org/wiki/Erlang_(unit)" },
-    { "label": "Kingman's formula, for when service times have a tail", "href": "https://en.wikipedia.org/wiki/Kingman%27s_formula" }
+    {
+      "label": "Erlang C, and where it comes from",
+      "href": "https://en.wikipedia.org/wiki/Erlang_(unit)"
+    },
+    {
+      "label": "The M/M/c queue, and its waiting time under first come, first served",
+      "href": "https://en.wikipedia.org/wiki/M/M/c_queue"
+    },
+    {
+      "label": "Kingman's formula, for when service times have a tail",
+      "href": "https://en.wikipedia.org/wiki/Kingman%27s_formula"
+    }
   ]
 }

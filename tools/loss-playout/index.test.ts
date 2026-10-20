@@ -32,9 +32,10 @@ function run(values: Partial<Values>): Output[] {
 	return out.kind === "group" ? out.parts : [];
 }
 
+/** The per-frame table: the one with no role, since the comparison comes first. */
 const tableOf = (parts: Output[]) => {
-	const part = parts.find((p): p is Extract<Output, { kind: "table" }> => p.kind === "table");
-	assert.ok(part, "expected a table part");
+	const part = parts.find((p): p is Extract<Output, { kind: "table" }> => p.kind === "table" && p.role === undefined);
+	assert.ok(part, "expected the per-frame table");
 	return part;
 };
 const chartOf = (parts: Output[]) => {
@@ -158,5 +159,54 @@ describe("the chart", () => {
 		const chart = chartOf(run({}));
 		assert.equal(chart.series.length, 4);
 		assert.ok(chart.series.every((s) => s.unit === "ms" && s.axis === undefined));
+	});
+});
+
+describe("the order a reader meets", () => {
+	it("is the comparison, the timeline, the timings, the frame-size chart, then the detail", () => {
+		const parts = run({});
+		assert.deepEqual(
+			parts.map((p) => `${p.kind}${p.role ? `:${p.role}` : ""}`),
+			["table:comparison", "series", "fields", "series", "table"],
+		);
+	});
+
+	it("compares the three transports in one frame, with no tone and no row that is not a fact", () => {
+		for (const values of grid.filter((v) => v.frame === "20")) {
+			const table = run(values)[0];
+			assert.ok(table?.kind === "table");
+			assert.deepEqual(
+				table.rows.map((r) => r[0]),
+				["UDP", "TCP, fast retransmit", `TCP, ${values.rto} ms timeout`],
+			);
+			assert.ok(table.rows.flat().every((c) => typeof c !== "object" || c.tone === undefined), JSON.stringify(values));
+			const m = missed(values);
+			// Audio lost is the frames each transport misses, read from the per-frame table, times the frame size.
+			assert.deepEqual(
+				table.rows.map((r) => r[1]),
+				[m.udp, m.fast, m.timeout].map((f) => `${f.length * 20} ms`),
+				JSON.stringify(values),
+			);
+		}
+	});
+
+	it("asks for exactly the buffer that makes each TCP row miss nothing", () => {
+		/*
+		 * The comparison names a buffer per TCP row. Running with that buffer must leave the row's transport with
+		 * no misses, and 10 ms less must not: the number is the threshold, not merely enough.
+		 */
+		for (const values of grid.filter((v) => v.frame === "20" && v.buffer === 0)) {
+			const table = run(values)[0];
+			assert.ok(table?.kind === "table");
+			for (const [col, row] of [
+				["fast", table.rows[1]],
+				["timeout", table.rows[2]],
+			] as const) {
+				const need = Number.parseInt(String(row?.[3]), 10);
+				if (need === 0) continue;
+				assert.deepEqual(missed({ ...values, buffer: need })[col], [], `${JSON.stringify(values)} at ${need} ms`);
+				assert.notDeepEqual(missed({ ...values, buffer: need - 10 })[col], [], `${JSON.stringify(values)} at ${need - 10} ms`);
+			}
+		}
 	});
 });

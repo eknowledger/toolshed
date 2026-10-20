@@ -1,0 +1,1289 @@
+[
+  {
+    "name": "the defaults: 20 calls at 0.5% slow leave 9.54% of requests slow, and each call needs p99.95",
+    "input": {
+      "calls": 20,
+      "slow": "0.5%",
+      "target": "p99",
+      "dependencies": ""
+    },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "fields",
+          "role": "key",
+          "fields": [
+            {
+              "label": "Requests that wait for a slow call",
+              "value": "9.54%"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "role": "formula",
+          "mono": true,
+          "text": "1 - (1 - 0.5%)^20  ·  a p99 target allows 1%"
+        },
+        {
+          "kind": "text",
+          "role": "answer",
+          "text": "For p99 on the request, each call needs p99.95. Your calls are at p99.5."
+        },
+        {
+          "kind": "series",
+          "chart": {
+            "xLabel": "Calls per request",
+            "yLabel": "Requests with a slow call",
+            "yUnit": "%",
+            "xScale": "log",
+            "x": [
+              1,
+              2,
+              5,
+              10,
+              20,
+              50,
+              100
+            ],
+            "series": [
+              {
+                "label": "0.5% of calls slow",
+                "shape": "line",
+                "markers": true,
+                "points": [
+                  0.5,
+                  0.997,
+                  2.475,
+                  4.889,
+                  9.539,
+                  22.169,
+                  39.423
+                ]
+              }
+            ],
+            "annotations": [
+              {
+                "x": 20,
+                "label": "20 calls"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "fields",
+          "role": "method",
+          "fields": [
+            {
+              "label": "Assumes",
+              "value": "Calls are slow independently of each other, and the request waits for all of them. Calls that share a host, a network path or a pause are slow together, so measure your own requests and use this as the baseline."
+            },
+            {
+              "label": "How it is worked out",
+              "value": "A request is fast only if every call is. With n calls, each slow a share q of the time, 1 - (1 - q)^n of requests are slow. For a share p of requests to be fast, each call must be fast with probability p^(1/n), which is the percentile it needs."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "The Tail at Scale: 100 calls at their p99 leave 63.4% of requests slow",
+    "input": {
+      "calls": 100,
+      "slow": "p99",
+      "target": "p99",
+      "dependencies": ""
+    },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "fields",
+          "role": "key",
+          "fields": [
+            {
+              "label": "Requests that wait for a slow call",
+              "value": "63.4%"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "role": "formula",
+          "mono": true,
+          "text": "1 - (1 - 1%)^100  ·  a p99 target allows 1%"
+        },
+        {
+          "kind": "text",
+          "role": "answer",
+          "text": "For p99 on the request, each call needs p99.99. Your calls are at p99."
+        },
+        {
+          "kind": "series",
+          "chart": {
+            "xLabel": "Calls per request",
+            "yLabel": "Requests with a slow call",
+            "yUnit": "%",
+            "xScale": "log",
+            "x": [
+              1,
+              2,
+              5,
+              10,
+              20,
+              50,
+              100,
+              200,
+              500,
+              1000
+            ],
+            "series": [
+              {
+                "label": "1% of calls slow",
+                "shape": "line",
+                "markers": true,
+                "points": [
+                  1,
+                  1.99,
+                  4.901,
+                  9.562,
+                  18.209,
+                  39.499,
+                  63.397,
+                  86.602,
+                  99.343,
+                  99.996
+                ]
+              }
+            ],
+            "annotations": [
+              {
+                "x": 100,
+                "label": "100 calls"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "fields",
+          "role": "method",
+          "fields": [
+            {
+              "label": "Assumes",
+              "value": "Calls are slow independently of each other, and the request waits for all of them. Calls that share a host, a network path or a pause are slow together, so measure your own requests and use this as the baseline."
+            },
+            {
+              "label": "How it is worked out",
+              "value": "A request is fast only if every call is. With n calls, each slow a share q of the time, 1 - (1 - q)^n of requests are slow. For a share p of requests to be fast, each call must be fast with probability p^(1/n), which is the percentile it needs."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "working backwards: 20 shards at p99 need p99.95 each for a p99 request",
+    "input": {
+      "calls": 20,
+      "slow": "p99",
+      "target": "p99",
+      "dependencies": ""
+    },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "fields",
+          "role": "key",
+          "fields": [
+            {
+              "label": "Requests that wait for a slow call",
+              "value": "18.2%"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "role": "formula",
+          "mono": true,
+          "text": "1 - (1 - 1%)^20  ·  a p99 target allows 1%"
+        },
+        {
+          "kind": "text",
+          "role": "answer",
+          "text": "For p99 on the request, each call needs p99.95. Your calls are at p99."
+        },
+        {
+          "kind": "series",
+          "chart": {
+            "xLabel": "Calls per request",
+            "yLabel": "Requests with a slow call",
+            "yUnit": "%",
+            "xScale": "log",
+            "x": [
+              1,
+              2,
+              5,
+              10,
+              20,
+              50,
+              100
+            ],
+            "series": [
+              {
+                "label": "1% of calls slow",
+                "shape": "line",
+                "markers": true,
+                "points": [
+                  1,
+                  1.99,
+                  4.901,
+                  9.562,
+                  18.209,
+                  39.499,
+                  63.397
+                ]
+              }
+            ],
+            "annotations": [
+              {
+                "x": 20,
+                "label": "20 calls"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "fields",
+          "role": "method",
+          "fields": [
+            {
+              "label": "Assumes",
+              "value": "Calls are slow independently of each other, and the request waits for all of them. Calls that share a host, a network path or a pause are slow together, so measure your own requests and use this as the baseline."
+            },
+            {
+              "label": "How it is worked out",
+              "value": "A request is fast only if every call is. With n calls, each slow a share q of the time, 1 - (1 - q)^n of requests are slow. For a share p of requests to be fast, each call must be fast with probability p^(1/n), which is the percentile it needs."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "one call is the identity, and calls already strict enough are told so",
+    "input": {
+      "calls": 1,
+      "slow": "0.01%",
+      "target": "p99.9",
+      "dependencies": ""
+    },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "fields",
+          "role": "key",
+          "fields": [
+            {
+              "label": "Requests that wait for a slow call",
+              "value": "0.01%"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "role": "formula",
+          "mono": true,
+          "text": "1 - (1 - 0.01%)^1  ·  a p99.9 target allows 0.1%"
+        },
+        {
+          "kind": "text",
+          "role": "answer",
+          "text": "For p99.9 on the request, the call needs p99.9. Your call, at p99.99, already meets it."
+        },
+        {
+          "kind": "series",
+          "chart": {
+            "xLabel": "Calls per request",
+            "yLabel": "Requests with a slow call",
+            "yUnit": "%",
+            "xScale": "log",
+            "x": [
+              1,
+              2,
+              5,
+              10,
+              20,
+              50,
+              100
+            ],
+            "series": [
+              {
+                "label": "0.01% of calls slow",
+                "shape": "line",
+                "markers": true,
+                "points": [
+                  0.01,
+                  0.02,
+                  0.05,
+                  0.1,
+                  0.2,
+                  0.499,
+                  0.995
+                ]
+              }
+            ],
+            "annotations": [
+              {
+                "x": 1,
+                "label": "1 call"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "fields",
+          "role": "method",
+          "fields": [
+            {
+              "label": "Assumes",
+              "value": "Calls are slow independently of each other, and the request waits for all of them. Calls that share a host, a network path or a pause are slow together, so measure your own requests and use this as the baseline."
+            },
+            {
+              "label": "How it is worked out",
+              "value": "A request is fast only if every call is. With n calls, each slow a share q of the time, 1 - (1 - q)^n of requests are slow. For a share p of requests to be fast, each call must be fast with probability p^(1/n), which is the percentile it needs."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "a bare number is a percentage, and the target may be written without the p",
+    "input": {
+      "calls": 5,
+      "slow": "2",
+      "target": "90",
+      "dependencies": ""
+    },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "fields",
+          "role": "key",
+          "fields": [
+            {
+              "label": "Requests that wait for a slow call",
+              "value": "9.61%"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "role": "formula",
+          "mono": true,
+          "text": "1 - (1 - 2%)^5  ·  a p90 target allows 10%"
+        },
+        {
+          "kind": "text",
+          "role": "answer",
+          "text": "For p90 on the request, each call needs p97.9. Your calls, at p98, already meet it."
+        },
+        {
+          "kind": "series",
+          "chart": {
+            "xLabel": "Calls per request",
+            "yLabel": "Requests with a slow call",
+            "yUnit": "%",
+            "xScale": "log",
+            "x": [
+              1,
+              2,
+              5,
+              10,
+              20,
+              50,
+              100
+            ],
+            "series": [
+              {
+                "label": "2% of calls slow",
+                "shape": "line",
+                "markers": true,
+                "points": [
+                  2,
+                  3.96,
+                  9.608,
+                  18.293,
+                  33.239,
+                  63.583,
+                  86.738
+                ]
+              }
+            ],
+            "annotations": [
+              {
+                "x": 5,
+                "label": "5 calls"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "fields",
+          "role": "method",
+          "fields": [
+            {
+              "label": "Assumes",
+              "value": "Calls are slow independently of each other, and the request waits for all of them. Calls that share a host, a network path or a pause are slow together, so measure your own requests and use this as the baseline."
+            },
+            {
+              "label": "How it is worked out",
+              "value": "A request is fast only if every call is. With n calls, each slow a share q of the time, 1 - (1 - q)^n of requests are slow. For a share p of requests to be fast, each call must be fast with probability p^(1/n), which is the percentile it needs."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "the checkout: 16.1% slow, pricing first at 7.26% without it, shipping quotes at 14.4%",
+    "input": {
+      "calls": 20,
+      "slow": "0.5%",
+      "target": "p99",
+      "dependencies": "cart 1 0.1%\npricing 20 0.5%\ninventory 1 1%\ntax 1 0.2%\nshipping quotes 1 2%\npayments 1 0.5%\nfraud check 1 1%\nuser profile 1 0.1%\npromotions 2 0.5%\nloyalty 1 0.3%\nrecommendations 1 1%\nsession cache 3 0.1%"
+    },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "fields",
+          "role": "key",
+          "fields": [
+            {
+              "label": "Requests that wait for a slow call",
+              "value": "16.1%"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "role": "formula",
+          "mono": true,
+          "text": "1 - (1 - 0.1%) × (1 - 0.5%)^20 × ... × (1 - 0.1%)^3  ·  34 calls to 12 dependencies  ·  a p99 target allows 1%"
+        },
+        {
+          "kind": "text",
+          "role": "answer",
+          "text": "For p99 on the request, each of the 34 calls needs p99.97. Fix pricing first: its 20 calls slow 9.54% of requests on their own."
+        },
+        {
+          "kind": "table",
+          "role": "comparison",
+          "caption": "Fix first: slow requests without each one, top 5 of 12",
+          "columns": [
+            {
+              "label": "Dependency"
+            },
+            {
+              "label": "Calls",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "Slow calls",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "Without it",
+              "align": "end",
+              "mono": true
+            }
+          ],
+          "rows": [
+            [
+              "pricing",
+              {
+                "text": "20",
+                "mono": true
+              },
+              {
+                "text": "0.5%",
+                "mono": true
+              },
+              {
+                "text": "7.26%",
+                "mono": true
+              }
+            ],
+            [
+              "shipping quotes",
+              {
+                "text": "1",
+                "mono": true
+              },
+              {
+                "text": "2%",
+                "mono": true
+              },
+              {
+                "text": "14.4%",
+                "mono": true
+              }
+            ],
+            [
+              "inventory",
+              {
+                "text": "1",
+                "mono": true
+              },
+              {
+                "text": "1%",
+                "mono": true
+              },
+              {
+                "text": "15.3%",
+                "mono": true
+              }
+            ],
+            [
+              "fraud check",
+              {
+                "text": "1",
+                "mono": true
+              },
+              {
+                "text": "1%",
+                "mono": true
+              },
+              {
+                "text": "15.3%",
+                "mono": true
+              }
+            ],
+            [
+              "recommendations",
+              {
+                "text": "1",
+                "mono": true
+              },
+              {
+                "text": "1%",
+                "mono": true
+              },
+              {
+                "text": "15.3%",
+                "mono": true
+              }
+            ]
+          ]
+        },
+        {
+          "kind": "fields",
+          "role": "method",
+          "fields": [
+            {
+              "label": "Assumes",
+              "value": "Calls are slow independently of each other, and the request waits for all of them. Calls that share a host, a network path or a pause are slow together, so measure your own requests and use this as the baseline."
+            },
+            {
+              "label": "How it is worked out",
+              "value": "A request is fast only if every call is, so multiply each dependency's chance of being fast: 1 - (1 - q1)^n1 × (1 - q2)^n2 × ... of requests are slow. Without it means that dependency is never slow. The per-call percentile holds every call to the same share, p^(1/n) for n calls in all."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "the long form with colons, calls and commas reads the same as the short one",
+    "input": {
+      "calls": 20,
+      "slow": "0.5%",
+      "target": "p99",
+      "dependencies": "cart: 1 call, 0.1%\npricing: 20 calls, 0.5%\ninventory: 1 call, 1%\ntax: 1 call, 0.2%\nshipping quotes: 1 call, 2%\npayments: 1 call, 0.5%\nfraud check: 1 call, 1%\nuser profile: 1 call, 0.1%\npromotions: 2 calls, 0.5%\nloyalty: 1 call, 0.3%\nrecommendations: 1 call, 1%\nsession cache: 3 calls, 0.1%"
+    },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "fields",
+          "role": "key",
+          "fields": [
+            {
+              "label": "Requests that wait for a slow call",
+              "value": "16.1%"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "role": "formula",
+          "mono": true,
+          "text": "1 - (1 - 0.1%) × (1 - 0.5%)^20 × ... × (1 - 0.1%)^3  ·  34 calls to 12 dependencies  ·  a p99 target allows 1%"
+        },
+        {
+          "kind": "text",
+          "role": "answer",
+          "text": "For p99 on the request, each of the 34 calls needs p99.97. Fix pricing first: its 20 calls slow 9.54% of requests on their own."
+        },
+        {
+          "kind": "table",
+          "role": "comparison",
+          "caption": "Fix first: slow requests without each one, top 5 of 12",
+          "columns": [
+            {
+              "label": "Dependency"
+            },
+            {
+              "label": "Calls",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "Slow calls",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "Without it",
+              "align": "end",
+              "mono": true
+            }
+          ],
+          "rows": [
+            [
+              "pricing",
+              {
+                "text": "20",
+                "mono": true
+              },
+              {
+                "text": "0.5%",
+                "mono": true
+              },
+              {
+                "text": "7.26%",
+                "mono": true
+              }
+            ],
+            [
+              "shipping quotes",
+              {
+                "text": "1",
+                "mono": true
+              },
+              {
+                "text": "2%",
+                "mono": true
+              },
+              {
+                "text": "14.4%",
+                "mono": true
+              }
+            ],
+            [
+              "inventory",
+              {
+                "text": "1",
+                "mono": true
+              },
+              {
+                "text": "1%",
+                "mono": true
+              },
+              {
+                "text": "15.3%",
+                "mono": true
+              }
+            ],
+            [
+              "fraud check",
+              {
+                "text": "1",
+                "mono": true
+              },
+              {
+                "text": "1%",
+                "mono": true
+              },
+              {
+                "text": "15.3%",
+                "mono": true
+              }
+            ],
+            [
+              "recommendations",
+              {
+                "text": "1",
+                "mono": true
+              },
+              {
+                "text": "1%",
+                "mono": true
+              },
+              {
+                "text": "15.3%",
+                "mono": true
+              }
+            ]
+          ]
+        },
+        {
+          "kind": "fields",
+          "role": "method",
+          "fields": [
+            {
+              "label": "Assumes",
+              "value": "Calls are slow independently of each other, and the request waits for all of them. Calls that share a host, a network path or a pause are slow together, so measure your own requests and use this as the baseline."
+            },
+            {
+              "label": "How it is worked out",
+              "value": "A request is fast only if every call is, so multiply each dependency's chance of being fast: 1 - (1 - q1)^n1 × (1 - q2)^n2 × ... of requests are slow. Without it means that dependency is never slow. The per-call percentile holds every call to the same share, p^(1/n) for n calls in all."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "several dependencies on one line, separated by commas, with the calls left out for one",
+    "input": {
+      "calls": 20,
+      "slow": "0.5%",
+      "target": "p99",
+      "dependencies": "pricing 20 0.5%, search 3 2%, ads 5%"
+    },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "fields",
+          "role": "key",
+          "fields": [
+            {
+              "label": "Requests that wait for a slow call",
+              "value": "19.1%"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "role": "formula",
+          "mono": true,
+          "text": "1 - (1 - 0.5%)^20 × (1 - 2%)^3 × (1 - 5%)  ·  24 calls to 3 dependencies  ·  a p99 target allows 1%"
+        },
+        {
+          "kind": "text",
+          "role": "answer",
+          "text": "For p99 on the request, each of the 24 calls needs p99.958. Fix pricing first: its 20 calls slow 9.54% of requests on their own."
+        },
+        {
+          "kind": "table",
+          "role": "comparison",
+          "caption": "Fix first: slow requests without each one",
+          "columns": [
+            {
+              "label": "Dependency"
+            },
+            {
+              "label": "Calls",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "Slow calls",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "Without it",
+              "align": "end",
+              "mono": true
+            }
+          ],
+          "rows": [
+            [
+              "pricing",
+              {
+                "text": "20",
+                "mono": true
+              },
+              {
+                "text": "0.5%",
+                "mono": true
+              },
+              {
+                "text": "10.6%",
+                "mono": true
+              }
+            ],
+            [
+              "search",
+              {
+                "text": "3",
+                "mono": true
+              },
+              {
+                "text": "2%",
+                "mono": true
+              },
+              {
+                "text": "14.1%",
+                "mono": true
+              }
+            ],
+            [
+              "ads",
+              {
+                "text": "1",
+                "mono": true
+              },
+              {
+                "text": "5%",
+                "mono": true
+              },
+              {
+                "text": "14.9%",
+                "mono": true
+              }
+            ]
+          ]
+        },
+        {
+          "kind": "fields",
+          "role": "method",
+          "fields": [
+            {
+              "label": "Assumes",
+              "value": "Calls are slow independently of each other, and the request waits for all of them. Calls that share a host, a network path or a pause are slow together, so measure your own requests and use this as the baseline."
+            },
+            {
+              "label": "How it is worked out",
+              "value": "A request is fast only if every call is, so multiply each dependency's chance of being fast: 1 - (1 - q1)^n1 × (1 - q2)^n2 × ... of requests are slow. Without it means that dependency is never slow. The per-call percentile holds every call to the same share, p^(1/n) for n calls in all."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "a dependency given as a percentile, and a comment line skipped",
+    "input": {
+      "calls": 20,
+      "slow": "0.5%",
+      "target": "p99",
+      "dependencies": "# the search tier\nshards 50 p99.9\nauth 2x p99"
+    },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "fields",
+          "role": "key",
+          "fields": [
+            {
+              "label": "Requests that wait for a slow call",
+              "value": "6.77%"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "role": "formula",
+          "mono": true,
+          "text": "1 - (1 - 0.1%)^50 × (1 - 1%)^2  ·  52 calls to 2 dependencies  ·  a p99 target allows 1%"
+        },
+        {
+          "kind": "text",
+          "role": "answer",
+          "text": "For p99 on the request, each of the 52 calls needs p99.981. Fix shards first: its 50 calls slow 4.88% of requests on their own."
+        },
+        {
+          "kind": "table",
+          "role": "comparison",
+          "caption": "Fix first: slow requests without each one",
+          "columns": [
+            {
+              "label": "Dependency"
+            },
+            {
+              "label": "Calls",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "Slow calls",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "Without it",
+              "align": "end",
+              "mono": true
+            }
+          ],
+          "rows": [
+            [
+              "shards",
+              {
+                "text": "50",
+                "mono": true
+              },
+              {
+                "text": "0.1%",
+                "mono": true
+              },
+              {
+                "text": "1.99%",
+                "mono": true
+              }
+            ],
+            [
+              "auth",
+              {
+                "text": "2",
+                "mono": true
+              },
+              {
+                "text": "1%",
+                "mono": true
+              },
+              {
+                "text": "4.88%",
+                "mono": true
+              }
+            ]
+          ]
+        },
+        {
+          "kind": "fields",
+          "role": "method",
+          "fields": [
+            {
+              "label": "Assumes",
+              "value": "Calls are slow independently of each other, and the request waits for all of them. Calls that share a host, a network path or a pause are slow together, so measure your own requests and use this as the baseline."
+            },
+            {
+              "label": "How it is worked out",
+              "value": "A request is fast only if every call is, so multiply each dependency's chance of being fast: 1 - (1 - q1)^n1 × (1 - q2)^n2 × ... of requests are slow. Without it means that dependency is never slow. The per-call percentile holds every call to the same share, p^(1/n) for n calls in all."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "within the target, the top of the table matters most rather than needing a fix",
+    "input": {
+      "calls": 20,
+      "slow": "0.5%",
+      "target": "p90",
+      "dependencies": "pricing 20 0.1%\nads 1 1%"
+    },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "fields",
+          "role": "key",
+          "fields": [
+            {
+              "label": "Requests that wait for a slow call",
+              "value": "2.96%"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "role": "formula",
+          "mono": true,
+          "text": "1 - (1 - 0.1%)^20 × (1 - 1%)  ·  21 calls to 2 dependencies  ·  a p90 target allows 10%"
+        },
+        {
+          "kind": "text",
+          "role": "answer",
+          "text": "For p90 on the request, each of the 21 calls needs p99.5. Pricing matters most: its 20 calls slow 1.98% of requests on their own."
+        },
+        {
+          "kind": "table",
+          "role": "comparison",
+          "caption": "Fix first: slow requests without each one",
+          "columns": [
+            {
+              "label": "Dependency"
+            },
+            {
+              "label": "Calls",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "Slow calls",
+              "align": "end",
+              "mono": true
+            },
+            {
+              "label": "Without it",
+              "align": "end",
+              "mono": true
+            }
+          ],
+          "rows": [
+            [
+              "pricing",
+              {
+                "text": "20",
+                "mono": true
+              },
+              {
+                "text": "0.1%",
+                "mono": true
+              },
+              {
+                "text": "1.00%",
+                "mono": true
+              }
+            ],
+            [
+              "ads",
+              {
+                "text": "1",
+                "mono": true
+              },
+              {
+                "text": "1%",
+                "mono": true
+              },
+              {
+                "text": "1.98%",
+                "mono": true
+              }
+            ]
+          ]
+        },
+        {
+          "kind": "fields",
+          "role": "method",
+          "fields": [
+            {
+              "label": "Assumes",
+              "value": "Calls are slow independently of each other, and the request waits for all of them. Calls that share a host, a network path or a pause are slow together, so measure your own requests and use this as the baseline."
+            },
+            {
+              "label": "How it is worked out",
+              "value": "A request is fast only if every call is, so multiply each dependency's chance of being fast: 1 - (1 - q1)^n1 × (1 - q2)^n2 × ... of requests are slow. Without it means that dependency is never slow. The per-call percentile holds every call to the same share, p^(1/n) for n calls in all."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "one line in the list is drawn as a curve with its name, and replaces the inputs above",
+    "input": {
+      "calls": 3,
+      "slow": "9%",
+      "target": "p99",
+      "dependencies": "search shards 40 0.2%"
+    },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        {
+          "kind": "fields",
+          "role": "key",
+          "fields": [
+            {
+              "label": "Requests that wait for a slow call",
+              "value": "7.70%"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "role": "formula",
+          "mono": true,
+          "text": "1 - (1 - 0.2%)^40  ·  a p99 target allows 1%"
+        },
+        {
+          "kind": "text",
+          "role": "answer",
+          "text": "For p99 on the request, each call needs p99.975. Your calls are at p99.8."
+        },
+        {
+          "kind": "series",
+          "chart": {
+            "xLabel": "Calls per request to search shards",
+            "yLabel": "Requests with a slow call",
+            "yUnit": "%",
+            "xScale": "log",
+            "x": [
+              1,
+              2,
+              5,
+              10,
+              20,
+              40,
+              50,
+              100,
+              200,
+              500,
+              1000
+            ],
+            "series": [
+              {
+                "label": "0.2% of calls slow",
+                "shape": "line",
+                "markers": true,
+                "points": [
+                  0.2,
+                  0.4,
+                  0.996,
+                  1.982,
+                  3.925,
+                  7.696,
+                  9.525,
+                  18.143,
+                  32.995,
+                  63.249,
+                  86.494
+                ]
+              }
+            ],
+            "annotations": [
+              {
+                "x": 40,
+                "label": "40 calls"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "fields",
+          "role": "method",
+          "fields": [
+            {
+              "label": "Assumes",
+              "value": "Calls are slow independently of each other, and the request waits for all of them. Calls that share a host, a network path or a pause are slow together, so measure your own requests and use this as the baseline."
+            },
+            {
+              "label": "How it is worked out",
+              "value": "A request is fast only if every call is. With n calls, each slow a share q of the time, 1 - (1 - q)^n of requests are slow. For a share p of requests to be fast, each call must be fast with probability p^(1/n), which is the percentile it needs."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "a slow share that is not a share or a percentile is refused",
+    "input": {
+      "calls": 20,
+      "slow": "fast",
+      "target": "p99",
+      "dependencies": ""
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Write the share of calls that are slow, such as 0.5%, or the percentile at your limit, such as p99.",
+      "input": "slow"
+    }
+  },
+  {
+    "name": "a slow share of 100% is refused",
+    "input": {
+      "calls": 20,
+      "slow": "100%",
+      "target": "p99",
+      "dependencies": ""
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Write the share of calls that are slow, such as 0.5%, or the percentile at your limit, such as p99.",
+      "input": "slow"
+    }
+  },
+  {
+    "name": "a target that is not a percentile is refused",
+    "input": {
+      "calls": 20,
+      "slow": "0.5%",
+      "target": "300 ms",
+      "dependencies": ""
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Write the percentile you promise for the whole request, such as p99 or p99.9.",
+      "input": "target"
+    }
+  },
+  {
+    "name": "a fractional call count is refused",
+    "input": {
+      "calls": 2.5,
+      "slow": "0.5%",
+      "target": "p99",
+      "dependencies": ""
+    },
+    "expect": {
+      "kind": "error",
+      "message": "The calls per request must be a whole number from 1 to 100,000.",
+      "input": "calls"
+    }
+  },
+  {
+    "name": "a dependency line without a share is refused, pointing at the line",
+    "input": {
+      "calls": 20,
+      "slow": "0.5%",
+      "target": "p99",
+      "dependencies": "pricing 20 0.5%\nads 3"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Write each dependency as a name, its calls per request and its share of slow calls, such as pricing 20 0.5%.",
+      "input": "dependencies",
+      "at": 16,
+      "len": 5
+    }
+  },
+  {
+    "name": "a dependency with two shares is refused",
+    "input": {
+      "calls": 20,
+      "slow": "0.5%",
+      "target": "p99",
+      "dependencies": "pricing 20 0.5% 1%"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Write each dependency as a name, its calls per request and its share of slow calls, such as pricing 20 0.5%.",
+      "input": "dependencies",
+      "at": 0,
+      "len": 18
+    }
+  },
+  {
+    "name": "a dependency called zero times is refused, pointing at the count",
+    "input": {
+      "calls": 20,
+      "slow": "0.5%",
+      "target": "p99",
+      "dependencies": "pricing 0 0.5%"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "pricing: the calls per request must be a whole number from 1 to 100,000.",
+      "input": "dependencies",
+      "at": 8,
+      "len": 1
+    }
+  }
+]

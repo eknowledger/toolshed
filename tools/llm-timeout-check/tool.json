@@ -1,0 +1,189 @@
+{
+	"sdk": 6,
+	"id": "llm-timeout-check",
+	"name": "LLM timeout check",
+	"blurb": "How long one agent task can run before your SDK and loop settings stop it, when the model is silent, trickling or overloaded, and what to set when that is too long.",
+	"version": "3.1.0",
+	"capabilities": ["pure"],
+	"runtime": {
+		"entry": "index.ts",
+		"thread": "main"
+	},
+	"kinds": ["group", "fields", "series", "table", "error"],
+	"card": "live",
+	"cardFields": 3,
+	"autoRun": false,
+	"inputs": [
+		{
+			"id": "stack",
+			"type": "select",
+			"label": "Stack",
+			"description": "Fills the read timeout, retries and turns with that SDK's defaults. The Anthropic and OpenAI Python SDKs share theirs and have no turn limit, so they leave Turns as it is.",
+			"default": "python",
+			"options": [
+				{
+					"value": "python",
+					"label": "Anthropic or OpenAI Python SDK",
+					"sets": {
+						"read": 600,
+						"retries": 2
+					}
+				},
+				{
+					"value": "agents",
+					"label": "OpenAI Agents SDK",
+					"sets": {
+						"read": 600,
+						"retries": 2,
+						"turns": 10
+					}
+				},
+				{
+					"value": "custom",
+					"label": "Custom"
+				}
+			],
+			"primary": true
+		},
+		{
+			"id": "read",
+			"type": "number",
+			"label": "Read timeout",
+			"description": "The SDK's timeout. It limits each wait for the next chunk, not the whole call.",
+			"default": 600,
+			"min": 0.1,
+			"max": 86400,
+			"step": 1,
+			"unit": "s",
+			"primary": true
+		},
+		{
+			"id": "retries",
+			"type": "number",
+			"label": "Retries",
+			"description": "How many times the SDK retries one call, waiting longer before each retry.",
+			"default": 2,
+			"min": 0,
+			"max": 20,
+			"step": 1,
+			"primary": true
+		},
+		{
+			"id": "deadline",
+			"type": "number",
+			"label": "Attempt deadline",
+			"description": "A limit on one whole attempt, set outside the SDK, such as asyncio.timeout. 0 for none.",
+			"default": 0,
+			"min": 0,
+			"max": 86400,
+			"step": 1,
+			"unit": "s",
+			"primary": true
+		},
+		{
+			"id": "turns",
+			"type": "number",
+			"label": "Turns",
+			"description": "Model calls in one task: your agent loop's limit.",
+			"default": 10,
+			"min": 1,
+			"max": 1000,
+			"step": 1
+		},
+		{
+			"id": "maxtokens",
+			"type": "number",
+			"label": "max_tokens",
+			"description": "The most output tokens one call may write. A trickling stream is assumed to send 2 tokens a second.",
+			"default": 4096,
+			"min": 1,
+			"max": 1000000,
+			"step": 1
+		},
+		{
+			"id": "patience",
+			"type": "number",
+			"label": "Acceptable wait",
+			"description": "How long the task may take before it is too late: a person in a chat, or a job's own deadline. Every result is judged against it.",
+			"default": 120,
+			"min": 1,
+			"max": 86400,
+			"step": 1,
+			"unit": "s"
+		}
+	],
+	"samples": [
+		{
+			"label": "Python SDK defaults, a 10-turn loop",
+			"input": {
+				"stack": "python",
+				"read": 600,
+				"retries": 2,
+				"deadline": 0,
+				"turns": 10,
+				"maxtokens": 4096,
+				"patience": 120
+			}
+		},
+		{
+			"label": "A 30 s attempt deadline",
+			"input": {
+				"stack": "python",
+				"read": 600,
+				"retries": 2,
+				"deadline": 30,
+				"turns": 10,
+				"maxtokens": 4096,
+				"patience": 120
+			}
+		},
+		{
+			"label": "Tuned for a chat: 3 s deadline, 1 retry, 4 turns",
+			"input": {
+				"stack": "custom",
+				"read": 10,
+				"retries": 1,
+				"deadline": 3,
+				"turns": 4,
+				"maxtokens": 1024,
+				"patience": 60
+			}
+		},
+		{
+			"label": "A batch job: an hour is fine",
+			"input": {
+				"stack": "python",
+				"read": 600,
+				"retries": 2,
+				"deadline": 100,
+				"turns": 10,
+				"maxtokens": 4096,
+				"patience": 3600
+			}
+		}
+	],
+	"help": "README.md",
+	"tags": ["llm", "agents", "timeouts", "retries", "reliability"],
+	"links": [
+		{
+			"label": "httpx timeouts: the read timeout bounds each chunk",
+			"href": "https://www.python-httpx.org/advanced/timeouts/"
+		},
+		{
+			"label": "anthropic-sdk-python 1.13.0: DEFAULT_TIMEOUT and DEFAULT_MAX_RETRIES",
+			"href": "https://github.com/anthropics/anthropic-sdk-python/blob/v1.13.0/src/anthropic/_constants.py#L10-L15"
+		},
+		{
+			"label": "openai-python 3.28.0: DEFAULT_TIMEOUT and DEFAULT_MAX_RETRIES",
+			"href": "https://github.com/openai/openai-python/blob/v3.28.0/src/openai/_constants.py#L7-L12"
+		},
+		{
+			"label": "openai-agents-python 0.23.1: DEFAULT_MAX_TURNS",
+			"href": "https://github.com/openai/openai-agents-python/blob/v0.23.1/src/agents/run_config.py#L45"
+		},
+		{
+			"label": "AWS Builders' Library: timeouts, retries and backoff with jitter",
+			"href": "https://builder.aws.com/content/3EumjoZascWd1oZiEgL8ORlv3qE/timeouts-retries-and-backoff-with-jitter"
+		}
+	]
+}

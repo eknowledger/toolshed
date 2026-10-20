@@ -1,0 +1,589 @@
+[
+  {
+    "name": "timeouts set by hand and every timeout retried: a banner, because 9.20 s overruns the 2 s deadline the reader set",
+    "input": {
+      "chain": "frontend -> checkout    none   2\ncheckout -> pricing     1s     2\npricing -> inventory    500ms  2",
+      "deadline": 2000,
+      "backoff": 25
+    },
+    "match": "subset",
+    "why": "Each number was printed first by service-mesh/timeout_budget.py in mainlog-code, which does the same arithmetic in Python. The banner is there only because the reader's deadline is exceeded.",
+    "fieldCount": 1,
+    "expect": {
+      "kind": "fields",
+      "role": "verdict",
+      "fields": [
+        {
+          "label": "When the bottom hangs",
+          "role": "verdict",
+          "tone": "bad",
+          "value": "Can take 9.20 s; the caller gives up after 2.00 s"
+        }
+      ]
+    }
+  },
+  {
+    "name": "timeouts set by hand: the two calls whose tries cannot fit, the deadline first, each with the per-try timeout that fits",
+    "input": {
+      "chain": "frontend -> checkout    none   2\ncheckout -> pricing     1s     2\npricing -> inventory    500ms  2",
+      "deadline": 2000,
+      "backoff": 25
+    },
+    "match": "subset",
+    "why": "Each number was printed first by service-mesh/timeout_budget.py in mainlog-code, which does the same arithmetic in Python. The timeouts are the same arithmetic solved for each call: (2.00 s - 2 x 25 ms) / 3 tries is 650 ms, and (1.00 s - 2 x 25 ms) / 3 is 316 ms.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "2 calls cannot finish their tries inside their caller's time",
+      "columns": [
+        {
+          "label": "Call"
+        },
+        {
+          "label": "Allowed",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Needs",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Fit",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Set per-try to",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "frontend -> checkout",
+            "mono": true
+          },
+          {
+            "text": "2.00 s",
+            "mono": true
+          },
+          {
+            "text": "9.20 s",
+            "mono": true
+          },
+          {
+            "text": "0/3",
+            "mono": true,
+            "tone": "bad"
+          },
+          {
+            "text": "650 ms or less",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "pricing -> inventory",
+            "mono": true
+          },
+          {
+            "text": "1.00 s",
+            "mono": true
+          },
+          {
+            "text": "1.55 s",
+            "mono": true
+          },
+          {
+            "text": "1/3",
+            "mono": true,
+            "tone": "warn"
+          },
+          {
+            "text": "316 ms or less",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "timeouts set by hand: what it assumes, last, with the 27 tries a fast failure would make",
+    "input": {
+      "chain": "frontend -> checkout    none   2\ncheckout -> pricing     1s     2\npricing -> inventory    500ms  2",
+      "deadline": 2000,
+      "backoff": 25
+    },
+    "match": "subset",
+    "why": "Each number was printed first by service-mesh/timeout_budget.py in mainlog-code, which does the same arithmetic in Python. 27 is 3 x 3 x 3 tries.",
+    "fieldCount": 3,
+    "expect": {
+      "kind": "fields",
+      "role": "method",
+      "fields": [
+        {
+          "label": "Assumes",
+          "value": "The bottom hangs, and every layer retries a try that timed out."
+        },
+        {
+          "label": "Backoff",
+          "value": "25 ms between tries"
+        },
+        {
+          "label": "If the bottom fails fast instead",
+          "value": "27 tries reach it, when every layer retries the error.",
+          "note": "Istio's defaults do not retry an HTTP 503."
+        }
+      ]
+    }
+  },
+  {
+    "name": "timeouts set by hand: the chain, with frontend's call and pricing's call marked and the first highlighted",
+    "input": {
+      "chain": "frontend -> checkout    none   2\ncheckout -> pricing     1s     2\npricing -> inventory    500ms  2",
+      "deadline": 2000,
+      "backoff": 25
+    },
+    "match": "subset",
+    "why": "A graph has no subset meaning, so this pins the whole chain.",
+    "expect": {
+      "kind": "graph",
+      "graph": {
+        "label": "The chain when the bottom hangs, with each call's per-try timeout and tries",
+        "layout": "layered",
+        "direction": "TB",
+        "nodes": [
+          {
+            "id": "caller",
+            "label": "Caller",
+            "note": "waits 2.00 s",
+            "shape": "pill"
+          },
+          {
+            "id": "n0",
+            "label": "frontend",
+            "note": "its calls take up to 9.20 s",
+            "tone": "bad"
+          },
+          {
+            "id": "n1",
+            "label": "checkout",
+            "note": "its calls take up to 3.05 s"
+          },
+          {
+            "id": "n2",
+            "label": "pricing",
+            "note": "its calls take up to 1.55 s",
+            "tone": "bad"
+          },
+          {
+            "id": "n3",
+            "label": "inventory",
+            "note": "hangs",
+            "tone": "warn"
+          }
+        ],
+        "edges": [
+          {
+            "from": "caller",
+            "to": "n0",
+            "line": "dotted"
+          },
+          {
+            "from": "n0",
+            "to": "n1",
+            "label": "no timeout, 3 tries",
+            "tone": "bad",
+            "width": "thick",
+            "line": "dashed"
+          },
+          {
+            "from": "n1",
+            "to": "n2",
+            "label": "1.00 s per try, 3 tries"
+          },
+          {
+            "from": "n2",
+            "to": "n3",
+            "label": "500 ms per try, 3 tries",
+            "tone": "bad",
+            "width": "thick"
+          }
+        ],
+        "highlight": [
+          "n0",
+          "n1"
+        ]
+      }
+    }
+  },
+  {
+    "name": "timeouts set by hand: the detail table marks the call whose tries do not fit, not its caller",
+    "input": {
+      "chain": "frontend -> checkout    none   2\ncheckout -> pricing     1s     2\npricing -> inventory    500ms  2",
+      "deadline": 2000,
+      "backoff": 25
+    },
+    "match": "subset",
+    "why": "Each number was printed first by service-mesh/timeout_budget.py in mainlog-code, which does the same arithmetic in Python. Fit above is how many of the call's own tries fit inside one try of its caller, or inside the deadline for the top call, so the red cell sits on the same call as its fix.",
+    "expect": {
+      "kind": "table",
+      "caption": "Each call, top first, when the bottom hangs",
+      "columns": [
+        {
+          "label": "Call"
+        },
+        {
+          "label": "Per try",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Tries",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Worst case",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Fit above",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "frontend -> checkout"
+          },
+          {
+            "text": "none",
+            "mono": true,
+            "tone": "warn"
+          },
+          {
+            "text": "3",
+            "mono": true
+          },
+          {
+            "text": "9.20 s",
+            "mono": true
+          },
+          {
+            "text": "0/3",
+            "mono": true,
+            "tone": "bad"
+          }
+        ],
+        [
+          {
+            "text": "checkout -> pricing"
+          },
+          {
+            "text": "1.00 s",
+            "mono": true
+          },
+          {
+            "text": "3",
+            "mono": true
+          },
+          {
+            "text": "3.05 s",
+            "mono": true
+          },
+          {
+            "text": "3/3",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "pricing -> inventory"
+          },
+          {
+            "text": "500 ms",
+            "mono": true
+          },
+          {
+            "text": "3",
+            "mono": true
+          },
+          {
+            "text": "1.55 s",
+            "mono": true
+          },
+          {
+            "text": "1/3",
+            "mono": true,
+            "tone": "bad"
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "timeouts that shrink going down: 1.48 s, a quiet answer and no banner, because every retry fits",
+    "input": {
+      "chain": "frontend -> checkout    1.8s   0\ncheckout -> pricing     800ms  1\npricing -> inventory    225ms  2",
+      "deadline": 2000,
+      "backoff": 25
+    },
+    "match": "subset",
+    "why": "Each number was printed first by service-mesh/timeout_budget.py in mainlog-code, which does the same arithmetic in Python. With every call's tries inside the try above, there is nothing to change and no row says so.",
+    "fieldCount": 1,
+    "expect": {
+      "kind": "fields",
+      "role": "answer",
+      "fields": [
+        {
+          "label": "Worst case when the bottom hangs",
+          "value": "1.48 s",
+          "note": "Inside the caller's 2.00 s, and every call's tries fit inside one try of the call above."
+        }
+      ]
+    }
+  },
+  {
+    "name": "Istio's defaults: each call below the top needs a timeout of its own",
+    "input": {
+      "chain": "frontend -> checkout    none   0\ncheckout -> pricing     none   0\npricing -> inventory    none   0",
+      "deadline": 2000,
+      "backoff": 25
+    },
+    "match": "subset",
+    "why": "With no timeout anywhere, the top call's row gives a per-try timeout no longer than the 2.00 s the caller waits, and each call below gets a row of its own asking for one.",
+    "expect": {
+      "kind": "table",
+      "caption": "Other changes. Fix the top one first, then run again.",
+      "columns": [
+        {
+          "label": "Call"
+        },
+        {
+          "label": "Change"
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "checkout -> pricing",
+            "mono": true
+          },
+          {
+            "text": "Set a per-try timeout. With none, a hung pricing holds the call until something above gives up."
+          }
+        ],
+        [
+          {
+            "text": "pricing -> inventory",
+            "mono": true
+          },
+          {
+            "text": "Set a per-try timeout. With none, a hung inventory holds the call until something above gives up."
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "timeouts that shrink going down: 1.48 s, every retry fits even with the backoff jittered, the table",
+    "input": {
+      "chain": "frontend -> checkout    1.8s   0\ncheckout -> pricing     800ms  1\npricing -> inventory    225ms  2",
+      "deadline": 2000,
+      "backoff": 25
+    },
+    "match": "subset",
+    "why": "Each number was printed first by service-mesh/timeout_budget.py in mainlog-code, which does the same arithmetic in Python. Every call's tries fit above, so no cell is toned.",
+    "expect": {
+      "kind": "table",
+      "caption": "Each call, top first, when the bottom hangs",
+      "columns": [
+        {
+          "label": "Call"
+        },
+        {
+          "label": "Per try",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Tries",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Worst case",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Fit above",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "frontend -> checkout"
+          },
+          {
+            "text": "1.80 s",
+            "mono": true
+          },
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "1.48 s",
+            "mono": true
+          },
+          {
+            "text": "1/1",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "checkout -> pricing"
+          },
+          {
+            "text": "800 ms",
+            "mono": true
+          },
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "1.48 s",
+            "mono": true
+          },
+          {
+            "text": "2/2",
+            "mono": true
+          }
+        ],
+        [
+          {
+            "text": "pricing -> inventory"
+          },
+          {
+            "text": "225 ms",
+            "mono": true
+          },
+          {
+            "text": "3",
+            "mono": true
+          },
+          {
+            "text": "725 ms",
+            "mono": true
+          },
+          {
+            "text": "3/3",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "Istio's defaults, no timeouts anywhere: nothing bounds the worst case",
+    "input": {
+      "chain": "frontend -> checkout    none   0\ncheckout -> pricing     none   0\npricing -> inventory    none   0",
+      "deadline": 2000,
+      "backoff": 25
+    },
+    "match": "subset",
+    "why": "With no timeout anywhere, the top call's fix is a per-try timeout no longer than the 2.00 s the caller waits.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "1 call cannot finish its tries inside its caller's time",
+      "columns": [
+        {
+          "label": "Call"
+        },
+        {
+          "label": "Allowed",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Needs",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Fit",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Set per-try to",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "frontend -> checkout",
+            "mono": true
+          },
+          {
+            "text": "2.00 s",
+            "mono": true
+          },
+          {
+            "text": "unbounded",
+            "mono": true
+          },
+          {
+            "text": "0/1",
+            "mono": true,
+            "tone": "bad"
+          },
+          {
+            "text": "2.00 s or less",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "a line it cannot read names the line",
+    "input": {
+      "chain": "frontend cart 1s",
+      "deadline": 2000,
+      "backoff": 25
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Cannot read \"frontend cart 1s\": expected \"caller -> callee  timeout  retries\".",
+      "input": "chain"
+    }
+  },
+  {
+    "name": "a chain that does not join up says where",
+    "input": {
+      "chain": "a -> b 1s 1\nc -> d 1s 1",
+      "deadline": 2000,
+      "backoff": 25
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Line 2 starts at c, but line 1 ends at b. Each call should be made by the service the line above called.",
+      "input": "chain"
+    }
+  }
+]

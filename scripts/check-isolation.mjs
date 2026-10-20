@@ -19,7 +19,7 @@ import { readFileSync } from "node:fs";
 import { readdir } from "node:fs/promises";
 
 const ALLOWED_BARE = new Set(["@toolbench/sdk"]);
-const IMPORT = /^\s*(?:import|export)[\s\S]*?from\s+["']([^"']+)["']|^\s*import\s*\(\s*["']([^"']+)["']/gm;
+const IMPORT = /^\s*(?:import|export)[^;`]*?from\s+["']([^"']+)["']|^\s*import\s*\(\s*["']([^"']+)["']/gm;
 
 const problems = [];
 const tools = (await readdir("tools", { withFileTypes: true })).filter((e) => e.isDirectory()).map((e) => e.name);

@@ -7,50 +7,127 @@
       "controlling": "local"
     },
     "match": "subset",
-    "why": "The post's call: three local candidates against the server's one host. The srflx pair is pruned, since its base is the host address and it would send the host pair's check; two checks run, host first.",
-    "fieldCount": 8,
+    "why": "The post's call: three local candidates against the server's one host. Two checks, host first and the relay last, through TURN. Pair priorities priced by hand with G the controlling agent's: host-host 2^32*2130706431 + 2*2130706431, relay-host 2^32*16777215 + 2*2130706431.",
     "expect": {
-      "kind": "fields",
-      "fields": [
+      "kind": "table",
+      "role": "comparison",
+      "id": "order",
+      "caption": "Computed check order, highest priority first. Local side controls",
+      "columns": [
         {
-          "label": "In short",
-          "value": "2 checks run, starting with host to host. 1 pair is dropped because it would send the same packet from the same place as a better pair. 1 check goes through a relay, so it comes last."
+          "label": "#",
+          "align": "end",
+          "mono": true
         },
         {
-          "label": "Checks",
-          "value": "2",
-          "note": "3 pairs formed, 1 pruned"
+          "label": "Local",
+          "mono": true
         },
         {
-          "label": "First check",
-          "value": "host 192.168.1.42:50004 → host 198.51.100.20:50004",
-          "note": "pair priority 9151314442783293438"
+          "label": "Remote",
+          "mono": true
         },
         {
-          "label": "Controlling",
-          "value": "local",
-          "note": "its candidate priorities are G in the formula; the other side's are D"
+          "label": "Route"
         },
         {
-          "label": "Local host, line 1",
-          "value": "2130706431",
-          "note": "type 126 (host), local 65535, component 1"
-        },
-        {
-          "label": "Local srflx, line 2",
-          "value": "1694498815",
-          "note": "type 100 (srflx), local 65535, component 1"
-        },
-        {
-          "label": "Local relay, line 3",
-          "value": "16777215",
-          "note": "type 0 (relay), local 65535, component 1"
-        },
-        {
-          "label": "Remote host, line 1",
-          "value": "2130706431",
-          "note": "type 126 (host), local 65535, component 1"
+          "label": "Priority",
+          "align": "end",
+          "mono": true
         }
+      ],
+      "rows": [
+        [
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "host 192.168.1.42:50004",
+            "mono": true
+          },
+          {
+            "text": "host 198.51.100.20:50004",
+            "mono": true
+          },
+          "direct",
+          {
+            "text": "9151314442783293438",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.50:49152",
+            "mono": true
+          },
+          {
+            "text": "host 198.51.100.20:50004",
+            "mono": true
+          },
+          "TURN",
+          {
+            "text": "72057594004373502",
+            "mono": true,
+            "tone": "muted"
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "alice and an ice-lite server, the pairs",
+    "input": {
+      "local": "a=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321",
+      "remote": "a=candidate:1 1 udp 2130706431 198.51.100.20 50004 typ host",
+      "controlling": "local"
+    },
+    "match": "subset",
+    "why": "The srflx pair, sent from its base 192.168.1.42:50004, would send the same check as #1, the host pair, so it is pruned. Its own price, 2^32*1694498815 + 2*2130706431, would put it second.",
+    "expect": {
+      "kind": "table",
+      "role": "decoded",
+      "id": "pruned",
+      "caption": "Pruned: this pair sends the same check, from the same place to the same place, as one above",
+      "columns": [
+        {
+          "label": "Local",
+          "mono": true
+        },
+        {
+          "label": "Sent from",
+          "mono": true
+        },
+        {
+          "label": "Remote",
+          "mono": true
+        },
+        {
+          "label": "Same as",
+          "align": "end"
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "srflx 192.0.2.10:54321",
+            "mono": true
+          },
+          {
+            "text": "192.168.1.42:50004",
+            "mono": true
+          },
+          {
+            "text": "host 198.51.100.20:50004",
+            "mono": true
+          },
+          "#1"
+        ]
       ]
     }
   },
@@ -63,55 +140,155 @@
     },
     "match": "subset",
     "why": "Both sides full agents with host, srflx and relay: nine pairs. The three that use the local srflx candidate are replaced by its base, the host address, and pruned; the remote srflx stays, since only local candidates are replaced. Six checks.",
-    "fieldCount": 10,
     "expect": {
-      "kind": "fields",
-      "fields": [
+      "kind": "table",
+      "role": "comparison",
+      "id": "order",
+      "caption": "Computed check order, highest priority first. Local side controls",
+      "columns": [
         {
-          "label": "Checks",
-          "value": "6",
-          "note": "9 pairs formed, 3 pruned"
+          "label": "#",
+          "align": "end",
+          "mono": true
         },
         {
-          "label": "First check",
-          "value": "host 192.168.1.42:50004 → host 10.0.0.8:61000",
-          "note": "pair priority 9151314442783293438"
+          "label": "Local",
+          "mono": true
         },
         {
-          "label": "Controlling",
-          "value": "local",
-          "note": "its candidate priorities are G in the formula; the other side's are D"
+          "label": "Remote",
+          "mono": true
         },
         {
-          "label": "Local host, line 1",
-          "value": "2130706431",
-          "note": "type 126 (host), local 65535, component 1"
+          "label": "Route"
         },
         {
-          "label": "Local srflx, line 2",
-          "value": "1694498815",
-          "note": "type 100 (srflx), local 65535, component 1"
-        },
-        {
-          "label": "Local relay, line 3",
-          "value": "16777215",
-          "note": "type 0 (relay), local 65535, component 1"
-        },
-        {
-          "label": "Remote host, line 1",
-          "value": "2130706431",
-          "note": "type 126 (host), local 65535, component 1"
-        },
-        {
-          "label": "Remote srflx, line 2",
-          "value": "1694498815",
-          "note": "type 100 (srflx), local 65535, component 1"
-        },
-        {
-          "label": "Remote relay, line 3",
-          "value": "16777215",
-          "note": "type 0 (relay), local 65535, component 1"
+          "label": "Priority",
+          "align": "end",
+          "mono": true
         }
+      ],
+      "rows": [
+        [
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "host 192.168.1.42:50004",
+            "mono": true
+          },
+          {
+            "text": "host 10.0.0.8:61000",
+            "mono": true
+          },
+          "direct",
+          {
+            "text": "9151314442783293438",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "host 192.168.1.42:50004",
+            "mono": true
+          },
+          {
+            "text": "srflx 198.51.100.77:40100",
+            "mono": true
+          },
+          "direct",
+          {
+            "text": "7277816997797167103",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "3",
+            "mono": true
+          },
+          {
+            "text": "host 192.168.1.42:50004",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.51:49200",
+            "mono": true
+          },
+          "TURN",
+          {
+            "text": "72057594004373503",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "4",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.50:49152",
+            "mono": true
+          },
+          {
+            "text": "host 10.0.0.8:61000",
+            "mono": true
+          },
+          "TURN",
+          {
+            "text": "72057594004373502",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "5",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.50:49152",
+            "mono": true
+          },
+          {
+            "text": "srflx 198.51.100.77:40100",
+            "mono": true
+          },
+          "TURN",
+          {
+            "text": "72057593131958270",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "6",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.50:49152",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.51:49200",
+            "mono": true
+          },
+          "TURN",
+          {
+            "text": "72057589776515070",
+            "mono": true,
+            "tone": "muted"
+          }
+        ]
       ]
     }
   },
@@ -123,55 +300,66 @@
       "controlling": "remote"
     },
     "match": "subset",
-    "why": "The same nine pairs with G and D swapped: equal-priority pairs now break the tie the other way, by the (G>D?1:0) term.",
-    "fieldCount": 10,
+    "why": "The same nine pairs with G and D swapped: equal-priority pairs now break the tie the other way, by the (G>D?1:0) term. The candidate priorities themselves do not change, only which side is G.",
+    "fieldCount": 9,
     "expect": {
       "kind": "fields",
+      "role": "method",
+      "id": "method",
       "fields": [
         {
-          "label": "Checks",
-          "value": "6",
-          "note": "9 pairs formed, 3 pruned"
-        },
-        {
-          "label": "First check",
-          "value": "host 192.168.1.42:50004 → host 10.0.0.8:61000",
-          "note": "pair priority 9151314442783293438"
-        },
-        {
+          "group": "Roles",
           "label": "Controlling",
           "value": "remote",
-          "note": "its candidate priorities are G in the formula; the other side's are D"
+          "note": "Its candidate priorities are G in the pair formula, the other side's D."
         },
         {
-          "label": "Local host, line 1",
+          "group": "Roles",
+          "label": "Pair priority",
+          "value": "2^32 x min(G, D) + 2 x max(G, D) + (G > D ? 1 : 0)",
+          "note": "RFC 8445 section 6.1.2.3"
+        },
+        {
+          "group": "Roles",
+          "label": "Read from",
+          "value": "candidate attributes",
+          "note": "Every candidate: attribute in the paste, wherever it was."
+        },
+        {
+          "group": "Local candidates",
+          "label": "host, line 1",
           "value": "2130706431",
-          "note": "type 126 (host), local 65535, component 1"
+          "note": "Type preference 126, which is host in RFC 8445's recommended values. Local preference 65535, component 1."
         },
         {
-          "label": "Local srflx, line 2",
+          "group": "Local candidates",
+          "label": "srflx, line 2",
           "value": "1694498815",
-          "note": "type 100 (srflx), local 65535, component 1"
+          "note": "Type preference 100, which is srflx in RFC 8445's recommended values. Local preference 65535, component 1."
         },
         {
-          "label": "Local relay, line 3",
+          "group": "Local candidates",
+          "label": "relay, line 3",
           "value": "16777215",
-          "note": "type 0 (relay), local 65535, component 1"
+          "note": "Type preference 0, which is relay in RFC 8445's recommended values. Local preference 65535, component 1."
         },
         {
-          "label": "Remote host, line 1",
+          "group": "Remote candidates",
+          "label": "host, line 1",
           "value": "2130706431",
-          "note": "type 126 (host), local 65535, component 1"
+          "note": "Type preference 126, which is host in RFC 8445's recommended values. Local preference 65535, component 1."
         },
         {
-          "label": "Remote srflx, line 2",
+          "group": "Remote candidates",
+          "label": "srflx, line 2",
           "value": "1694498815",
-          "note": "type 100 (srflx), local 65535, component 1"
+          "note": "Type preference 100, which is srflx in RFC 8445's recommended values. Local preference 65535, component 1."
         },
         {
-          "label": "Remote relay, line 3",
+          "group": "Remote candidates",
+          "label": "relay, line 3",
           "value": "16777215",
-          "note": "type 0 (relay), local 65535, component 1"
+          "note": "Type preference 0, which is relay in RFC 8445's recommended values. Local preference 65535, component 1."
         }
       ]
     }
@@ -184,61 +372,500 @@
       "controlling": "local"
     },
     "match": "subset",
-    "why": "A browser's mDNS name pairs with the IPv4 server; the IPv6 host does not, and the srflx with a hidden raddr cannot be traced to its base, so it is kept.",
-    "fieldCount": 8,
+    "why": "A browser's mDNS name pairs with the IPv4 server; the IPv6 host does not, and the srflx with a hidden raddr cannot be traced to its base, so it is kept. No relay on either side, but the server's host address is public, so that is a note rather than a warning.",
     "expect": {
-      "kind": "fields",
-      "fields": [
+      "kind": "table",
+      "role": "findings",
+      "id": "findings",
+      "caption": "What to look at, most serious first",
+      "columns": [
         {
-          "label": "Checks",
-          "value": "2",
-          "note": "2 pairs formed, 0 pruned"
+          "label": "Severity"
         },
         {
-          "label": "First check",
-          "value": "host 7f3c1b2e-4d5a-4b6c-8d7e-9f0a1b2c3d4e.local:50004 → host 198.51.100.20:50004",
-          "note": "pair priority 9115038255648079870"
+          "label": "What we found"
         },
         {
-          "label": "Controlling",
-          "value": "local",
-          "note": "its candidate priorities are G in the formula; the other side's are D"
-        },
-        {
-          "label": "Local host, line 1",
-          "value": "2122260223",
-          "note": "type 126 (host), local 32542, component 1"
-        },
-        {
-          "label": "Local host, line 2",
-          "value": "2122262783",
-          "note": "type 126 (host), local 32552, component 1"
-        },
-        {
-          "label": "Local srflx, line 3",
-          "value": "1686052607",
-          "note": "type 100 (srflx), local 32542, component 1"
-        },
-        {
-          "label": "Remote host, line 1",
-          "value": "2130706431",
-          "note": "type 126 (host), local 65535, component 1"
+          "label": "What it means and what to do"
         }
+      ],
+      "rows": [
+        [
+          {
+            "text": "Note",
+            "tone": "muted"
+          },
+          "Neither side has a relayed candidate, but the remote side has a public host address.",
+          "That usually connects. Only a network that blocks UDP stops it; a TURN server over TCP or TLS on port 443 is the fallback."
+        ],
+        [
+          {
+            "text": "Note",
+            "tone": "muted"
+          },
+          "1 local reflexive candidate does not say which host address it was learned from.",
+          "Browsers hide it as raddr 0.0.0.0. Its pairs are kept here; if the host it came from is listed, the browser prunes them."
+        ],
+        [
+          {
+            "text": "Note",
+            "tone": "muted"
+          },
+          "1 candidate has nothing to pair with: local host 2001:db8::42:50006.",
+          "A pair needs the same component, transport and address family on both sides. An IPv6 candidate needs an IPv6 one on the other side."
+        ]
+      ]
+    }
+  },
+  {
+    "name": "two whole sdps",
+    "input": {
+      "local": "v=0\no=- 4611731400430051336 2 IN IP4 127.0.0.1\ns=-\nt=0 0\na=group:BUNDLE 0\nm=audio 54321 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 192.0.2.10\na=mid:0\na=ice-ufrag:alce\na=ice-pwd:alice+password+24+chars\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates\na=rtpmap:111 opus/48000/2",
+      "remote": "v=0\no=- 1 1 IN IP4 198.51.100.20\ns=-\nt=0 0\na=ice-lite\na=group:BUNDLE 0\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 198.51.100.20\na=mid:0\na=ice-ufrag:srv7\na=ice-pwd:server+password+24+chars\na=candidate:1 1 udp 2130706431 198.51.100.20 50004 typ host\na=end-of-candidates\na=rtpmap:111 opus/48000/2",
+      "controlling": "local"
+    },
+    "match": "subset",
+    "why": "The post's call pasted as two whole SDPs, ufrags, rtpmaps and all: only the candidate lines are read, and the result is the first sample's, two checks and one pruned.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "id": "order",
+      "caption": "Computed check order, highest priority first. Local side controls",
+      "columns": [
+        {
+          "label": "#",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Local",
+          "mono": true
+        },
+        {
+          "label": "Remote",
+          "mono": true
+        },
+        {
+          "label": "Route"
+        },
+        {
+          "label": "Priority",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "host 192.168.1.42:50004",
+            "mono": true
+          },
+          {
+            "text": "host 198.51.100.20:50004",
+            "mono": true
+          },
+          "direct",
+          {
+            "text": "9151314442783293438",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.50:49152",
+            "mono": true
+          },
+          {
+            "text": "host 198.51.100.20:50004",
+            "mono": true
+          },
+          "TURN",
+          {
+            "text": "72057594004373502",
+            "mono": true,
+            "tone": "muted"
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "the ice-lite side cannot control",
+    "input": {
+      "local": "v=0\no=- 4611731400430051336 2 IN IP4 127.0.0.1\ns=-\nt=0 0\na=group:BUNDLE 0\nm=audio 54321 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 192.0.2.10\na=mid:0\na=ice-ufrag:alce\na=ice-pwd:alice+password+24+chars\na=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321\na=end-of-candidates\na=rtpmap:111 opus/48000/2",
+      "remote": "v=0\no=- 1 1 IN IP4 198.51.100.20\ns=-\nt=0 0\na=ice-lite\na=group:BUNDLE 0\nm=audio 50004 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 198.51.100.20\na=mid:0\na=ice-ufrag:srv7\na=ice-pwd:server+password+24+chars\na=candidate:1 1 udp 2130706431 198.51.100.20 50004 typ host\na=end-of-candidates\na=rtpmap:111 opus/48000/2",
+      "controlling": "remote"
+    },
+    "match": "subset",
+    "why": "The server's SDP says a=ice-lite, and RFC 8445 section 6.1.1 makes the full agent controlling, so choosing the remote side is flagged first.",
+    "expect": {
+      "kind": "table",
+      "role": "findings",
+      "id": "findings",
+      "caption": "What to look at, most serious first",
+      "columns": [
+        {
+          "label": "Severity"
+        },
+        {
+          "label": "What we found"
+        },
+        {
+          "label": "What it means and what to do"
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "Warning",
+            "tone": "warn"
+          },
+          "The remote side is ICE-lite, and a lite agent is always the controlled one.",
+          "Set the controlling side to Local (RFC 8445 section 6.1.1)."
+        ]
+      ]
+    }
+  },
+  {
+    "name": "from getstats",
+    "input": {
+      "local": "[\n {\n  \"id\": \"T01\",\n  \"type\": \"transport\",\n  \"dtlsState\": \"connected\",\n  \"selectedCandidatePairId\": \"CPa1b2c3d4_e5f6a7b8\"\n },\n {\n  \"id\": \"Ia1b2c3d4\",\n  \"type\": \"local-candidate\",\n  \"transportId\": \"T01\",\n  \"address\": \"7f3c1b2e-4d5a-4b6c-8d7e-9f0a1b2c3d4e.local\",\n  \"port\": 50004,\n  \"protocol\": \"udp\",\n  \"candidateType\": \"host\",\n  \"priority\": 2122260223,\n  \"foundation\": \"1928318821\"\n },\n {\n  \"id\": \"I0c1d2e3f\",\n  \"type\": \"local-candidate\",\n  \"transportId\": \"T01\",\n  \"address\": \"192.0.2.10\",\n  \"port\": 54321,\n  \"protocol\": \"udp\",\n  \"candidateType\": \"srflx\",\n  \"priority\": 1686052607,\n  \"foundation\": \"3307418132\",\n  \"relatedAddress\": \"0.0.0.0\",\n  \"relatedPort\": 0,\n  \"url\": \"stun:stun.example.org:3478\"\n },\n {\n  \"id\": \"I9a8b7c6d\",\n  \"type\": \"local-candidate\",\n  \"transportId\": \"T01\",\n  \"address\": \"198.51.100.50\",\n  \"port\": 49152,\n  \"protocol\": \"udp\",\n  \"candidateType\": \"relay\",\n  \"priority\": 41885439,\n  \"foundation\": \"1453882197\",\n  \"relatedAddress\": \"192.0.2.10\",\n  \"relatedPort\": 54321,\n  \"relayProtocol\": \"udp\",\n  \"url\": \"turn:turn.example.org:3478?transport=udp\"\n },\n {\n  \"id\": \"Ie5f6a7b8\",\n  \"type\": \"remote-candidate\",\n  \"transportId\": \"T01\",\n  \"address\": \"3b9e2f10-8c4d-4e5f-a6b7-c8d9e0f1a2b3.local\",\n  \"port\": 61000,\n  \"protocol\": \"udp\",\n  \"candidateType\": \"host\",\n  \"priority\": 2122260223,\n  \"foundation\": \"2784410573\"\n },\n {\n  \"id\": \"I11223344\",\n  \"type\": \"remote-candidate\",\n  \"transportId\": \"T01\",\n  \"address\": \"198.51.100.77\",\n  \"port\": 40100,\n  \"protocol\": \"udp\",\n  \"candidateType\": \"srflx\",\n  \"priority\": 1686052607,\n  \"foundation\": \"812553307\"\n },\n {\n  \"id\": \"I55667788\",\n  \"type\": \"remote-candidate\",\n  \"transportId\": \"T01\",\n  \"address\": \"198.51.100.51\",\n  \"port\": 49200,\n  \"protocol\": \"udp\",\n  \"candidateType\": \"relay\",\n  \"priority\": 41885439,\n  \"foundation\": \"3916721290\"\n }\n]",
+      "remote": "",
+      "controlling": "local"
+    },
+    "match": "subset",
+    "why": "A browser's getStats() report: three local-candidate and three remote-candidate entries fill both sides from one paste. The srflx's base is hidden as 0.0.0.0, so nothing is pruned and nine checks run, five through a relay.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "id": "order",
+      "caption": "Computed check order, highest priority first. Local side controls",
+      "columns": [
+        {
+          "label": "#",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Local",
+          "mono": true
+        },
+        {
+          "label": "Remote",
+          "mono": true
+        },
+        {
+          "label": "Route"
+        },
+        {
+          "label": "Priority",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "host 7f3c1b2e-4d5a-4b6c-8d7e-9f0a1b2c3d4e.local:50004",
+            "mono": true
+          },
+          {
+            "text": "host 3b9e2f10-8c4d-4e5f-a6b7-c8d9e0f1a2b3.local:61000",
+            "mono": true
+          },
+          "direct",
+          {
+            "text": "9115038255631187454",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "2",
+            "mono": true
+          },
+          {
+            "text": "host 7f3c1b2e-4d5a-4b6c-8d7e-9f0a1b2c3d4e.local:50004",
+            "mono": true
+          },
+          {
+            "text": "srflx 198.51.100.77:40100",
+            "mono": true
+          },
+          "direct",
+          {
+            "text": "7241540810645061119",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "3",
+            "mono": true
+          },
+          {
+            "text": "srflx 192.0.2.10:54321",
+            "mono": true
+          },
+          {
+            "text": "host 3b9e2f10-8c4d-4e5f-a6b7-c8d9e0f1a2b3.local:61000",
+            "mono": true
+          },
+          "direct",
+          {
+            "text": "7241540810645061118",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "4",
+            "mono": true
+          },
+          {
+            "text": "srflx 192.0.2.10:54321",
+            "mono": true
+          },
+          {
+            "text": "srflx 198.51.100.77:40100",
+            "mono": true
+          },
+          "direct",
+          {
+            "text": "7241540809772645886",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "5",
+            "mono": true
+          },
+          {
+            "text": "host 7f3c1b2e-4d5a-4b6c-8d7e-9f0a1b2c3d4e.local:50004",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.51:49200",
+            "mono": true
+          },
+          "TURN",
+          {
+            "text": "179896594928123391",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "6",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.50:49152",
+            "mono": true
+          },
+          {
+            "text": "host 3b9e2f10-8c4d-4e5f-a6b7-c8d9e0f1a2b3.local:61000",
+            "mono": true
+          },
+          "TURN",
+          {
+            "text": "179896594928123390",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "7",
+            "mono": true
+          },
+          {
+            "text": "srflx 192.0.2.10:54321",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.51:49200",
+            "mono": true
+          },
+          "TURN",
+          {
+            "text": "179896594055708159",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "8",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.50:49152",
+            "mono": true
+          },
+          {
+            "text": "srflx 198.51.100.77:40100",
+            "mono": true
+          },
+          "TURN",
+          {
+            "text": "179896594055708158",
+            "mono": true,
+            "tone": "muted"
+          }
+        ],
+        [
+          {
+            "text": "9",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.50:49152",
+            "mono": true
+          },
+          {
+            "text": "relay 198.51.100.51:49200",
+            "mono": true
+          },
+          "TURN",
+          {
+            "text": "179896590767373822",
+            "mono": true,
+            "tone": "muted"
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "candidate json",
+    "input": {
+      "local": "[{\"candidate\":\"candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\",\"sdpMid\":\"0\",\"sdpMLineIndex\":0},{\"candidate\":\"candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004 generation 0 ufrag alce network-cost 10\",\"sdpMid\":\"0\",\"sdpMLineIndex\":0}]",
+      "remote": "a=candidate:1 1 udp 2130706431 198.51.100.20 50004 typ host",
+      "controlling": "local"
+    },
+    "match": "subset",
+    "why": "RTCIceCandidate JSON, as onicecandidate hands it over, with Chrome's trailing generation, ufrag and network-cost: two candidates, the srflx pruned against its host.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "id": "order",
+      "caption": "Computed check order, highest priority first. Local side controls",
+      "columns": [
+        {
+          "label": "#",
+          "align": "end",
+          "mono": true
+        },
+        {
+          "label": "Local",
+          "mono": true
+        },
+        {
+          "label": "Remote",
+          "mono": true
+        },
+        {
+          "label": "Route"
+        },
+        {
+          "label": "Priority",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "1",
+            "mono": true
+          },
+          {
+            "text": "host 192.168.1.42:50004",
+            "mono": true
+          },
+          {
+            "text": "host 198.51.100.20:50004",
+            "mono": true
+          },
+          "direct",
+          {
+            "text": "9151314442783293438",
+            "mono": true,
+            "tone": "muted"
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "no relay anywhere is a warning",
+    "input": {
+      "local": "a=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004",
+      "remote": "a=candidate:1 1 udp 2130706431 10.0.0.8 61000 typ host\na=candidate:2 1 udp 1694498815 198.51.100.77 40100 typ srflx raddr 10.0.0.8 rport 61000",
+      "controlling": "local"
+    },
+    "match": "subset",
+    "why": "Two browsers behind NATs and no TURN server: if either NAT maps per destination every check fails, so it is a warning, listed straight after the check order.",
+    "expect": {
+      "kind": "table",
+      "role": "findings",
+      "id": "findings",
+      "caption": "What to look at, most serious first",
+      "columns": [
+        {
+          "label": "Severity"
+        },
+        {
+          "label": "What we found"
+        },
+        {
+          "label": "What it means and what to do"
+        }
+      ],
+      "rows": [
+        [
+          {
+            "text": "Warning",
+            "tone": "warn"
+          },
+          "Neither side has a relayed candidate, so there is no fallback through a server.",
+          "If a firewall blocks UDP, or both NATs give a new port per destination, every check fails and the call never connects. Add a TURN server to iceServers."
+        ]
       ]
     }
   },
   {
     "name": "a line that is not a candidate is named",
     "input": {
-      "local": "m=audio 9 UDP/TLS/RTP/SAVPF 111",
+      "local": "a=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10\n",
       "remote": "a=candidate:1 1 udp 2130706431 198.51.100.20 50004 typ host",
       "controlling": "local"
     },
     "match": "subset",
-    "why": "An SDP line other than a candidate is refused with the expected syntax, not skipped silently.",
+    "why": "A candidate attribute that does not parse is refused with the expected syntax, not skipped silently. Other SDP lines are skipped, since a whole SDP is a valid paste.",
     "expect": {
       "kind": "error",
-      "message": "Line 1 is not a candidate line: expected \"candidate:<foundation> <component> <transport> <priority> <address> <port> typ <type>\".",
+      "message": "Line 2 has a candidate that does not parse: expected \"candidate:<foundation> <component> <transport> <priority> <address> <port> typ <type>\".",
       "input": "local"
     }
   },
@@ -255,6 +882,21 @@
       "kind": "error",
       "message": "No candidates can be paired: a pair needs the same component, the same transport and the same address family on both sides.",
       "input": "remote"
+    }
+  },
+  {
+    "name": "nothing with candidates in it",
+    "input": {
+      "local": "v=0\no=- 1 1 IN IP4 127.0.0.1\ns=-",
+      "remote": "a=candidate:1 1 udp 2130706431 198.51.100.20 50004 typ host",
+      "controlling": "local"
+    },
+    "match": "subset",
+    "why": "An SDP with no candidates: the tool says what it can read rather than ranking nothing.",
+    "expect": {
+      "kind": "error",
+      "message": "No local candidates found. Paste a=candidate lines, a whole SDP, RTCIceCandidate JSON, or the JSON of getStats().",
+      "input": "local"
     }
   }
 ]

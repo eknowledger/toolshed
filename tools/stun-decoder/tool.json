@@ -1,9 +1,9 @@
 {
-  "sdk": 4,
+  "sdk": 5,
   "id": "stun-decoder",
   "name": "STUN message decoder",
-  "blurb": "Paste a STUN message as hex: the header, every attribute, the addresses un-XORed, and the integrity checks a receiver runs.",
-  "version": "1.0.0",
+  "blurb": "Paste a STUN message as hex or a Wireshark hex dump: what it is, what to fix, every attribute with addresses un-XORed, and its integrity checked, TURN long-term credentials included.",
+  "version": "3.0.0",
   "capabilities": [
     "pure"
   ],
@@ -14,22 +14,21 @@
   "kinds": [
     "group",
     "fields",
-    "series",
     "table",
     "bytes",
     "error"
   ],
   "card": "live",
-  "cardFields": 5,
+  "cardFields": 3,
   "inputs": [
     {
       "id": "message",
       "type": "textarea",
       "label": "Message",
-      "description": "Hex, however you copied it. Wireshark offsets and separators are stripped.",
+      "description": "Hex, however you copied it: a hex stream, bytes with spaces or colons, or a hex dump from Wireshark, tcpdump or xxd. A captured frame's Ethernet, IP and UDP headers are skipped.",
       "primary": true,
       "dir": "ltr",
-      "rows": 4,
+      "rows": 6,
       "maxLength": 8192,
       "default": "0101000c 2112a442 b7e7a701 bc5ca493 5d339347 00200008 0001f523 e112a648"
     },
@@ -37,23 +36,37 @@
       "id": "password",
       "type": "text",
       "label": "Password",
-      "description": "Optional. The ICE password or TURN key, to check MESSAGE-INTEGRITY. Never sent anywhere: the check runs in this page.",
+      "description": "Optional, to check MESSAGE-INTEGRITY. For ICE, the ice-pwd of the side that receives the check. For TURN, the account's password. It never leaves this page.",
+      "default": ""
+    },
+    {
+      "id": "username",
+      "type": "text",
+      "label": "Username",
+      "description": "Only for a TURN response, which does not repeat it. A message's own USERNAME is used when it has one.",
+      "default": ""
+    },
+    {
+      "id": "realm",
+      "type": "text",
+      "label": "Realm",
+      "description": "Only for a TURN response, the same way. With a realm, the key is MD5 of username:realm:password rather than the password.",
       "default": ""
     },
     {
       "id": "view",
       "type": "select",
-      "label": "Show",
-      "description": "The byte view marks every attribute in place.",
+      "label": "Byte view",
+      "description": "The byte view marks the header and every attribute in place.",
       "default": "all",
       "options": [
         {
           "value": "all",
-          "label": "Fields and bytes"
+          "label": "Show the bytes"
         },
         {
           "value": "fields",
-          "label": "Fields only"
+          "label": "Hide the bytes"
         }
       ]
     }
@@ -64,14 +77,18 @@
       "input": {
         "message": "00010000 2112a442 b7e7a701 bc5ca493 5d339347",
         "password": "",
+        "username": "",
+        "realm": "",
         "view": "all"
       }
     },
     {
-      "label": "Binding answer",
+      "label": "Its answer, from Wireshark",
       "input": {
-        "message": "0101000c 2112a442 b7e7a701 bc5ca493 5d339347 00200008 0001f523 e112a648",
+        "message": "0000   02 00 5e 10 00 02 02 00 5e 10 00 01 08 00 45 00   ..^.....^.....E.\n0010   00 3c 1c 46 40 00 39 11 39 51 c6 33 64 14 c0 a8   .<.F@.9.9Q.3d...\n0020   01 2a 0d 96 c3 54 00 28 4f 3a 01 01 00 0c 21 12   .*...T.(O:....!.\n0030   a4 42 b7 e7 a7 01 bc 5c a4 93 5d 33 93 47 00 20   .B.....\\..]3.G. \n0040   00 08 00 01 f5 23 e1 12 a6 48                     .....#...H",
         "password": "",
+        "username": "",
+        "realm": "",
         "view": "all"
       }
     },
@@ -80,6 +97,8 @@
       "input": {
         "message": "00010048 2112a442 8f1e2d3c 4b5a6978 8796a5b4 00060009 73727637 3a616c63 65000000 00240004 6effffff 802a0008 1d2c3b4a 59687786 00250000 00080014 af2e7f7f ee8a3d03 b3149db5 176cad74 55e8d938 80280004 839f5505",
         "password": "server+password+24+chars",
+        "username": "",
+        "realm": "",
         "view": "all"
       }
     },
@@ -88,6 +107,8 @@
       "input": {
         "message": "0101002c 2112a442 8f1e2d3c 4b5a6978 8796a5b4 00200008 0001f523 e112a648 00080014 9b1d37c1 ecaa213d 226fce8a 1d42f3f2 65a293f2 80280004 9526a91a",
         "password": "server+password+24+chars",
+        "username": "",
+        "realm": "",
         "view": "all"
       }
     },
@@ -96,6 +117,18 @@
       "input": {
         "message": "01130058 2112a442 01020304 05060708 090a0b0c 00090010 00000401 556e6175 74686f72 697a6564 0014000b 6578616d 706c652e 6f726700 00150027 6f624d61 744a6f73 32414141 43663439 396b3935 3464364f 4c33346f 4c394653 54767936 34734100 80280004 ebbf3214",
         "password": "",
+        "username": "",
+        "realm": "",
+        "view": "all"
+      }
+    },
+    {
+      "label": "Long-term credentials",
+      "input": {
+        "message": "000100602112a44278ad3433c6ad72c029da412e00060012e3839ee38388e383aae38383e382afe382b900000015001c662f2f3439396b39353464364f4c33346f4c394653547679363473410014000b6578616d706c652e6f72670000080014f67024656dd64a3e02b8e0712e85c9a28ca89666",
+        "password": "TheMatrIX",
+        "username": "",
+        "realm": "",
         "view": "all"
       }
     }
@@ -120,6 +153,11 @@
     {
       "label": "RFC 8656: TURN",
       "href": "https://www.rfc-editor.org/rfc/rfc8656"
+    },
+    {
+      "label": "RFC 5769: STUN test vectors",
+      "href": "https://www.rfc-editor.org/rfc/rfc5769"
     }
-  ]
+  ],
+  "autoRun": false
 }

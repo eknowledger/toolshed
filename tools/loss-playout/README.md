@@ -7,6 +7,48 @@ before they have to play, and how much audio has to be concealed.
 The short answer is that UDP loses the one frame, and TCP loses the one frame plus every frame queued behind it
 while it waits for the resend. The numbers show how many that is.
 
+## How to use it: an example
+
+Say you're choosing a transport for a voice feature. Frames are 20 ms of Opus, the path is 30 ms each way, and the
+receiver holds 40 ms of buffer. One packet in the middle of a sentence, frame 5, is dropped.
+
+**1. Enter the call.**
+
+| Input | You enter | Why |
+|---|---|---|
+| Frame size | `20 ms` | The usual Opus packet |
+| One-way delay | `30` | Half the round trip |
+| Jitter buffer | `40` | What the receiver waits before playing |
+| Lost frame | `5` | Any frame with at least three after it |
+| Retransmission timeout | `200` | Linux's default minimum |
+| Frames | `20` | Enough to see the queue drain |
+
+**2. Press Run, and read the table at the top.**
+
+*Frame 5 lost, at a 40 ms buffer: the audio each loses, the frames, and the buffer that would hide it*
+
+| Transport | Audio | Frames | Buffer |
+|---|---|---|---|
+| UDP | 20 ms | 5 (lost) | never |
+| TCP, fast retransmit | 80 ms | 5 to 8 | 120 ms |
+| TCP, 200 ms timeout | 160 ms | 5 to 12 | 200 ms |
+
+In plain words: over UDP the listener hears one 20 ms gap, which the decoder papers over. Over TCP the same loss
+costs four frames at best and eight at worst, because TCP won't hand over frame 6 until frame 5 has been resent.
+Frame 9 is held too, and still plays on time: it is released at 250 ms and plays at 250 ms.
+
+**3. Read the buffer column.** That's the trade in one column: TCP can hide the loss only with a buffer of 120 ms or
+200 ms, 80 or 160 ms more than the 40 in use, and that delay is paid on every word of the call, not just the lost
+one. UDP never resends, so no buffer brings frame 5 back.
+
+**4. Check it.** Press the **Bigger buffer** sample (120 ms) and Run. The fast retransmit row reads 0 ms and
+"none" frames: the resend lands at 250 ms, exactly when frame 5 has to play. The timeout still misses frames 5 to 8.
+
+**5. Read the chart under it.** Each line is when the application gets a frame. Points on or under the deadline
+line play. The TCP lines go flat at the lost frame: that flat stretch is the queue being held, and every point on it
+above the deadline is audio nobody hears. Under the chart, the three timings it turns on: when frame 5 has to
+play, and when each kind of resend leaves.
+
 ## The model
 
 Every number follows from a handful of rules, so every result can be checked by hand.
@@ -27,10 +69,13 @@ Every number follows from a handful of rules, so every result can be checked by 
   frames with a 200 ms timer, for instance) the fast-retransmit row resends on the timer too.
 - A frame is **missed** if it never arrives or arrives after its playout time. Concealed audio is missed frames
   times the frame size.
+- **The buffer that hides a resend** is `resend - lost x frame`: the repair arrives at `resend + delay` and the
+  lost frame plays at `lost x frame + delay + buffer`, so the delay cancels. That's the "Buffer"
+  column, and everything above the buffer you have is added to every frame of the call.
 
 At the defaults (20 ms frames, 30 ms each way, 40 ms of buffer, frame 5 lost):
 
-| | Missed | Concealed |
+| Transport | Missed | Concealed |
 |---|---|---|
 | UDP | frame 5 | 20 ms |
 | TCP, fast retransmit | frames 5 to 8, all released at 250 ms | 80 ms |
@@ -49,7 +94,7 @@ audio nobody hears.
 
 ## What a frame size costs
 
-The second chart is why 20 ms is the usual choice. Every packet carries 40 bytes of headers, IPv4's 20 without
+The second chart, after the timings, is why 20 ms is the usual choice. Every packet carries 40 bytes of headers, IPv4's 20 without
 options, UDP's 8 and RTP's 12, whatever the frame size, so a smaller frame sends more packets and more header bits:
 at 10 ms the headers cost as much as the sound itself. A bigger frame saves them and loses more audio per lost
 packet. The sound is fixed at Opus's 32 kb/s, 80 bytes per 20 ms frame, so the chart compares sizes rather than

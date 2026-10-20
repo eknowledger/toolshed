@@ -1,0 +1,668 @@
+[
+  {
+    "name": "Istio's default over gRPC, 2 retries on each of 3 calls, bottom down: 27 calls: the answer",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 100,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The key is the worst case; a fractional one is shown to one decimal.",
+    "fieldCount": 1,
+    "expect": {
+      "kind": "fields",
+      "role": "key",
+      "fields": [
+        {
+          "label": "Calls at the bottom service",
+          "value": "27 calls",
+          "note": "For one user request, while it is down."
+        }
+      ]
+    }
+  },
+  {
+    "name": "Istio's default over gRPC, 2 retries on each of 3 calls, bottom down: 27 calls: the multiplication under it",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 100,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The formula is the factors of the same product.",
+    "expect": {
+      "kind": "text",
+      "role": "formula",
+      "mono": true,
+      "text": "3 tries per call, 3 calls deep: 3 x 3 x 3 = 27"
+    }
+  },
+  {
+    "name": "Linkerd's preset, 1 retry on each of 3 calls, bottom down: 8 calls: the answer",
+    "input": {
+      "depth": 3,
+      "platform": "linkerd",
+      "mesh": 1,
+      "app": 0,
+      "client": 0,
+      "fail": 100,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The Mesh preset fills the proxy retries with Linkerd's documented default once retries are on, 1, so the bottom sees 2 to the power of 3. The arithmetic reads the number, not the preset's name.",
+    "fieldCount": 1,
+    "expect": {
+      "kind": "fields",
+      "role": "key",
+      "fields": [
+        {
+          "label": "Calls at the bottom service",
+          "value": "8 calls",
+          "note": "For one user request, while it is down."
+        }
+      ]
+    }
+  },
+  {
+    "name": "Linkerd's preset, 1 retry on each of 3 calls, bottom down: 8 calls: the multiplication under it",
+    "input": {
+      "depth": 3,
+      "platform": "linkerd",
+      "mesh": 1,
+      "app": 0,
+      "client": 0,
+      "fail": 100,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The formula is the factors of the same product.",
+    "expect": {
+      "kind": "text",
+      "role": "formula",
+      "mono": true,
+      "text": "2 tries per call, 3 calls deep: 2 x 2 x 2 = 8"
+    }
+  },
+  {
+    "name": "code retrying twice around the proxy's 2: 9 per call, 729 at the bottom: the answer",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 2,
+      "client": 0,
+      "fail": 100,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The key is the worst case; a fractional one is shown to one decimal.",
+    "fieldCount": 1,
+    "expect": {
+      "kind": "fields",
+      "role": "key",
+      "fields": [
+        {
+          "label": "Calls at the bottom service",
+          "value": "729 calls",
+          "note": "For one user request, while it is down."
+        }
+      ]
+    }
+  },
+  {
+    "name": "code retrying twice around the proxy's 2: 9 per call, 729 at the bottom: the multiplication under it",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 2,
+      "client": 0,
+      "fail": 100,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The formula is the factors of the same product.",
+    "expect": {
+      "kind": "text",
+      "role": "formula",
+      "mono": true,
+      "text": "9 tries per call (3 in the code, each through 3 in the proxy), 3 calls deep: 9 x 9 x 9 = 729"
+    }
+  },
+  {
+    "name": "the bottom failing half its calls: twice the load on it: the answer",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 50,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The key is the worst case; a fractional one is shown to one decimal.",
+    "fieldCount": 1,
+    "expect": {
+      "kind": "fields",
+      "role": "key",
+      "fields": [
+        {
+          "label": "Calls at the bottom service",
+          "value": "27 calls",
+          "note": "For one user request, while it is down."
+        }
+      ]
+    }
+  },
+  {
+    "name": "the bottom failing half its calls: twice the load on it: the multiplication under it",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 50,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The formula is the factors of the same product.",
+    "expect": {
+      "kind": "text",
+      "role": "formula",
+      "mono": true,
+      "text": "3 tries per call, 3 calls deep: 3 x 3 x 3 = 27"
+    }
+  },
+  {
+    "name": "the bottom failing half its calls: twice the load on it: the numbers beside it",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 50,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The quiet numbers are the average and the share that still fails, shown only when the bottom fails part of the time.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "role": "metrics",
+      "fields": [
+        {
+          "label": "When the bottom fails 50%",
+          "value": "about 2 calls",
+          "note": "The average for each user request: extra load on a service that is already failing."
+        },
+        {
+          "label": "User requests that still fail",
+          "value": "1 in 134,217,728",
+          "note": "If failures were independent. Real ones come in runs, so this is the best case. Without retries, 50%."
+        }
+      ]
+    }
+  },
+  {
+    "name": "the bottom failing 90%: 9.42 calls, and about 5.8% of users still fail: the answer",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 90,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The key is the worst case; a fractional one is shown to one decimal.",
+    "fieldCount": 1,
+    "expect": {
+      "kind": "fields",
+      "role": "key",
+      "fields": [
+        {
+          "label": "Calls at the bottom service",
+          "value": "27 calls",
+          "note": "For one user request, while it is down."
+        }
+      ]
+    }
+  },
+  {
+    "name": "the bottom failing 90%: 9.42 calls, and about 5.8% of users still fail: the multiplication under it",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 90,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The formula is the factors of the same product.",
+    "expect": {
+      "kind": "text",
+      "role": "formula",
+      "mono": true,
+      "text": "3 tries per call, 3 calls deep: 3 x 3 x 3 = 27"
+    }
+  },
+  {
+    "name": "the bottom failing 90%: 9.42 calls, and about 5.8% of users still fail: the numbers beside it",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 90,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The quiet numbers are the average and the share that still fails, shown only when the bottom fails part of the time.",
+    "fieldCount": 2,
+    "expect": {
+      "kind": "fields",
+      "role": "metrics",
+      "fields": [
+        {
+          "label": "When the bottom fails 90%",
+          "value": "about 9.4 calls",
+          "note": "The average for each user request: extra load on a service that is already failing."
+        },
+        {
+          "label": "User requests that still fail",
+          "value": "5.81%",
+          "note": "If failures were independent. Real ones come in runs, so this is the best case. Without retries, 90%."
+        }
+      ]
+    }
+  },
+  {
+    "name": "4 deep, 1 retry per call, and a client retrying twice: 48: the answer",
+    "input": {
+      "depth": 4,
+      "mesh": 1,
+      "app": 0,
+      "client": 2,
+      "fail": 100,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The key is the worst case; a fractional one is shown to one decimal.",
+    "fieldCount": 1,
+    "expect": {
+      "kind": "fields",
+      "role": "key",
+      "fields": [
+        {
+          "label": "Calls at the bottom service",
+          "value": "48 calls",
+          "note": "For one user request, while it is down."
+        }
+      ]
+    }
+  },
+  {
+    "name": "4 deep, 1 retry per call, and a client retrying twice: 48: the multiplication under it",
+    "input": {
+      "depth": 4,
+      "mesh": 1,
+      "app": 0,
+      "client": 2,
+      "fail": 100,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The formula is the factors of the same product.",
+    "expect": {
+      "kind": "text",
+      "role": "formula",
+      "mono": true,
+      "text": "2 tries per call, 4 calls deep: 3 from the client x 2 x 2 x 2 x 2 = 48"
+    }
+  },
+  {
+    "name": "a 20% budget caps each layer at 1.2: 1.728 at the bottom: the answer",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 100,
+      "budget": "20"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The key is the worst case; a fractional one is shown to one decimal.",
+    "fieldCount": 1,
+    "expect": {
+      "kind": "fields",
+      "role": "key",
+      "fields": [
+        {
+          "label": "Calls at the bottom service",
+          "value": "about 1.7 calls",
+          "note": "At most, for one user request while it is down, if the 20% budget binds."
+        }
+      ]
+    }
+  },
+  {
+    "name": "a 20% budget caps each layer at 1.2: 1.728 at the bottom: the multiplication under it",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 100,
+      "budget": "20"
+    },
+    "match": "subset",
+    "why": "The numbers are the assertion, and each was printed first by service-mesh/retry_fanout.py in mainlog-code, which does the same arithmetic in Python. The formula is the factors of the same product.",
+    "expect": {
+      "kind": "text",
+      "role": "formula",
+      "mono": true,
+      "text": "3 retrying layers, each capped at 1.2 times its traffic: 1.2 x 1.2 x 1.2 = about 1.7"
+    }
+  },
+  {
+    "name": "a chain needs at least one call",
+    "input": {
+      "depth": 0,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 100,
+      "budget": "none"
+    },
+    "expect": {
+      "kind": "error",
+      "message": "Depth is a whole number of calls, 1 to 12.",
+      "input": "depth"
+    }
+  },
+  {
+    "name": "what to change for Istio's default: retry only at the top leaves 3, a 20% budget about 1.7",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 100,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "Each row's number is retry_fanout.py run with that change made: --depth 1 gives 3, --budget 20 gives 1.728. Shown to one decimal where the budget makes it fractional.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "What each change leaves at the bottom",
+      "columns": [
+        {
+          "label": "Change"
+        },
+        {
+          "label": "Calls at the bottom",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "A 20% retry budget",
+          {
+            "text": "about 1.7",
+            "mono": true
+          }
+        ],
+        [
+          "Retry only at the top",
+          {
+            "text": "3",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "with a budget, the method says the cap is a ceiling",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 100,
+      "budget": "20"
+    },
+    "match": "subset",
+    "why": "The method notes are the model's assumptions; a budget adds one, that the cap is counted as if it always binds.",
+    "fieldCount": 3,
+    "expect": {
+      "kind": "fields",
+      "role": "method",
+      "fields": [
+        {
+          "group": "How this was worked out",
+          "label": "Every layer retries the error it gets",
+          "value": "As a gRPC service that passes UNAVAILABLE up does",
+          "note": "Failures are independent and happen only at the bottom; nothing in the middle fails on its own."
+        },
+        {
+          "group": "How this was worked out",
+          "label": "The budget",
+          "value": "Each layer at most 1.2 times its traffic",
+          "note": "Real budgets are counted over a window or over requests in flight, so read the capped numbers as a ceiling."
+        },
+        {
+          "group": "Why each change works",
+          "label": "Retry only at the top",
+          "value": "3 calls in a row each retry, so their tries multiply. Retrying once, at the top, and failing fast below it stops that."
+        }
+      ]
+    }
+  },
+  {
+    "name": "code retries inside the mesh: both changes, biggest cut first",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 2,
+      "client": 0,
+      "fail": 100,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "retry_fanout.py --depth 3 --app 2 --budget 20 gives 2.986, --depth 1 --app 2 gives 9, and --depth 3 --app 0 gives 27. Shown to one decimal where the budget makes it fractional.",
+    "expect": {
+      "kind": "table",
+      "role": "comparison",
+      "caption": "What each change leaves at the bottom",
+      "columns": [
+        {
+          "label": "Change"
+        },
+        {
+          "label": "Calls at the bottom",
+          "align": "end",
+          "mono": true
+        }
+      ],
+      "rows": [
+        [
+          "A 20% retry budget",
+          {
+            "text": "about 3",
+            "mono": true
+          }
+        ],
+        [
+          "Retry only at the top",
+          {
+            "text": "9",
+            "mono": true
+          }
+        ],
+        [
+          "Retry in the code or the proxy, not both",
+          {
+            "text": "27",
+            "mono": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "name": "the chain for Istio's default: one node per service, x3 on every hop, 27 at the bottom",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 0,
+      "client": 0,
+      "fail": 100,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "A graph has no subset meaning, so this pins the whole chain: the counts are 3 to the power of each depth.",
+    "expect": {
+      "kind": "graph",
+      "graph": {
+        "label": "Calls each service receives for one user request while the bottom is down",
+        "layout": "layered",
+        "direction": "TB",
+        "spacing": "compact",
+        "nodes": [
+          {
+            "id": "user",
+            "label": "User request",
+            "shape": "pill"
+          },
+          {
+            "id": "s0",
+            "label": "Top service",
+            "note": "1 call",
+            "role": "service"
+          },
+          {
+            "id": "s1",
+            "label": "Service 2",
+            "note": "3 calls",
+            "role": "service"
+          },
+          {
+            "id": "s2",
+            "label": "Service 3",
+            "note": "9 calls",
+            "role": "service"
+          },
+          {
+            "id": "s3",
+            "label": "Bottom service",
+            "note": "27 calls",
+            "role": "bottom"
+          }
+        ],
+        "edges": [
+          {
+            "from": "user",
+            "to": "s0"
+          },
+          {
+            "from": "s0",
+            "to": "s1",
+            "label": "x3"
+          },
+          {
+            "from": "s1",
+            "to": "s2",
+            "label": "x3"
+          },
+          {
+            "from": "s2",
+            "to": "s3",
+            "label": "x3"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the chain with code retries inside the mesh: x9 on every hop, 729 at the bottom",
+    "input": {
+      "depth": 3,
+      "mesh": 2,
+      "app": 2,
+      "client": 0,
+      "fail": 100,
+      "budget": "none"
+    },
+    "match": "subset",
+    "why": "A graph has no subset meaning, so this pins the whole chain: 9 tries a call, so 9 to the power of each depth.",
+    "expect": {
+      "kind": "graph",
+      "graph": {
+        "label": "Calls each service receives for one user request while the bottom is down",
+        "layout": "layered",
+        "direction": "TB",
+        "spacing": "compact",
+        "nodes": [
+          {
+            "id": "user",
+            "label": "User request",
+            "shape": "pill"
+          },
+          {
+            "id": "s0",
+            "label": "Top service",
+            "note": "1 call",
+            "role": "service"
+          },
+          {
+            "id": "s1",
+            "label": "Service 2",
+            "note": "9 calls",
+            "role": "service"
+          },
+          {
+            "id": "s2",
+            "label": "Service 3",
+            "note": "81 calls",
+            "role": "service"
+          },
+          {
+            "id": "s3",
+            "label": "Bottom service",
+            "note": "729 calls",
+            "role": "bottom"
+          }
+        ],
+        "edges": [
+          {
+            "from": "user",
+            "to": "s0"
+          },
+          {
+            "from": "s0",
+            "to": "s1",
+            "label": "x9"
+          },
+          {
+            "from": "s1",
+            "to": "s2",
+            "label": "x9"
+          },
+          {
+            "from": "s2",
+            "to": "s3",
+            "label": "x9"
+          }
+        ]
+      }
+    }
+  }
+]

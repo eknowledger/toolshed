@@ -1,0 +1,212 @@
+{
+  "sdk": 7,
+  "id": "retry-amplification",
+  "name": "Retry amplification calculator",
+  "blurb": "Retries per layer and how deep the chain goes: how many calls reach the bottom service for one user request when every layer retries what it gets, and the extra load on it while it fails.",
+  "version": "3.0.0",
+  "capabilities": [
+    "pure"
+  ],
+  "runtime": {
+    "entry": "index.ts",
+    "thread": "main"
+  },
+  "kinds": [
+    "group",
+    "fields",
+    "text",
+    "table",
+    "graph",
+    "error"
+  ],
+  "card": "live",
+  "cardFields": 2,
+  "autoRun": false,
+  "inputs": [
+    {
+      "id": "depth",
+      "type": "number",
+      "label": "Calls deep",
+      "description": "Calls in a row below the user: frontend to checkout to pricing to inventory is 3.",
+      "primary": true,
+      "default": 3,
+      "min": 1,
+      "max": 12,
+      "step": 1
+    },
+    {
+      "id": "platform",
+      "type": "select",
+      "label": "Mesh",
+      "description": "Fills the proxy retries with that mesh's default. Linkerd retries only once you turn retries on for a route, and then 1 time unless you say otherwise.",
+      "primary": true,
+      "default": "istio",
+      "options": [
+        {
+          "value": "istio",
+          "label": "Istio, 2 retries",
+          "sets": {
+            "mesh": 2
+          }
+        },
+        {
+          "value": "linkerd",
+          "label": "Linkerd, 1 retry once turned on",
+          "sets": {
+            "mesh": 1
+          }
+        },
+        {
+          "value": "none",
+          "label": "None, no proxy retries",
+          "sets": {
+            "mesh": 0
+          }
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
+      "id": "mesh",
+      "type": "number",
+      "label": "Proxy retries per call",
+      "description": "Retries the mesh's proxy makes on each call. Istio's default is 2, for connection failures and gRPC UNAVAILABLE.",
+      "primary": true,
+      "default": 2,
+      "min": 0,
+      "max": 10,
+      "step": 1
+    },
+    {
+      "id": "app",
+      "type": "number",
+      "label": "Code retries per call",
+      "description": "Retries the service's own code makes around each call. Each one goes through the proxy's retries, so they multiply.",
+      "default": 0,
+      "min": 0,
+      "max": 10,
+      "step": 1
+    },
+    {
+      "id": "client",
+      "type": "number",
+      "label": "Client retries",
+      "description": "Retries by the app or browser at the top, around the whole chain.",
+      "default": 0,
+      "min": 0,
+      "max": 10,
+      "step": 1
+    },
+    {
+      "id": "fail",
+      "type": "number",
+      "label": "Bottom fails",
+      "unit": "%",
+      "description": "The share of calls to the bottom service that fail, independently. 100 means it is down.",
+      "default": 100,
+      "min": 0,
+      "max": 100,
+      "step": 1
+    },
+    {
+      "id": "budget",
+      "type": "select",
+      "label": "Retry budget",
+      "description": "A cap on retries as a share of requests, on every layer.",
+      "default": "none",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "20",
+          "label": "20%, Envoy's budget default"
+        },
+        {
+          "value": "10",
+          "label": "10%, the SRE book's per-client ratio"
+        }
+      ]
+    }
+  ],
+  "samples": [
+    {
+      "label": "Istio's default over gRPC, bottom down",
+      "input": {
+        "depth": 3,
+        "platform": "istio",
+        "mesh": 2,
+        "app": 0,
+        "client": 0,
+        "fail": 100,
+        "budget": "none"
+      }
+    },
+    {
+      "label": "Code that retries inside the mesh",
+      "input": {
+        "depth": 3,
+        "platform": "istio",
+        "mesh": 2,
+        "app": 2,
+        "client": 0,
+        "fail": 100,
+        "budget": "none"
+      }
+    },
+    {
+      "label": "Bottom half failing",
+      "input": {
+        "depth": 3,
+        "platform": "istio",
+        "mesh": 2,
+        "app": 0,
+        "client": 0,
+        "fail": 50,
+        "budget": "none"
+      }
+    },
+    {
+      "label": "With a 20% budget",
+      "input": {
+        "depth": 3,
+        "platform": "istio",
+        "mesh": 2,
+        "app": 0,
+        "client": 0,
+        "fail": 100,
+        "budget": "20"
+      }
+    }
+  ],
+  "help": "README.md",
+  "tags": [
+    "retries",
+    "reliability",
+    "service-mesh",
+    "microservices",
+    "overload"
+  ],
+  "links": [
+    {
+      "label": "Google SRE book: retries multiply across layers",
+      "href": "https://sre.google/sre-book/addressing-cascading-failures/"
+    },
+    {
+      "label": "Envoy: circuit breakers and retry budgets",
+      "href": "https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/circuit_breaking"
+    },
+    {
+      "label": "Istio: default retries",
+      "href": "https://istio.io/latest/docs/concepts/traffic-management/"
+    },
+    {
+      "label": "Linkerd: retries",
+      "href": "https://linkerd.io/docs/reference/retries/"
+    }
+  ]
+}
