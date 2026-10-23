@@ -97,7 +97,7 @@
       "id": "review",
       "type": "select",
       "label": "Reviewed",
-      "description": "One after another: each waits for the last to merge. Side by side: all open at once, picked up independently. In one sitting: one reviewer takes them all together, as soon as they'd start one small piece.",
+      "description": "How the pieces get reviewed.\n- One after another: each waits for the last to merge.\n- Side by side: all open at once, picked up independently.\n- In one sitting: one reviewer takes them all together, as soon as they'd start one small piece.",
       "default": "serial",
       "options": [
         {

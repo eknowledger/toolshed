@@ -3,7 +3,7 @@
 	"id": "agent-tool-schema-linter",
 	"name": "Agent tool schema linter",
 	"blurb": "Paste the tools your agent can call, an MCP server's tool list included, or the events your agents send each other, and see which fields let someone else's words reach the model on the other side.",
-	"version": "4.0.0",
+	"version": "4.0.1",
 	"capabilities": ["pure"],
 	"runtime": {
 		"entry": "index.ts",
@@ -29,7 +29,7 @@
 			"id": "reader",
 			"type": "select",
 			"label": "Who reads the fields",
-			"description": "A model reads every free-text field like any other text, so a field that carries words is an instruction channel: an agent offered as a tool, or a server that prompts a model with its arguments. If only code reads them, free text is still unchecked input, but it can't instruct a model. A command stays a command either way.",
+			"description": "Who reads the free-text fields.\n- A model: it reads every free-text field like any other text, so a field that carries words is an instruction channel. An agent offered as a tool, or a server that prompts a model with its arguments.\n- Only code: free text is still unchecked input, but it can't instruct a model.\n\nA command stays a command either way.",
 			"default": "model",
 			"options": [
 				{

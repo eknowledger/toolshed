@@ -68,7 +68,7 @@
 			"id": "ignore",
 			"type": "text",
 			"label": "Ignore commits",
-			"description": "Commas between them: words to match in a subject (format, lint), or commit hashes. For sweeping commits that touched both copies for reasons that say nothing about them. The first sample ignores 8e36f2b, a 29-file TLS change that cochange.py sets aside on its own; clear it and that commit counts as changing both.",
+			"description": "Commits to leave out, with commas between them: words to match in a subject (format, lint), or commit hashes. For sweeping commits that touched both copies for reasons that say nothing about them.\n\nThe first sample ignores 8e36f2b, a 29-file TLS change that cochange.py sets aside on its own. Clear it and that commit counts as changing both.",
 			"dir": "ltr",
 			"maxLength": 400,
 			"default": "8e36f2b"

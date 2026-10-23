@@ -34,7 +34,7 @@
       "id": "values",
       "type": "textarea",
       "label": "Latency histogram, or raw latencies",
-      "description": "Paste any one of these, and the format is detected.\nPrometheus: bucket lines such as x_bucket{instance=\"a\",le=\"0.05\"} 120, the query API's JSON (Amazon's and Azure's managed Prometheus too), or a CSV of instance,le,count with cumulative counts.\nGoogle Cloud Monitoring: the timeSeries.list JSON of a distribution metric.\nAWS X-Ray: the JSON from GetTimeSeriesServiceStatistics or GetServiceGraph.\nAzure Log Analytics or CloudWatch Logs Insights: a query result of duration bins and counts, as CSV or JSON.\nAnything else: raw latencies, a group per host separated by a blank line, as in host 1: 12 14 15.",
+      "description": "Paste any one of these; the format is detected.\n- Prometheus: bucket lines such as x_bucket{instance=\"a\",le=\"0.05\"} 120, the query API's JSON (Amazon's and Azure's managed Prometheus too), or a CSV of instance,le,count with cumulative counts.\n- Google Cloud Monitoring: the timeSeries.list JSON of a distribution metric.\n- AWS X-Ray: the JSON from GetTimeSeriesServiceStatistics or GetServiceGraph.\n- Azure Log Analytics or CloudWatch Logs Insights: a query result of duration bins and counts, as CSV or JSON.\n- Anything else: raw latencies, a group per host separated by a blank line, as in host 1: 12 14 15.",
       "primary": true,
       "rows": 12,
       "dir": "ltr",
