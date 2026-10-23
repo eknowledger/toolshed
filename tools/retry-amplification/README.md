@@ -27,7 +27,7 @@ None 0. Change the number and the select shows Custom. It answers in this order:
 
 Three gRPC calls in a row, frontend to checkout to pricing to inventory, on a mesh with Istio's default of 2 retries
 per call, and inventory is down. Enter **Calls deep** 3, **Mesh** *Istio over gRPC*, which fills **Proxy retries per
-call** with 2, everything else 0, **Bottom fails** 100%, **Retry budget** None, and press Run (or press the sample *Istio's default over gRPC, bottom down*).
+call** with 2, everything else 0, **Bottom fails** 100%, **Retry budget** None, and press Run (or press the sample *Istio gRPC, bottom down*).
 
 The answer:
 
@@ -47,7 +47,7 @@ The tree shows checkout tried 3 times, pricing 9 and inventory 27, and the table
 In plain words: two retries per call looks harmless in one config file, but three of them in a row turn one request
 into 27 at a service that is already down, and every one of them fails. The retries add load exactly when the
 bottom can least take it, and they cannot help, because it is down. A budget, or retries at one layer only, takes it
-back to a handful. Try *Code that retries inside the mesh* to see the same chain with a client library that also
+back to a handful. Try *App retries in the mesh* to see the same chain with a client library that also
 retries twice: 9 tries per call, 729 at the bottom. Or set **Mesh** to Linkerd: 1 retry per call, 2 tries, and 8
 calls reach the bottom instead of 27.
 

@@ -35,7 +35,7 @@ pair ranker decodes it.
 Say you are adding simulcast to a video call: the browser should send three copies of the camera, small, medium and
 full size, so a server can forward each viewer the one that fits. You have the offer and want to know it says that.
 
-**1. Paste the offer.** It's the **Simulcast video and a data channel** sample. The lines that matter:
+**1. Paste the offer.** It's the **Simulcast + data channel** sample. The lines that matter:
 
 ```
 m=video 9 UDP/TLS/RTP/SAVPF 96 97
@@ -147,11 +147,11 @@ Only one of them is a capture, and it is not a browser's:
 | Sample | Made how |
 |---|---|
 | Alice's offer | Constructed: the series' running example, a full agent with three candidates |
-| Alice's offer, before gathering | Constructed: trickle ICE, port 9 and `0.0.0.0`, no candidates yet |
+| Alice, before gathering | Constructed: trickle ICE, port 9 and `0.0.0.0`, no candidates yet |
 | The assistant's answer | Constructed: ICE-lite, one host candidate, `a=setup:active` |
 | aiortc's answer | **Captured** from aiortc answering Alice's offer: three fingerprints, `recvonly`, no `a=tls-id` |
 | RFC 9429's example offer | RFC 9429 section 7.1's offer, with its layout undone: blank lines removed and the wrapped fingerprint joined into one line |
-| Simulcast video and a data channel | Constructed: one VP8 source sent as three rids, `q`, `h` and `f`, and an SCTP data channel, both bundled |
+| Simulcast + data channel | Constructed: one VP8 source sent as three rids, `q`, `h` and `f`, and an SCTP data channel, both bundled |
 | A broken offer | Constructed: Alice's offer with five mistakes, which the checks report as six errors |
 
 All the addresses are from the documentation ranges, and the credentials are made up.

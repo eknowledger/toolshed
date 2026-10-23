@@ -93,7 +93,7 @@ const parts = (o: Output) => {
 
 describe("state-machine-analyzer", () => {
 	it("decides the booking exactly as booking.py does, all 119 cells", () => {
-		const m = parse(sample("Dinner booking, every cell decided"));
+		const m = parse(sample("Booking, all cells decided"));
 		assert.deepEqual(m.states, Object.keys(BOOKING));
 		assert.deepEqual(m.events, EVENTS);
 		const got = said(m);
@@ -103,7 +103,7 @@ describe("state-machine-analyzer", () => {
 	});
 
 	it("draws the first booking as booking.py's TRANSITIONS and leaves every other cell open", () => {
-		const m = parse(sample("Dinner booking, as first drawn"));
+		const m = parse(sample("Booking, first draft"));
 		assert.deepEqual(m.states, Object.keys(BOOKING));
 		assert.deepEqual(m.events, EVENTS);
 		for (const [k, v] of said(m)) assert.equal(v, DRAWN[k.replace("\u0000", " ")] ?? null, k);
@@ -278,7 +278,7 @@ describe("state-machine-analyzer", () => {
 			const want = [...m.events].sort((a, b) => open(b) - open(a) || m.events.indexOf(a) - m.events.indexOf(b));
 			assert.deepEqual(order, want, label);
 		}
-		const first = parts(tool.run({ machine: sample("Dinner booking, as first drawn"), also: "none" })).find(
+		const first = parts(tool.run({ machine: sample("Booking, first draft"), also: "none" })).find(
 			(p) => p.role === "matrix",
 		);
 		assert.ok(first?.kind === "table");
@@ -311,9 +311,9 @@ describe("state-machine-analyzer", () => {
 	});
 
 	it("tones the state that can't be reached or left, and follows the written happy path", () => {
-		const m = parse(sample("Dinner booking, as first drawn"));
+		const m = parse(sample("Booking, first draft"));
 		assert.deepEqual(mainPath(m), ["gather", "search", "confirm", "book", "notify", "done"]);
-		const g = parts(tool.run({ machine: sample("Dinner booking, as first drawn"), also: "none" })).find(
+		const g = parts(tool.run({ machine: sample("Booking, first draft"), also: "none" })).find(
 			(p) => p.kind === "graph",
 		);
 		assert.ok(g?.kind === "graph");
@@ -321,7 +321,7 @@ describe("state-machine-analyzer", () => {
 		assert.deepEqual([degraded?.tone, degraded?.note], ["warn", "can't be reached or left"]);
 		assert.deepEqual(g.graph.highlight, mainPath(m));
 		// The decided booking's back returns to the two states that move into degraded, drawn dashed.
-		const decided = parts(tool.run({ machine: sample("Dinner booking, every cell decided"), also: "none" })).find(
+		const decided = parts(tool.run({ machine: sample("Booking, all cells decided"), also: "none" })).find(
 			(p) => p.kind === "graph",
 		);
 		assert.ok(decided?.kind === "graph");

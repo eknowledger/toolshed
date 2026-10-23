@@ -3,7 +3,7 @@
   "id": "overload-queue",
   "name": "Load shedding simulator",
   "blurb": "More requests than a service can answer, for a minute. Your workers, traffic, timeout, retries, queue policy and queue size: who is answered in time, who waits for nothing, and does it recover.",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "capabilities": [
     "pure"
   ],
@@ -162,7 +162,7 @@
       }
     },
     {
-      "label": "The sale, bounded at 1,024 (Envoy's default)",
+      "label": "The sale, Envoy's 1,024",
       "input": {
         "policy": "bounded",
         "retries": 0,
@@ -188,7 +188,7 @@
       }
     },
     {
-      "label": "Queue timeout, with 3 retries",
+      "label": "Queue timeout, 3 retries",
       "input": {
         "policy": "codel",
         "retries": 3,

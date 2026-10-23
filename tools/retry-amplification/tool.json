@@ -3,7 +3,7 @@
   "id": "retry-amplification",
   "name": "Retry amplification calculator",
   "blurb": "Retries per layer and how deep the chain goes: how many calls reach the bottom service for one user request when every layer retries what it gets, and the extra load on it while it fails.",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "capabilities": [
     "pure"
   ],
@@ -135,7 +135,7 @@
   ],
   "samples": [
     {
-      "label": "Istio's default over gRPC, bottom down",
+      "label": "Istio gRPC, bottom down",
       "input": {
         "depth": 3,
         "platform": "istio",
@@ -147,7 +147,7 @@
       }
     },
     {
-      "label": "Code that retries inside the mesh",
+      "label": "App retries in the mesh",
       "input": {
         "depth": 3,
         "platform": "istio",

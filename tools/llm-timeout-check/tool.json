@@ -3,7 +3,7 @@
 	"id": "llm-timeout-check",
 	"name": "LLM timeout check",
 	"blurb": "How long one agent task can run before your SDK and loop settings stop it, when the model is silent, trickling or overloaded, and what to set when that is too long.",
-	"version": "3.1.0",
+	"version": "3.1.1",
 	"capabilities": ["pure"],
 	"runtime": {
 		"entry": "index.ts",
@@ -114,7 +114,7 @@
 	],
 	"samples": [
 		{
-			"label": "Python SDK defaults, a 10-turn loop",
+			"label": "Python SDK, 10 turns",
 			"input": {
 				"stack": "python",
 				"read": 600,
@@ -138,7 +138,7 @@
 			}
 		},
 		{
-			"label": "Tuned for a chat: 3 s deadline, 1 retry, 4 turns",
+			"label": "Chat: 3 s, 1 retry",
 			"input": {
 				"stack": "custom",
 				"read": 10,

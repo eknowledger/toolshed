@@ -3,7 +3,7 @@
 	"id": "copy-drift",
 	"name": "Copy drift",
 	"blurb": "Paste two copies of a function and each one's git log, and see whether they have been changing together or drifting apart, which commits changed only one, and where the copies differ.",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"capabilities": ["pure"],
 	"runtime": {
 		"entry": "index.ts",
@@ -76,7 +76,7 @@
 	],
 	"samples": [
 		{
-			"label": "httpx: the two _send_single_request",
+			"label": "httpx: _send_single_request",
 			"input": {
 				"a": "    def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, SyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send an async request with a sync Client instance.\"\n            )\n\n        with request_context(request=request):\n            response = transport.handle_request(request)\n\n        assert isinstance(response.stream, SyncByteStream)\n\n        response.request = request\n        response.stream = BoundSyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
 				"b": "    async def _send_single_request(self, request: Request) -> Response:\n        \"\"\"\n        Sends a single request, without handling any redirections.\n        \"\"\"\n        transport = self._transport_for_url(request.url)\n        start = time.perf_counter()\n\n        if not isinstance(request.stream, AsyncByteStream):\n            raise RuntimeError(\n                \"Attempted to send a sync request with an AsyncClient instance.\"\n            )\n\n        with request_context(request=request):\n            response = await transport.handle_async_request(request)\n\n        assert isinstance(response.stream, AsyncByteStream)\n        response.request = request\n        response.stream = BoundAsyncStream(\n            response.stream, response=response, start=start\n        )\n        self.cookies.extract_cookies(response)\n        response.default_encoding = self._default_encoding\n\n        logger.info(\n            'HTTP Request: %s %s \"%s %d %s\"',\n            request.method,\n            request.url,\n            response.http_version,\n            response.status_code,\n            response.reason_phrase,\n        )\n\n        return response\n",
@@ -87,7 +87,7 @@
 			}
 		},
 		{
-			"label": "httpx: httpx.get and Client.get",
+			"label": "httpx: get and Client.get",
 			"input": {
 				"a": "def get(\n    url: URL | str,\n    *,\n    params: QueryParamTypes | None = None,\n    headers: HeaderTypes | None = None,\n    cookies: CookieTypes | None = None,\n    auth: AuthTypes | None = None,\n    proxy: ProxyTypes | None = None,\n    follow_redirects: bool = False,\n    verify: ssl.SSLContext | str | bool = True,\n    timeout: TimeoutTypes = DEFAULT_TIMEOUT_CONFIG,\n    trust_env: bool = True,\n) -> Response:\n    \"\"\"\n    Sends a `GET` request.\n\n    **Parameters**: See `httpx.request`.\n\n    Note that the `data`, `files`, `json` and `content` parameters are not available\n    on this function, as `GET` requests should not include a request body.\n    \"\"\"\n    return request(\n        \"GET\",\n        url,\n        params=params,\n        headers=headers,\n        cookies=cookies,\n        auth=auth,\n        proxy=proxy,\n        follow_redirects=follow_redirects,\n        verify=verify,\n        timeout=timeout,\n        trust_env=trust_env,\n    )\n",
 				"b": "    def get(\n        self,\n        url: URL | str,\n        *,\n        params: QueryParamTypes | None = None,\n        headers: HeaderTypes | None = None,\n        cookies: CookieTypes | None = None,\n        auth: AuthTypes | UseClientDefault | None = USE_CLIENT_DEFAULT,\n        follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,\n        timeout: TimeoutTypes | UseClientDefault = USE_CLIENT_DEFAULT,\n        extensions: RequestExtensions | None = None,\n    ) -> Response:\n        \"\"\"\n        Send a `GET` request.\n\n        **Parameters**: See `httpx.request`.\n        \"\"\"\n        return self.request(\n            \"GET\",\n            url,\n            params=params,\n            headers=headers,\n            cookies=cookies,\n            auth=auth,\n            follow_redirects=follow_redirects,\n            timeout=timeout,\n            extensions=extensions,\n        )\n",
@@ -98,7 +98,7 @@
 			}
 		},
 		{
-			"label": "Two retry helpers, no history (made up)",
+			"label": "Two helpers, no history",
 			"input": {
 				"a": "export async function fetchWithRetry(url: string, attempts = 3): Promise<Response> {\n\tlet delay = 200;\n\tfor (let i = 0; i < attempts; i++) {\n\t\tconst res = await fetch(url);\n\t\tif (res.ok || res.status < 500) return res;\n\t\tawait sleep(delay + Math.random() * delay);\n\t\tdelay *= 2;\n\t}\n\tthrow new Error(`gave up on ${url} after ${attempts} attempts`);\n}\n",
 				"b": "export async function getWithRetry(endpoint: string, tries = 3): Promise<Response> {\n\tlet wait = 200;\n\tfor (let n = 0; n < tries; n++) {\n\t\tconst response = await fetch(endpoint);\n\t\tif (response.ok) return response;\n\t\tawait sleep(wait);\n\t\twait *= 2;\n\t}\n\tthrow new Error(`gave up on ${endpoint} after ${tries} attempts`);\n}\n",

@@ -3,7 +3,7 @@
   "id": "pr-split-cost",
   "name": "PR split cost",
   "blurb": "Paste your PRs' sizes and review waits. Get how much the wait grows with size, and what splitting a change into k PRs costs in waiting, reviewed one after another, side by side, or in one sitting.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "capabilities": [
     "pure"
   ],
@@ -129,7 +129,7 @@
       }
     },
     {
-      "label": "Just an elasticity: ruff's 0.43",
+      "label": "ruff's elasticity, 0.43",
       "input": {
         "source": "given",
         "elasticity": 0.43,
@@ -137,7 +137,7 @@
       }
     },
     {
-      "label": "A line that isn't two numbers",
+      "label": "Not two numbers",
       "input": {
         "source": "fit",
         "pairs": "size,wait_hours\n120,3.5\n40 h,1"

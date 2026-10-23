@@ -3,7 +3,7 @@
 	"id": "metric-cardinality",
 	"name": "Metric cardinality calculator",
 	"blurb": "List a metric's labels and how many values each takes, pick where it is stored, and see how many time series it really writes, which change saves the most, and what that backend bills it in.",
-	"version": "3.1.0",
+	"version": "3.1.1",
 	"capabilities": ["pure"],
 	"runtime": {
 		"entry": "index.ts",
@@ -237,7 +237,7 @@
 			}
 		},
 		{
-			"label": "Same, on Amazon Managed Prometheus",
+			"label": "Same, Amazon Prometheus",
 			"input": {
 				"backend": "amp",
 				"labels": "route 12\nmethod 3\nstatus 6",
@@ -251,7 +251,7 @@
 			}
 		},
 		{
-			"label": "CloudWatch EMF with a customer dimension",
+			"label": "CloudWatch EMF, per customer",
 			"input": {
 				"backend": "cloudwatch",
 				"labels": "operation 6\nstatus 3\ncustomer 200",

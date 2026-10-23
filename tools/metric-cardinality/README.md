@@ -57,7 +57,7 @@ Choose **Counter** instead and the same labels are 1,080 series, which is the co
 ### The same metric on a managed Prometheus
 
 Now choose **Amazon Managed Service for Prometheus** and set *Scrape or write interval* to 30 s. This is the sample
-*Same, on Amazon Managed Prometheus*. The series are the same 15,120, because the service stores what the client
+*Same, Amazon Prometheus*. The series are the same 15,120, because the service stores what the client
 writes, and so are the changes. What moves is the quiet row, which now counts what Amazon bills:
 
 | Label sets | Samples ingested |
@@ -77,7 +77,7 @@ billion a month", the same as Amazon's at most.
 
 An API on Lambda emits a latency metric through the Embedded Metric Format, with dimensions `operation` (6 values),
 `status` (3) and `customer` (200), and about half of the combinations occur. Twelve instances publish it. Choose
-**Amazon CloudWatch custom metrics, including EMF**, or press the sample *CloudWatch EMF with a customer dimension*:
+**Amazon CloudWatch custom metrics, including EMF**, or press the sample *CloudWatch EMF, per customer*:
 
 ```text
 1,800 custom metrics

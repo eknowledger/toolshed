@@ -3,7 +3,7 @@
   "id": "fan-out-tail",
   "name": "Fan-out tail latency calculator",
   "blurb": "A request fans out to N calls and waits for all of them. See how many requests are slow, and what percentile each call needs to meet your target.",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "capabilities": [
     "pure"
   ],
@@ -85,7 +85,7 @@
       }
     },
     {
-      "label": "The Tail at Scale: 100 servers at their p99",
+      "label": "Tail at Scale: 100 servers",
       "input": {
         "calls": 100,
         "slow": "p99",
@@ -94,7 +94,7 @@
       }
     },
     {
-      "label": "What p99 does each of 20 shards need?",
+      "label": "p99 for each of 20 shards",
       "input": {
         "calls": 20,
         "slow": "p99",
@@ -103,7 +103,7 @@
       }
     },
     {
-      "label": "A checkout service with 12 dependencies",
+      "label": "Checkout, 12 dependencies",
       "input": {
         "calls": 20,
         "slow": "0.5%",

@@ -43,7 +43,7 @@ inside one try of the layer above, so timeouts shrink going down the chain.
 
 The chain above, with the app at the top giving up after 2 seconds and 25 ms between tries, Istio's base backoff.
 Paste it, set **Top caller waits** to 2000 ms and **Backoff between tries** to 25 ms, and press Run (or press the sample
-*Timeouts set by hand, every timeout retried*).
+*By hand, all retried*).
 
 The answer, in red, because 9.20 s overruns the 2 s you set:
 
@@ -71,7 +71,7 @@ In plain words: when inventory hangs, pricing tries it three times at 500 ms eac
 gives pricing only 1 s per try, so two of pricing's three tries run for nobody. Checkout's three tries of pricing take up to
 3.05 s, and frontend, with no timeout, tries checkout three times: 9.2 s for a request the app gave up on after 2.
 The 650 ms and 316 ms are what make each call fit on its own. To make the whole chain fit, shrink the timeouts going
-down: the sample *Timeouts that shrink going down* uses 1.8 s with no retry, 800 ms with one, and 225 ms with two, for a
+down: the sample *Shrinking timeouts* uses 1.8 s with no retry, 800 ms with one, and 225 ms with two, for a
 worst case of 1.48 s, which the tool gives as one quiet line with no banner and no table of changes.
 
 ## Where it stops being true

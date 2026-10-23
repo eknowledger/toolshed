@@ -78,7 +78,7 @@ A service on Cloud Run is rolling out a new revision as a canary, with 4% of the
 5% of its requests take 0.6 to 1.4 seconds. A dashboard charts each revision's p99 and the alert averages them. To
 check it, list the time series of `run.googleapis.com/request_latencies` for the hour with `projects.timeSeries.list`,
 aligned with `ALIGN_DELTA` so each revision keeps its distribution, and paste the JSON. This is the sample
-**Google Cloud Monitoring: a distribution metric**; its counts and bucket layout are illustrative, not from a real
+**Cloud Monitoring**; its counts and bucket layout are illustrative, not from a real
 project:
 
 ```json

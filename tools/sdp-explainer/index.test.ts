@@ -107,7 +107,7 @@ describe("sdp-explainer", () => {
 			assert.equal(build(type, local, component), p);
 			assert.deepEqual(decodePriority(p), { type, local, component }, String(p));
 		}
-		const rows = parts(tool.run({ sdp: sample("RFC 9429's example offer, unwrapped"), other: "", show: "all" })).find((p) => p.kind === "table" && p.caption?.startsWith("Every line"));
+		const rows = parts(tool.run({ sdp: sample("RFC 9429 offer"), other: "", show: "all" })).find((p) => p.kind === "table" && p.caption?.startsWith("Every line"));
 		assert.ok(rows?.kind === "table");
 		const host = rows.rows.find((r) => cellText(r[1]).includes("2113929471"));
 		assert.match(cellText(host?.[2]), /type preference 126, local preference 0, component 1/);
@@ -145,7 +145,7 @@ describe("sdp-explainer", () => {
 });
 
 describe("rules real stacks follow, and offers they really send", () => {
-	const offer = sample("Simulcast video and a data channel");
+	const offer = sample("Simulcast + data channel");
 	const problems = (sdp: string) => explain(sdp).problems.map((p) => `${p.severity}: ${p.message}`);
 
 	it("a missing a=tls-id is one note for the description, not a warning on every section", () => {
@@ -205,10 +205,10 @@ describe("rules real stacks follow, and offers they really send", () => {
 	});
 
 	it("shows every line whole, however long", () => {
-		const out = parts(tool.run({ sdp: sample("RFC 9429's example offer, unwrapped"), other: "", show: "all" }));
+		const out = parts(tool.run({ sdp: sample("RFC 9429 offer"), other: "", show: "all" }));
 		const table = out.find((p) => p.kind === "table" && p.caption?.startsWith("Every line"));
 		assert.ok(table?.kind === "table");
-		const longest = sample("RFC 9429's example offer, unwrapped").split("\n").reduce((a, l) => Math.max(a, l.trim().length), 0);
+		const longest = sample("RFC 9429 offer").split("\n").reduce((a, l) => Math.max(a, l.trim().length), 0);
 		assert.ok(longest > 72);
 		assert.ok(table.rows.some((r) => cellText(r[1]).length === longest), "the longest line is in the table whole");
 	});

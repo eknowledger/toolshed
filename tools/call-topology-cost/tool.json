@@ -3,7 +3,7 @@
   "id": "call-topology-cost",
   "name": "Call topology cost",
   "blurb": "Pick a call size and see where a voice call's cost lands for mesh, an SFU, an MCU and a server that is the other peer, with real packet sizes, and what would make it cheaper.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "capabilities": [
     "pure"
   ],
@@ -283,7 +283,7 @@
       }
     },
     {
-      "label": "Ten people, three loudest forwarded",
+      "label": "10 people, 3 loudest sent",
       "input": {
         "participants": 10,
         "pattern": "sfu",
@@ -328,7 +328,7 @@
       }
     },
     {
-      "label": "Real packets: AES-GCM, IPv6, four extensions",
+      "label": "Real packets, AES-GCM",
       "input": {
         "participants": 10,
         "pattern": "sfu",

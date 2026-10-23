@@ -75,7 +75,7 @@ serves the rest in time. Press *Unbounded, with 3 retries* to see the same sale 
 ### A real default: a bound of 1,024
 
 The bound of 50 above is derived, a quarter of the timeout's worth of work. Proxies ship a fixed number instead:
-Envoy's default limit on pending requests is 1,024. Press *The sale, bounded at 1,024 (Envoy's default)*, which is
+Envoy's default limit on pending requests is 1,024. Press *The sale, Envoy's 1,024*, which is
 the same sale with **Policy** *Bounded queue* and **Queue size** 1024:
 
 | Policy | Answered in time | Refused at once | Waited for nothing |

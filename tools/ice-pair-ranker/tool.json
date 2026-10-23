@@ -3,7 +3,7 @@
   "id": "ice-pair-ranker",
   "name": "ICE pair ranker",
   "blurb": "Paste both sides' ICE candidates, as SDP lines, a whole offer, candidate JSON or getStats(): the pairs ICE forms, the ones it drops, the order it tries them, and what to fix.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "capabilities": [
     "pure"
   ],
@@ -79,7 +79,7 @@
       }
     },
     {
-      "label": "Same call, the other side controls",
+      "label": "Same call, other side leads",
       "input": {
         "local": "a=candidate:1 1 udp 2130706431 192.168.1.42 50004 typ host\na=candidate:2 1 udp 1694498815 192.0.2.10 54321 typ srflx raddr 192.168.1.42 rport 50004\na=candidate:3 1 udp 16777215 198.51.100.50 49152 typ relay raddr 192.0.2.10 rport 54321",
         "remote": "a=candidate:1 1 udp 2130706431 10.0.0.8 61000 typ host\na=candidate:2 1 udp 1694498815 198.51.100.77 40100 typ srflx raddr 10.0.0.8 rport 61000\na=candidate:3 1 udp 16777215 198.51.100.51 49200 typ relay raddr 198.51.100.77 rport 40100",

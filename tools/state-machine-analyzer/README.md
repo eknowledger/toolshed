@@ -121,7 +121,7 @@ every state:
 
 Undecided drops to 0 and Decided reads `13 moves, 3 stays and 103 rejects`. That is honest only if you mean it: rejecting
 `user_revises` in `confirm` means ignoring a user who changes the time while being asked to confirm it. The sample
-**Dinner booking, every cell decided** makes each of those decisions on purpose: 32 move, 22 stay, 6 defer and 59
+**Booking, all cells decided** makes each of those decisions on purpose: 32 move, 22 stay, 6 defer and 59
 reject.
 
 **8. Take it with you.** Set **Also write** to *The table as markdown* and Run. Under the gaps comes the grid as a
