@@ -1,0 +1,280 @@
+[
+  {
+    "name": "the default name: four letters in two pieces, because أ never joins the letter after it",
+    "input": { "name": "أحمد", "greeting": "ahlan", "ya": true },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        { "kind": "text", "text": "أهلاً يا أحمد" },
+        {
+          "kind": "fields",
+          "fields": [
+            { "label": "Letters", "value": "4" },
+            { "label": "Pieces", "value": "2", "note": "أ · حمد" },
+            { "label": "UTF-8 bytes", "value": "8", "note": "two for each Arabic letter or mark, one for a space" },
+            { "label": "Abjad value", "value": "53", "note": "the letters' values added up" }
+          ]
+        },
+        {
+          "kind": "series",
+          "chart": {
+            "xLabel": "Letter, first to last",
+            "yLabel": "Abjad value",
+            "x": ["1. أ", "2. ح", "3. م", "4. د"],
+            "series": [
+              {
+                "label": "Abjad value",
+                "shape": "bar",
+                "points": [1, 8, 40, 4]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "table",
+          "caption": "Letter by letter",
+          "columns": [
+            { "label": "Letter" },
+            { "label": "Name" },
+            { "label": "Code point", "mono": true },
+            { "label": "UTF-8", "mono": true },
+            { "label": "Abjad", "align": "end" },
+            { "label": "Joins the next" }
+          ],
+          "rows": [
+            ["أ", "alif, hamza above", "U+0623", "D8 A3", 1, "no"],
+            ["ح", "ḥa", "U+062D", "D8 AD", 8, "yes"],
+            ["م", "mim", "U+0645", "D9 85", 40, "yes"],
+            ["د", "dal", "U+062F", "D8 AF", 4, "no"]
+          ]
+        },
+        {
+          "kind": "bytes",
+          "bytes": [216, 163, 216, 173, 217, 133, 216, 175],
+          "caption": "The name in UTF-8, one highlighted run per letter",
+          "highlight": [
+            { "at": 0, "len": 2, "label": "U+0623 alif, hamza above" },
+            { "at": 2, "len": 2, "label": "U+062D ḥa" },
+            { "at": 4, "len": 2, "label": "U+0645 mim" },
+            { "at": 6, "len": 2, "label": "U+062F dal" }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "a shadda is two more bytes and no more letters",
+    "input": { "name": "محمّد", "greeting": "marhaban", "ya": true },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        { "kind": "text", "text": "مرحباً يا محمّد" },
+        {
+          "kind": "fields",
+          "fields": [
+            { "label": "Letters", "value": "4" },
+            { "label": "Pieces", "value": "1", "note": "محمّد" },
+            { "label": "UTF-8 bytes", "value": "10", "note": "two for each Arabic letter or mark, one for a space" },
+            { "label": "Abjad value", "value": "92", "note": "the letters' values added up" }
+          ]
+        },
+        {
+          "kind": "series",
+          "chart": {
+            "xLabel": "Letter, first to last",
+            "yLabel": "Abjad value",
+            "x": ["1. م", "2. ح", "3. م", "4. د"],
+            "series": [
+              {
+                "label": "Abjad value",
+                "shape": "bar",
+                "points": [40, 8, 40, 4]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "table",
+          "caption": "Letter by letter",
+          "columns": [
+            { "label": "Letter" },
+            { "label": "Name" },
+            { "label": "Code point", "mono": true },
+            { "label": "UTF-8", "mono": true },
+            { "label": "Abjad", "align": "end" },
+            { "label": "Joins the next" }
+          ],
+          "rows": [
+            ["م", "mim", "U+0645", "D9 85", 40, "yes"],
+            ["ح", "ḥa", "U+062D", "D8 AD", 8, "yes"],
+            ["مّ", "mim", "U+0645", "D9 85 D9 91", 40, "yes"],
+            ["د", "dal", "U+062F", "D8 AF", 4, "no"]
+          ]
+        },
+        {
+          "kind": "bytes",
+          "bytes": [217, 133, 216, 173, 217, 133, 217, 145, 216, 175],
+          "caption": "The name in UTF-8, one highlighted run per letter",
+          "highlight": [
+            { "at": 0, "len": 2, "label": "U+0645 mim" },
+            { "at": 2, "len": 2, "label": "U+062D ḥa" },
+            { "at": 4, "len": 4, "label": "U+0645 mim + shadda U+0651" },
+            { "at": 8, "len": 2, "label": "U+062F dal" }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "a hamza joins neither neighbour, so هناء ends in a piece of its own",
+    "input": { "name": "هناء", "greeting": "masa", "ya": false },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        { "kind": "text", "text": "مساء الخير هناء" },
+        {
+          "kind": "fields",
+          "fields": [
+            { "label": "Letters", "value": "4" },
+            { "label": "Pieces", "value": "2", "note": "هنا · ء" },
+            { "label": "UTF-8 bytes", "value": "8", "note": "two for each Arabic letter or mark, one for a space" },
+            { "label": "Abjad value", "value": "57", "note": "the letters' values added up" }
+          ]
+        },
+        {
+          "kind": "series",
+          "chart": {
+            "xLabel": "Letter, first to last",
+            "yLabel": "Abjad value",
+            "x": ["1. ه", "2. ن", "3. ا", "4. ء"],
+            "series": [
+              {
+                "label": "Abjad value",
+                "shape": "bar",
+                "points": [5, 50, 1, 1]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "table",
+          "caption": "Letter by letter",
+          "columns": [
+            { "label": "Letter" },
+            { "label": "Name" },
+            { "label": "Code point", "mono": true },
+            { "label": "UTF-8", "mono": true },
+            { "label": "Abjad", "align": "end" },
+            { "label": "Joins the next" }
+          ],
+          "rows": [
+            ["ه", "ha", "U+0647", "D9 87", 5, "yes"],
+            ["ن", "nun", "U+0646", "D9 86", 50, "yes"],
+            ["ا", "alif", "U+0627", "D8 A7", 1, "no"],
+            ["ء", "hamza", "U+0621", "D8 A1", 1, "no"]
+          ]
+        },
+        {
+          "kind": "bytes",
+          "bytes": [217, 135, 217, 134, 216, 167, 216, 161],
+          "caption": "The name in UTF-8, one highlighted run per letter",
+          "highlight": [
+            { "at": 0, "len": 2, "label": "U+0647 ha" },
+            { "at": 2, "len": 2, "label": "U+0646 nun" },
+            { "at": 4, "len": 2, "label": "U+0627 alif" },
+            { "at": 6, "len": 2, "label": "U+0621 hamza" }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "two words: the space ends a piece and costs one byte",
+    "input": { "name": "عبد الرحمن", "greeting": "salam", "ya": true },
+    "expect": {
+      "kind": "group",
+      "parts": [
+        { "kind": "text", "text": "السلام عليكم يا عبد الرحمن" },
+        {
+          "kind": "fields",
+          "fields": [
+            { "label": "Letters", "value": "9" },
+            { "label": "Pieces", "value": "4", "note": "عبد · ا · لر · حمن" },
+            { "label": "UTF-8 bytes", "value": "19", "note": "two for each Arabic letter or mark, one for a space" },
+            { "label": "Abjad value", "value": "405", "note": "the letters' values added up" }
+          ]
+        },
+        {
+          "kind": "series",
+          "chart": {
+            "xLabel": "Letter, first to last",
+            "yLabel": "Abjad value",
+            "x": ["1. ع", "2. ب", "3. د", "4. ا", "5. ل", "6. ر", "7. ح", "8. م", "9. ن"],
+            "series": [
+              {
+                "label": "Abjad value",
+                "shape": "bar",
+                "points": [70, 2, 4, 1, 30, 200, 8, 40, 50]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "table",
+          "caption": "Letter by letter",
+          "columns": [
+            { "label": "Letter" },
+            { "label": "Name" },
+            { "label": "Code point", "mono": true },
+            { "label": "UTF-8", "mono": true },
+            { "label": "Abjad", "align": "end" },
+            { "label": "Joins the next" }
+          ],
+          "rows": [
+            ["ع", "ʿayn", "U+0639", "D8 B9", 70, "yes"],
+            ["ب", "ba", "U+0628", "D8 A8", 2, "yes"],
+            ["د", "dal", "U+062F", "D8 AF", 4, "no"],
+            ["ا", "alif", "U+0627", "D8 A7", 1, "no"],
+            ["ل", "lam", "U+0644", "D9 84", 30, "yes"],
+            ["ر", "ra", "U+0631", "D8 B1", 200, "no"],
+            ["ح", "ḥa", "U+062D", "D8 AD", 8, "yes"],
+            ["م", "mim", "U+0645", "D9 85", 40, "yes"],
+            ["ن", "nun", "U+0646", "D9 86", 50, "no"]
+          ]
+        },
+        {
+          "kind": "bytes",
+          "bytes": [216, 185, 216, 168, 216, 175, 32, 216, 167, 217, 132, 216, 177, 216, 173, 217, 133, 217, 134],
+          "caption": "The name in UTF-8, one highlighted run per letter",
+          "highlight": [
+            { "at": 0, "len": 2, "label": "U+0639 ʿayn" },
+            { "at": 2, "len": 2, "label": "U+0628 ba" },
+            { "at": 4, "len": 2, "label": "U+062F dal" },
+            { "at": 7, "len": 2, "label": "U+0627 alif" },
+            { "at": 9, "len": 2, "label": "U+0644 lam" },
+            { "at": 11, "len": 2, "label": "U+0631 ra" },
+            { "at": 13, "len": 2, "label": "U+062D ḥa" },
+            { "at": 15, "len": 2, "label": "U+0645 mim" },
+            { "at": 17, "len": 2, "label": "U+0646 nun" }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "an empty name is an error on the name, not an empty greeting",
+    "input": { "name": "   ", "greeting": "ahlan", "ya": true },
+    "expect": { "kind": "error", "message": "Type a name.", "input": "name" }
+  },
+  {
+    "name": "Latin letters are refused, and the message points at the first one",
+    "input": { "name": "Ahmed", "greeting": "ahlan", "ya": true },
+    "expect": {
+      "kind": "error",
+      "message": "\"A\" is not an Arabic letter. Write the name in Arabic letters, for example أحمد.",
+      "input": "name",
+      "at": 0,
+      "len": 1
+    }
+  }
+]
