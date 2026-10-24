@@ -33,8 +33,8 @@ const MARK_NAMES: Record<string, string> = {
 };
 
 /*
- * Each letter's value in the abjad order, أبجد هوز حطي كلمن سعفص قرشت ثخذ ضظغ: the old order of the alphabet, in
- * which the letters were also numerals. A hamza seat counts as the letter carrying it, and ta marbuta as ه.
+ * Each letter's value in the eastern (Mashriqi) abjad order, أبجد هوز حطي كلمن سعفص قرشت ثخذ ضظغ: the old order
+ * of the alphabet, in which the letters were also numerals. A hamza seat counts as the letter carrying it, and ta marbuta as ه.
  */
 const ABJAD: Record<string, number> = {
 	ا: 1, أ: 1, إ: 1, آ: 1, ٱ: 1, ء: 1, ب: 2, ج: 3, د: 4, ه: 5, ة: 5, و: 6, ؤ: 6, ز: 7, ح: 8, ط: 9,

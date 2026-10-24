@@ -38,7 +38,7 @@
   "samples": [
     { "label": "Muhammad, with a shadda", "input": { "name": "محمّد" } },
     { "label": "Two words", "input": { "name": "عبد الرحمن" } },
-    { "label": "Khalid ibn al-Walid", "input": { "name": "خالد بن الوليد" } },
+    { "label": "Fatima al-Zahra", "input": { "name": "فاطمة الزهراء" } },
     { "label": "Latin letters", "input": { "name": "Ahmed" } }
   ],
   "help": "README.md",
