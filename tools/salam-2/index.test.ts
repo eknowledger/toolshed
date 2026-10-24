@@ -23,7 +23,11 @@ it("every greeting in the select produces a greeting, with and without يا", ()
 });
 
 it("refuses anything that is not an Arabic letter, a mark or a space, and says where", () => {
-	for (const [name, at] of [["أحمد1", 4], ["ali", 0], ["أحمد!", 4]] as const) {
+	for (const [name, at] of [
+		["أحمد1", 4],
+		["ali", 0],
+		["أحمد!", 4],
+	] as const) {
 		const out = tool.run({ name, greeting: "ahlan", ya: true });
 		assert.equal(out.kind, "error");
 		if (out.kind === "error") assert.equal(out.at, at);

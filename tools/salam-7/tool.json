@@ -1,50 +1,50 @@
 {
-  "sdk": 5,
-  "id": "salam-7",
-  "name": "Salam, step 7: styled by the page",
-  "blurb": "Greets a name in Arabic, shows its letters, bytes and abjad values, and counts every order its letters can be written in.",
-  "version": "7.0.0",
-  "capabilities": ["pure"],
-  "runtime": { "entry": "index.ts", "thread": "worker" },
-  "timeoutMs": 3000,
-  "kinds": ["group", "text", "fields", "series", "table", "bytes", "error"],
-  "card": "live",
-  "cardFields": 4,
-  "inputs": [
-    {
-      "id": "name",
-      "type": "text",
-      "label": "Name",
-      "description": "In Arabic letters. Short vowels and shadda are fine.",
-      "primary": true,
-      "maxLength": 40,
-      "default": "أحمد"
-    },
-    {
-      "id": "greeting",
-      "type": "select",
-      "label": "Greeting",
-      "default": "ahlan",
-      "options": [
-        { "value": "ahlan", "label": "أهلاً, welcome" },
-        { "value": "marhaban", "label": "مرحباً, hello" },
-        { "value": "salam", "label": "السلام عليكم, peace be upon you" },
-        { "value": "sabah", "label": "صباح الخير, good morning" },
-        { "value": "masa", "label": "مساء الخير, good evening" }
-      ]
-    },
-    { "id": "ya", "type": "toggle", "label": "Call them by name, with يا", "default": true }
-  ],
-  "samples": [
-    { "label": "Muhammad, with a shadda", "input": { "name": "محمّد" } },
-    { "label": "Two words", "input": { "name": "عبد الرحمن" } },
-    { "label": "Fatima al-Zahra", "input": { "name": "فاطمة الزهراء" } },
-    { "label": "Latin letters", "input": { "name": "Ahmed" } }
-  ],
-  "help": "README.md",
-  "tags": ["arabic", "unicode", "example"],
-  "links": [
-    { "label": "Unicode Arabic block (U+0600 to U+06FF)", "href": "https://www.unicode.org/charts/PDF/U0600.pdf" },
-    { "label": "Abjad numerals", "href": "https://en.wikipedia.org/wiki/Abjad_numerals" }
-  ]
+	"sdk": 5,
+	"id": "salam-7",
+	"name": "Salam, step 7: styled by the page",
+	"blurb": "Greets a name in Arabic, shows its letters, bytes and abjad values, and counts every order its letters can be written in.",
+	"version": "7.0.0",
+	"capabilities": ["pure"],
+	"runtime": { "entry": "index.ts", "thread": "worker" },
+	"timeoutMs": 3000,
+	"kinds": ["group", "text", "fields", "series", "table", "bytes", "error"],
+	"card": "live",
+	"cardFields": 4,
+	"inputs": [
+		{
+			"id": "name",
+			"type": "text",
+			"label": "Name",
+			"description": "In Arabic letters. Short vowels and shadda are fine.",
+			"primary": true,
+			"maxLength": 40,
+			"default": "أحمد"
+		},
+		{
+			"id": "greeting",
+			"type": "select",
+			"label": "Greeting",
+			"default": "ahlan",
+			"options": [
+				{ "value": "ahlan", "label": "أهلاً, welcome" },
+				{ "value": "marhaban", "label": "مرحباً, hello" },
+				{ "value": "salam", "label": "السلام عليكم, peace be upon you" },
+				{ "value": "sabah", "label": "صباح الخير, good morning" },
+				{ "value": "masa", "label": "مساء الخير, good evening" }
+			]
+		},
+		{ "id": "ya", "type": "toggle", "label": "Call them by name, with يا", "default": true }
+	],
+	"samples": [
+		{ "label": "Muhammad, with a shadda", "input": { "name": "محمّد" } },
+		{ "label": "Two words", "input": { "name": "عبد الرحمن" } },
+		{ "label": "Fatima al-Zahra", "input": { "name": "فاطمة الزهراء" } },
+		{ "label": "Latin letters", "input": { "name": "Ahmed" } }
+	],
+	"help": "README.md",
+	"tags": ["arabic", "unicode", "example"],
+	"links": [
+		{ "label": "Unicode Arabic block (U+0600 to U+06FF)", "href": "https://www.unicode.org/charts/PDF/U0600.pdf" },
+		{ "label": "Abjad numerals", "href": "https://en.wikipedia.org/wiki/Abjad_numerals" }
+	]
 }

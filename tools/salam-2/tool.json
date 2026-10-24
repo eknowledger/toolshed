@@ -1,35 +1,35 @@
 {
-  "sdk": 1,
-  "id": "salam-2",
-  "name": "Salam, step 2: a form",
-  "blurb": "Greets a name in Arabic, with a choice of greeting, and says so when the name is not written in Arabic letters.",
-  "version": "2.0.0",
-  "capabilities": ["pure"],
-  "runtime": { "entry": "index.ts" },
-  "kinds": ["text", "error"],
-  "inputs": [
-    {
-      "id": "name",
-      "type": "text",
-      "label": "Name",
-      "description": "In Arabic letters. Short vowels and shadda are fine.",
-      "maxLength": 40,
-      "default": "أحمد"
-    },
-    {
-      "id": "greeting",
-      "type": "select",
-      "label": "Greeting",
-      "default": "ahlan",
-      "options": [
-        { "value": "ahlan", "label": "أهلاً, welcome" },
-        { "value": "marhaban", "label": "مرحباً, hello" },
-        { "value": "salam", "label": "السلام عليكم, peace be upon you" },
-        { "value": "sabah", "label": "صباح الخير, good morning" },
-        { "value": "masa", "label": "مساء الخير, good evening" }
-      ]
-    },
-    { "id": "ya", "type": "toggle", "label": "Call them by name, with يا", "default": true }
-  ],
-  "help": "README.md"
+	"sdk": 1,
+	"id": "salam-2",
+	"name": "Salam, step 2: a form",
+	"blurb": "Greets a name in Arabic, with a choice of greeting, and says so when the name is not written in Arabic letters.",
+	"version": "2.0.0",
+	"capabilities": ["pure"],
+	"runtime": { "entry": "index.ts" },
+	"kinds": ["text", "error"],
+	"inputs": [
+		{
+			"id": "name",
+			"type": "text",
+			"label": "Name",
+			"description": "In Arabic letters. Short vowels and shadda are fine.",
+			"maxLength": 40,
+			"default": "أحمد"
+		},
+		{
+			"id": "greeting",
+			"type": "select",
+			"label": "Greeting",
+			"default": "ahlan",
+			"options": [
+				{ "value": "ahlan", "label": "أهلاً, welcome" },
+				{ "value": "marhaban", "label": "مرحباً, hello" },
+				{ "value": "salam", "label": "السلام عليكم, peace be upon you" },
+				{ "value": "sabah", "label": "صباح الخير, good morning" },
+				{ "value": "masa", "label": "مساء الخير, good evening" }
+			]
+		},
+		{ "id": "ya", "type": "toggle", "label": "Call them by name, with يا", "default": true }
+	],
+	"help": "README.md"
 }

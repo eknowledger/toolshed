@@ -45,7 +45,11 @@ it("ا د ذ ر ز و never join the letter after them", () => {
 });
 
 it("abjad values that are well known: محمد 92, أحمد 53, علي 110", () => {
-	for (const [name, value] of [["محمد", "92"], ["أحمد", "53"], ["علي", "110"]] as const) {
+	for (const [name, value] of [
+		["محمد", "92"],
+		["أحمد", "53"],
+		["علي", "110"],
+	] as const) {
 		const fields = parts(name)[1];
 		assert.ok(fields?.kind === "fields");
 		assert.equal(fields.fields[3]!.value, value);
@@ -57,7 +61,10 @@ it("the abjad value is the chart's bars added up, and no letter is worth 0", () 
 		const [, fields, chart] = parts(name);
 		assert.ok(fields?.kind === "fields" && chart?.kind === "series");
 		const bars = chart.chart.series[0]!.points as number[];
-		assert.ok(bars.every((v) => v > 0), name);
+		assert.ok(
+			bars.every((v) => v > 0),
+			name,
+		);
 		assert.equal(String(bars.reduce((a, b) => a + b, 0)), fields.fields[3]!.value);
 	}
 });

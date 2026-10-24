@@ -1,14 +1,12 @@
 {
-  "sdk": 1,
-  "id": "salam-1",
-  "name": "Salam, step 1: hello",
-  "blurb": "Greets a name in Arabic. The smallest tool there is: one input, one line of text back.",
-  "version": "1.0.0",
-  "capabilities": ["pure"],
-  "runtime": { "entry": "index.ts" },
-  "kinds": ["text", "error"],
-  "inputs": [
-    { "id": "name", "type": "text", "label": "Name", "default": "أحمد" }
-  ],
-  "help": "README.md"
+	"sdk": 1,
+	"id": "salam-1",
+	"name": "Salam, step 1: hello",
+	"blurb": "Greets a name in Arabic. The smallest tool there is: one input, one line of text back.",
+	"version": "1.0.0",
+	"capabilities": ["pure"],
+	"runtime": { "entry": "index.ts" },
+	"kinds": ["text", "error"],
+	"inputs": [{ "id": "name", "type": "text", "label": "Name", "default": "أحمد" }],
+	"help": "README.md"
 }

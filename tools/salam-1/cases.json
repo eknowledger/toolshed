@@ -1,12 +1,12 @@
 [
-  {
-    "name": "greets the default name",
-    "input": { "name": "أحمد" },
-    "expect": { "kind": "text", "text": "أهلاً يا أحمد" }
-  },
-  {
-    "name": "an empty name is an error on the name, not an empty greeting",
-    "input": { "name": "  " },
-    "expect": { "kind": "error", "message": "Type a name.", "input": "name" }
-  }
+	{
+		"name": "greets the default name",
+		"input": { "name": "أحمد" },
+		"expect": { "kind": "text", "text": "أهلاً يا أحمد" }
+	},
+	{
+		"name": "an empty name is an error on the name, not an empty greeting",
+		"input": { "name": "  " },
+		"expect": { "kind": "error", "message": "Type a name.", "input": "name" }
+	}
 ]
