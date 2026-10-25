@@ -25,23 +25,6 @@ Small, exact tools for systems questions. Each one shows how it got its answer.
 | [`tcp-throughput`](tools/tcp-throughput) | What one TCP connection can carry over a given path, how much of the link that is, and whether the window or the loss is the limit |
 | [`timeout-budget`](tools/timeout-budget) | A call chain's worst case when the bottom hangs, whether it fits the caller's deadline, and which retries can never finish |
 
-### A worked example, in seven steps
-
-`salam-1` to `salam-7` are one small tool at seven stages, not seven tools: a greeting for a name written in
-Arabic, which grows one part of toolbench at a time. Step 1 is one input and one line of text. By step 7 it has a
-form with a select and a toggle, a result in six parts with a chart and a byte view among them, samples,
-fixtures, a worker with a timeout, and names a host stylesheet can select. Each step is a complete tool that passes `pnpm check` on its own.
-
-| Step | Adds |
-|---|---|
-| [`salam-1`](tools/salam-1) | One text input, a `text` result, and the `error` every tool must declare |
-| [`salam-2`](tools/salam-2) | A select and a toggle, and an error that points at the first non-Arabic character |
-| [`salam-3`](tools/salam-3) | A `group` of `fields`, a `table` and `bytes`: the name's letters, how they join, their UTF-8 bytes |
-| [`salam-4`](tools/salam-4) | The manifest's samples, a live card, links and help, and six fixtures. The code is step 3's |
-| [`salam-5`](tools/salam-5) | Each letter's abjad value, added up and drawn as a bar chart |
-| [`salam-6`](tools/salam-6) | A count that grows with the name, so a worker and a three-second timeout |
-| [`salam-7`](tools/salam-7) | `role` on two parts, for the page's own stylesheet |
-
 They are built on [toolbench](https://github.com/eknowledger/toolbench), which turns a tool
 directory into a working interface in a page. Each tool here is a plain TypeScript module with a
 manifest: no framework imports beyond types, no DOM, no network.
