@@ -249,10 +249,10 @@ function parseRtp(bytes: Uint8Array, clock: number): { spans: Span[]; extras: Ou
 					kind: "table",
 					caption: `Header extension elements, ${form} form`,
 					columns: [
-						{ label: "ID", align: "end", mono: true },
-						{ label: "Length", align: "end", mono: true },
-						{ label: "Offset", align: "end", mono: true },
-						{ label: "Data", mono: true },
+						{ label: "ID", align: "end", mono: true, wrap: "none", rowHeader: true },
+						{ label: "Length", align: "end", mono: true, wrap: "none" },
+						{ label: "Offset", align: "end", mono: true, wrap: "none" },
+						{ label: "Data", mono: true, wrap: "prose" },
 					],
 					rows,
 				});
@@ -433,7 +433,11 @@ function parseFeedback(
 				kind: "table",
 				id: `nack-${index + 1}`,
 				caption: `NACK ${n}: each entry is one lost packet (PID) and a mask of the 16 after it (BLP)`,
-				columns: [{ label: "PID", align: "end", mono: true }, { label: "BLP", mono: true }, { label: "Lost sequence numbers", mono: true }],
+				columns: [
+					{ label: "PID", align: "end", mono: true, wrap: "none", rowHeader: true },
+					{ label: "BLP", mono: true, wrap: "none" },
+					{ label: "Lost sequence numbers", mono: true, wrap: "prose" },
+				],
 				rows,
 			});
 			break;
@@ -537,7 +541,12 @@ function parseCcfb(bytes: Uint8Array, from: number, end: number, index: number, 
 		kind: "table",
 		id: `ccfb-${index + 1}`,
 		caption: `RFC 8888 feedback ${n}: when each packet arrived, before the report timestamp`,
-		columns: [{ label: "Stream", mono: true }, { label: "Sequence", align: "end", mono: true }, { label: "Status" }, { label: "Arrived before the report", align: "end", mono: true }],
+		columns: [
+			{ label: "Stream", mono: true, wrap: "none" },
+			{ label: "Sequence", align: "end", mono: true, wrap: "none", rowHeader: true },
+			{ label: "Status", wrap: "none" },
+			{ label: "Arrived before the report", align: "end", mono: true, wrap: "none" },
+		],
 		rows: rows.slice(0, 500),
 	});
 }
@@ -647,10 +656,10 @@ function parseTwcc(bytes: Uint8Array, fci: number, end: number, media: number, i
 		id: `twcc-${index + 1}`,
 		caption: `TWCC ${n}: ${plural(count, "packet")} from sequence ${base}, ${received} arrived${packets.length > shown.length ? `, the first ${shown.length} shown` : ""}`,
 		columns: [
-			{ label: "Sequence", align: "end", mono: true },
-			{ label: "Status" },
-			{ label: "Delta", align: "end", mono: true },
-			{ label: "Arrived, after the reference time", align: "end", mono: true },
+			{ label: "Sequence", align: "end", mono: true, wrap: "none", rowHeader: true },
+			{ label: "Status", wrap: "none" },
+			{ label: "Delta", align: "end", mono: true, wrap: "none" },
+			{ label: "Arrived, after the reference time", align: "end", mono: true, wrap: "none" },
 		],
 		rows: shown.map((p) => [
 			{ text: String(p.seq), mono: true },
@@ -929,11 +938,11 @@ function reportTable(rows: Cell[][], name: string, found: Findings): Output {
 		role: "decoded",
 		caption: `${name} reports on ${plural(rows.length, "stream")}, lost since its last report${rule}`,
 		columns: [
-			{ label: "Reports on", mono: true },
-			{ label: "Lost (interval)", align: "end", mono: true },
-			{ label: "Cum. lost", align: "end", mono: true },
-			{ label: "Jitter", align: "end", mono: true },
-			{ label: "RTT", align: "end" },
+			{ label: "Reports on", mono: true, wrap: "none", rowHeader: true },
+			{ label: "Lost (interval)", align: "end", mono: true, wrap: "none" },
+			{ label: "Cum. lost", align: "end", mono: true, wrap: "none" },
+			{ label: "Jitter", align: "end", mono: true, wrap: "none" },
+			{ label: "RTT", align: "end", wrap: "none" },
 		],
 		rows,
 	};

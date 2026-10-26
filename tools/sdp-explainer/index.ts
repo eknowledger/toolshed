@@ -817,7 +817,12 @@ function lineTable(m: Model, onlyProblems: boolean, caption: string): Output | n
 		kind: "table",
 		role: "decoded",
 		caption,
-		columns: [{ label: "#", align: "end", mono: true }, { label: "Line", mono: true }, { label: "What it sets" }, { label: "Read by" }],
+		columns: [
+			{ label: "#", align: "end", mono: true, wrap: "none", rowHeader: true },
+			{ label: "Line", mono: true, wrap: "prose" },
+			{ label: "What it sets", wrap: "prose" },
+			{ label: "Read by", wrap: "prose" },
+		],
 		rows,
 	};
 }
@@ -888,7 +893,11 @@ export default {
 						role: "findings",
 						id: "problems",
 						caption: fixable ? "What to fix, worst first" : "Worth knowing, nothing to fix",
-						columns: [{ label: "Severity" }, { label: "Where" }, { label: "Problem" }],
+						columns: [
+							{ label: "Severity", wrap: "none" },
+							{ label: "Where", wrap: "none" },
+							{ label: "Problem", wrap: "prose" },
+						],
 						rows: problemRows,
 					}
 				: null;

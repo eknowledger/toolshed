@@ -209,6 +209,7 @@ function needs(total: number, target: Target, current?: number): string {
 
 const ASSUMES = {
 	label: "Assumes",
+	mono: false,
 	value:
 		"Calls are slow independently of each other, and the request waits for all of them. Calls that share a host, a network path or a pause are slow together, so measure your own requests and use this as the baseline.",
 };
@@ -240,6 +241,7 @@ function single(d: Dependency, named: boolean, target: Target): Output[] {
 				ASSUMES,
 				{
 					label: "How it is worked out",
+					mono: false,
 					value:
 						"A request is fast only if every call is. With n calls, each slow a share q of the time, 1 - (1 - q)^n of requests are slow. For a share p of requests to be fast, each call must be fast with probability p^(1/n), which is the percentile it needs.",
 				},
@@ -273,10 +275,10 @@ function several(deps: Dependency[], target: Target): Output[] {
 			role: "comparison",
 			caption: `Fix first: slow requests without each one${deps.length > rows.length ? `, top ${rows.length} of ${deps.length}` : ""}`,
 			columns: [
-				{ label: "Dependency" },
-				{ label: "Calls", align: "end", mono: true },
-				{ label: "Slow calls", align: "end", mono: true },
-				{ label: "Without it", align: "end", mono: true },
+				{ label: "Dependency", wrap: "none", rowHeader: true },
+				{ label: "Calls", align: "end", mono: true, wrap: "none" },
+				{ label: "Slow calls", align: "end", mono: true, wrap: "none" },
+				{ label: "Without it", align: "end", mono: true, wrap: "none" },
 			],
 			rows: rows.map(({ d, without }): Cell[] => [d.name, { text: comma(d.calls), mono: true }, { text: typed(d.q), mono: true }, { text: share(without), mono: true }]),
 		},
@@ -287,6 +289,7 @@ function several(deps: Dependency[], target: Target): Output[] {
 				ASSUMES,
 				{
 					label: "How it is worked out",
+					mono: false,
 					value:
 						"A request is fast only if every call is, so multiply each dependency's chance of being fast: 1 - (1 - q1)^n1 × (1 - q2)^n2 × ... of requests are slow. Without it means that dependency is never slow. The per-call percentile holds every call to the same share, p^(1/n) for n calls in all.",
 				},

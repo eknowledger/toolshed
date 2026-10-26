@@ -230,7 +230,10 @@ export default {
 					kind: "table",
 					role: "comparison",
 					caption: "What each change leaves at the bottom",
-					columns: [{ label: "Change" }, { label: "Calls at the bottom", align: "end", mono: true }],
+					columns: [
+						{ label: "Change", wrap: "prose" },
+						{ label: "Calls at the bottom", align: "end", mono: true, wrap: "none" },
+					],
 					rows: changes.map((c): Cell[] => [c.what, { text: bare(c.after), mono: true }]),
 				});
 			}
@@ -267,6 +270,7 @@ export default {
 					group: "How this was worked out",
 					label: "Every layer retries the error it gets",
 					value: "As a gRPC service that passes UNAVAILABLE up does",
+					mono: false,
 					note: "Failures are independent and happen only at the bottom; nothing in the middle fails on its own.",
 				},
 			];
@@ -275,10 +279,11 @@ export default {
 					group: "How this was worked out",
 					label: "The budget",
 					value: `Each layer at most ${num(1 + budget, 2)} times its traffic`,
+					mono: false,
 					note: "Real budgets are counted over a window or over requests in flight, so read the capped numbers as a ceiling.",
 				});
 			}
-			for (const c of changes) method.push({ group: "Why each change works", label: c.what, value: c.why });
+			for (const c of changes) method.push({ group: "Why each change works", label: c.what, value: c.why, mono: false });
 			parts.push({ kind: "fields", role: "method", fields: method });
 
 			return { kind: "group", parts };

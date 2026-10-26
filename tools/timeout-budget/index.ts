@@ -189,6 +189,7 @@ export default {
 						{
 							label: "When the bottom hangs",
 							role: "verdict",
+							mono: false,
 							tone: "bad",
 							value: Number.isFinite(top)
 								? `Can take ${fmt(top)}; the caller gives up after ${fmt(deadline)}`
@@ -205,11 +206,11 @@ export default {
 							? "1 call cannot finish its tries inside its caller's time"
 							: `${failing.length} calls cannot finish their tries inside their caller's time`,
 					columns: [
-						{ label: "Call" },
-						{ label: "Allowed", align: "end", mono: true },
-						{ label: "Needs", align: "end", mono: true },
-						{ label: "Fit", align: "end", mono: true },
-						{ label: "Set per-try to", align: "end", mono: true },
+						{ label: "Call", wrap: "none", rowHeader: true },
+						{ label: "Allowed", align: "end", mono: true, wrap: "none" },
+						{ label: "Needs", align: "end", mono: true, wrap: "none" },
+						{ label: "Fit", align: "end", mono: true, wrap: "none" },
+						{ label: "Set per-try to", align: "end", mono: true, wrap: "none" },
 					],
 					rows: failing,
 				});
@@ -229,18 +230,21 @@ export default {
 				parts.push({
 					kind: "table",
 					caption: failing.length ? "Other changes. Fix the top one first, then run again." : "Changes",
-					columns: [{ label: "Call" }, { label: "Change" }],
+					columns: [
+						{ label: "Call", wrap: "none", rowHeader: true },
+						{ label: "Change", wrap: "prose" },
+					],
 					rows: others,
 				});
 			parts.push(chainGraph(calls, worst, broken, deadline), {
 				kind: "table",
 				caption: "Each call, top first, when the bottom hangs",
 				columns: [
-					{ label: "Call" },
-					{ label: "Per try", align: "end", mono: true },
-					{ label: "Tries", align: "end", mono: true },
-					{ label: "Worst case", align: "end", mono: true },
-					{ label: "Fit above", align: "end", mono: true },
+					{ label: "Call", wrap: "none", rowHeader: true },
+					{ label: "Per try", align: "end", mono: true, wrap: "none" },
+					{ label: "Tries", align: "end", mono: true, wrap: "none" },
+					{ label: "Worst case", align: "end", mono: true, wrap: "none" },
+					{ label: "Fit above", align: "end", mono: true, wrap: "none" },
 				],
 				rows: calls.map((c, i) => [
 					{ text: name(c) },
@@ -262,11 +266,12 @@ export default {
 				kind: "fields",
 				role: "method",
 				fields: [
-					{ label: "Assumes", value: "The bottom hangs, and every layer retries a try that timed out." },
+					{ label: "Assumes", value: "The bottom hangs, and every layer retries a try that timed out.", mono: false },
 					{ label: "Backoff", value: `${fmt(backoff)} between tries` },
 					{
 						label: "If the bottom fails fast instead",
 						value: `${plural(attempts, "try reaches", "tries reach")} it, when every layer retries the error.`,
+						mono: false,
 						note: "Istio's defaults do not retry an HTTP 503.",
 					},
 				],

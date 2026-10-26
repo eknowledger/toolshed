@@ -131,17 +131,22 @@
 			"caption": "Changed only one copy, newest first",
 			"columns": [
 				{
-					"label": "Copy"
+					"label": "Copy",
+					"wrap": "none"
 				},
 				{
 					"label": "Commit",
-					"mono": true
+					"mono": true,
+					"wrap": "none",
+					"rowHeader": true
 				},
 				{
-					"label": "Date"
+					"label": "Date",
+					"wrap": "none"
 				},
 				{
-					"label": "Subject"
+					"label": "Subject",
+					"wrap": "prose"
 				}
 			],
 			"rows": [
@@ -230,23 +235,28 @@
 				{
 					"label": "A",
 					"align": "end",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "Copy A",
-					"mono": true
+					"mono": true,
+					"wrap": "prose"
 				},
 				{
 					"label": "B",
 					"align": "end",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "Copy B",
-					"mono": true
+					"mono": true,
+					"wrap": "prose"
 				},
 				{
-					"label": "Differs in"
+					"label": "Differs in",
+					"wrap": "none"
 				}
 			],
 			"rows": [
@@ -516,23 +526,28 @@
 				{
 					"label": "A",
 					"align": "end",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "Copy A",
-					"mono": true
+					"mono": true,
+					"wrap": "prose"
 				},
 				{
 					"label": "B",
 					"align": "end",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "Copy B",
-					"mono": true
+					"mono": true,
+					"wrap": "prose"
 				},
 				{
-					"label": "Differs in"
+					"label": "Differs in",
+					"wrap": "none"
 				}
 			],
 			"rows": [

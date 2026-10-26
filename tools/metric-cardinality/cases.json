@@ -69,17 +69,21 @@
 			"caption": "Each change on its own",
 			"columns": [
 				{
-					"label": "Change"
+					"label": "Change",
+					"wrap": "prose",
+					"rowHeader": true
 				},
 				{
 					"label": "Series after",
 					"align": "end",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "Saves",
 					"align": "end",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				}
 			],
 			"rows": [
@@ -343,17 +347,21 @@
 			"caption": "Each change on its own",
 			"columns": [
 				{
-					"label": "Change"
+					"label": "Change",
+					"wrap": "prose",
+					"rowHeader": true
 				},
 				{
 					"label": "Series after",
 					"align": "end",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "Saves",
 					"align": "end",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				}
 			],
 			"rows": [

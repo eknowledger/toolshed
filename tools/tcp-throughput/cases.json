@@ -17,15 +17,19 @@
       "caption": "One connection tops out at 5.65 Mbit/s, 0.57% of the link",
       "columns": [
         {
-          "label": "Limit"
+          "label": "Limit",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Ceiling",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Status"
+          "label": "Status",
+          "wrap": "prose"
         }
       ],
       "rows": [
@@ -136,15 +140,19 @@
       "caption": "One connection tops out at 6.55 Mbit/s, 0.66% of the link",
       "columns": [
         {
-          "label": "Limit"
+          "label": "Limit",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Ceiling",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Status"
+          "label": "Status",
+          "wrap": "prose"
         }
       ],
       "rows": [
@@ -218,15 +226,19 @@
       "caption": "One connection tops out at 809.2 kbit/s, 0.081% of the link",
       "columns": [
         {
-          "label": "Limit"
+          "label": "Limit",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Ceiling",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Status"
+          "label": "Status",
+          "wrap": "prose"
         }
       ],
       "rows": [
@@ -305,15 +317,19 @@
       "caption": "One connection tops out at 262.14 Mbit/s, 26% of the link",
       "columns": [
         {
-          "label": "Limit"
+          "label": "Limit",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Ceiling",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Status"
+          "label": "Status",
+          "wrap": "prose"
         }
       ],
       "rows": [
@@ -387,15 +403,19 @@
       "caption": "One connection tops out at 27.76 Mbit/s, 2.8% of the link",
       "columns": [
         {
-          "label": "Limit"
+          "label": "Limit",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Ceiling",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Status"
+          "label": "Status",
+          "wrap": "prose"
         }
       ],
       "rows": [
@@ -474,15 +494,19 @@
       "caption": "One connection can fill the 100.00 Mbit/s link",
       "columns": [
         {
-          "label": "Limit"
+          "label": "Limit",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Ceiling",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Status"
+          "label": "Status",
+          "wrap": "prose"
         }
       ],
       "rows": [

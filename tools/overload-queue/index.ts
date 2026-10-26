@@ -642,11 +642,11 @@ export default {
 					// Short headers, because a comparison keeps its columns on a phone; the caption says what the last two are.
 					caption: "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
 					columns: [
-						{ label: "Policy" },
-						{ label: "Answered", align: "end", mono: true },
-						{ label: "p50", align: "end", mono: true },
-						{ label: "Recovery", align: "end", mono: true },
-						{ label: "Wasted", align: "end", mono: true },
+						{ label: "Policy", wrap: "prose", rowHeader: true },
+						{ label: "Answered", align: "end", mono: true, wrap: "none" },
+						{ label: "p50", align: "end", mono: true, wrap: "none" },
+						{ label: "Recovery", align: "end", mono: true, wrap: "none" },
+						{ label: "Wasted", align: "end", mono: true, wrap: "none" },
 					],
 					rows,
 				},

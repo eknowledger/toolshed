@@ -47,22 +47,28 @@
         {
           "label": "Offset",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Attribute"
+          "label": "Attribute",
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Value",
-          "mono": true
+          "mono": true,
+          "wrap": "prose"
         },
         {
-          "label": "How it was decoded"
+          "label": "How it was decoded",
+          "wrap": "prose"
         },
         {
           "label": "Value bytes",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -208,13 +214,16 @@
       "caption": "What to fix, most serious first",
       "columns": [
         {
-          "label": "Severity"
+          "label": "Severity",
+          "wrap": "none"
         },
         {
-          "label": "What is wrong"
+          "label": "What is wrong",
+          "wrap": "prose"
         },
         {
-          "label": "What to do"
+          "label": "What to do",
+          "wrap": "prose"
         }
       ],
       "rows": [
@@ -426,22 +435,28 @@
         {
           "label": "Offset",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Attribute"
+          "label": "Attribute",
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Value",
-          "mono": true
+          "mono": true,
+          "wrap": "prose"
         },
         {
-          "label": "How it was decoded"
+          "label": "How it was decoded",
+          "wrap": "prose"
         },
         {
           "label": "Value bytes",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -537,13 +552,16 @@
       "caption": "What to fix, most serious first",
       "columns": [
         {
-          "label": "Severity"
+          "label": "Severity",
+          "wrap": "none"
         },
         {
-          "label": "What is wrong"
+          "label": "What is wrong",
+          "wrap": "prose"
         },
         {
-          "label": "What to do"
+          "label": "What to do",
+          "wrap": "prose"
         }
       ],
       "rows": [

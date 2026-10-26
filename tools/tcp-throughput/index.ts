@@ -230,7 +230,11 @@ export default {
 					caption: fills
 						? `One connection can fill the ${bitrate(linkBits)} link`
 						: `One connection tops out at ${bitrate(ceiling)}, ${share(ceiling / linkBits)} of the link`,
-					columns: [{ label: "Limit" }, { label: "Ceiling", align: "end", mono: true }, { label: "Status" }],
+					columns: [
+						{ label: "Limit", wrap: "prose", rowHeader: true },
+						{ label: "Ceiling", align: "end", mono: true, wrap: "none" },
+						{ label: "Status", wrap: "prose" },
+					],
 					rows: limits.map((l, i) => [l.name, { text: bitrate(l.bits), mono: true }, status[i] ?? ""]),
 				},
 				...(changes.length ? [{ kind: "fields" as const, role: "answer", fields: changes }] : []),

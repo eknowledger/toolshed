@@ -17,22 +17,27 @@
       "caption": "Frame 5 lost, at a 40 ms buffer: the audio each loses, the frames, and the buffer that would hide it",
       "columns": [
         {
-          "label": "Transport"
+          "label": "Transport",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Audio",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Frames",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Buffer",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -109,22 +114,27 @@
       "caption": "Frame 5 lost, at a 120 ms buffer: the audio each loses, the frames, and the buffer that would hide it",
       "columns": [
         {
-          "label": "Transport"
+          "label": "Transport",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Audio",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Frames",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Buffer",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -167,22 +177,27 @@
       "caption": "Frame 19 lost, at a 40 ms buffer: the audio each loses, the frames, and the buffer that would hide it",
       "columns": [
         {
-          "label": "Transport"
+          "label": "Transport",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Audio",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Frames",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Buffer",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -259,22 +274,27 @@
       "caption": "Frame 5 lost, at a 40 ms buffer: the audio each loses, the frames, and the buffer that would hide it",
       "columns": [
         {
-          "label": "Transport"
+          "label": "Transport",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Audio",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Frames",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Buffer",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -317,22 +337,27 @@
       "caption": "Frame 5 lost, at a 40 ms buffer: the audio each loses, the frames, and the buffer that would hide it",
       "columns": [
         {
-          "label": "Transport"
+          "label": "Transport",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Audio",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Frames",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Buffer",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -439,32 +464,39 @@
         {
           "label": "Frame",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Sent (ms)",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Play by (ms)",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "UDP",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "TCP, fast retransmit",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "TCP, 200 ms timeout",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [

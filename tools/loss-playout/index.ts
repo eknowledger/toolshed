@@ -209,10 +209,10 @@ export default {
 				// Short headers, because a comparison keeps its columns on a phone; the caption says what each one is.
 				caption: `Frame ${lost} lost, at a ${buffer} ms buffer: the audio each loses, the frames, and the buffer that would hide it`,
 				columns: [
-					{ label: "Transport" },
-					{ label: "Audio", align: "end", mono: true },
-					{ label: "Frames", align: "end", mono: true },
-					{ label: "Buffer", align: "end", mono: true },
+					{ label: "Transport", wrap: "prose", rowHeader: true },
+					{ label: "Audio", align: "end", mono: true, wrap: "none" },
+					{ label: "Frames", align: "end", mono: true, wrap: "none" },
+					{ label: "Buffer", align: "end", mono: true, wrap: "none" },
 				],
 				rows: transports.map((t): Cell[] => [
 					t.label,
@@ -280,10 +280,10 @@ export default {
 					kind: "table",
 					caption: "Every frame: when the application gets it, against when it has to play",
 					columns: [
-						{ label: "Frame", align: "end", mono: true },
-						{ label: "Sent (ms)", align: "end", mono: true },
-						{ label: "Play by (ms)", align: "end", mono: true },
-						...transports.map((t) => ({ label: t.label, align: "end" as const, mono: true })),
+						{ label: "Frame", align: "end", mono: true, wrap: "none", rowHeader: true },
+						{ label: "Sent (ms)", align: "end", mono: true, wrap: "none" },
+						{ label: "Play by (ms)", align: "end", mono: true, wrap: "none" },
+						...transports.map((t) => ({ label: t.label, align: "end" as const, mono: true, wrap: "none" as const })),
 					],
 					rows,
 					link: { chart: "playout", keys: numbers },

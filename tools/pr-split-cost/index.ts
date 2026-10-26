@@ -270,9 +270,9 @@ export default {
 				role: "comparison",
 				caption: `${pieces} instead of one of ${lines} lines: the wait for a first review, as a multiple of the one PR's`,
 				columns: [
-					{ label: "Reviewed" },
-					{ label: source === "fit" ? "Fit says" : `At e = ${e.toFixed(2)}`, align: "end", mono: true },
-					{ label: "If size does not matter", align: "end", mono: true },
+					{ label: "Reviewed", wrap: "prose", rowHeader: true },
+					{ label: source === "fit" ? "Fit says" : `At e = ${e.toFixed(2)}`, align: "end", mono: true, wrap: "none" },
+					{ label: "If size does not matter", align: "end", mono: true, wrap: "none" },
 				],
 				rows: ways.map((w) => {
 					const v = onFit(w, k);
@@ -312,8 +312,8 @@ export default {
 				kind: "fields",
 				role: "method",
 				fields: [
-					...(["serial", "parallel", "sitting"] as Way[]).map((w): Field => ({ label: WAY_NAME[w], value: WAY_RESTS_ON[w], group: "What each way assumes" })),
-					{ label: "Measured", value: "Hours from ready for review to the first review by someone else. Not the time to merge.", group: "What it counts" },
+					...(["serial", "parallel", "sitting"] as Way[]).map((w): Field => ({ label: WAY_NAME[w], value: WAY_RESTS_ON[w], group: "What each way assumes", mono: false })),
+					{ label: "Measured", value: "Hours from ready for review to the first review by someone else. Not the time to merge.", group: "What it counts", mono: false },
 				],
 			};
 

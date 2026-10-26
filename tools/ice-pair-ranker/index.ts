@@ -398,11 +398,11 @@ export default {
 				id: "order",
 				caption: `Computed check order, highest priority first. ${localControls ? "Local" : "Remote"} side controls`,
 				columns: [
-					{ label: "#", align: "end", mono: true },
-					{ label: "Local", mono: true },
-					{ label: "Remote", mono: true },
-					{ label: "Route" },
-					{ label: "Priority", align: "end", mono: true },
+					{ label: "#", align: "end", mono: true, wrap: "none", rowHeader: true },
+					{ label: "Local", mono: true, wrap: "none" },
+					{ label: "Remote", mono: true, wrap: "none" },
+					{ label: "Route", wrap: "prose" },
+					{ label: "Priority", align: "end", mono: true, wrap: "none" },
 				],
 				rows: checks.map((p): Cell[] => [
 					{ text: String(order.get(p)), mono: true },
@@ -422,10 +422,10 @@ export default {
 							? `Pruned, ${words(pruned, "pair", "pairs")} sending the same check as one above, and ${over} past the ${PAIR_LIMIT} a checklist holds`
 							: `Pruned: ${pruned === 1 ? "this pair sends" : "these pairs send"} the same check, from the same place to the same place, as one above`,
 						columns: [
-							{ label: "Local", mono: true },
-							{ label: "Sent from", mono: true },
-							{ label: "Remote", mono: true },
-							{ label: "Same as", align: "end" },
+							{ label: "Local", mono: true, wrap: "none", rowHeader: true },
+							{ label: "Sent from", mono: true, wrap: "none" },
+							{ label: "Remote", mono: true, wrap: "none" },
+							{ label: "Same as", align: "end", wrap: "none" },
 						],
 						rows: dropped.map((p): Cell[] => [
 							{ text: label(p.l), mono: true },
@@ -442,7 +442,11 @@ export default {
 						role: "findings",
 						id: "findings",
 						caption: "What to look at, most serious first",
-						columns: [{ label: "Severity" }, { label: "What we found" }, { label: "What it means and what to do" }],
+						columns: [
+							{ label: "Severity", wrap: "none" },
+							{ label: "What we found", wrap: "prose" },
+							{ label: "What it means and what to do", wrap: "prose" },
+						],
 						rows: actions.map((a): Cell[] => [{ text: severity(a.tone), tone: a.tone === "normal" ? "muted" : a.tone === "good" ? "muted" : a.tone }, a.problem, a.fix]),
 					}
 				: null;

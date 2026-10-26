@@ -37,27 +37,33 @@
       "caption": "2 calls cannot finish their tries inside their caller's time",
       "columns": [
         {
-          "label": "Call"
+          "label": "Call",
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Allowed",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Needs",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Fit",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Set per-try to",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -234,27 +240,33 @@
       "caption": "Each call, top first, when the bottom hangs",
       "columns": [
         {
-          "label": "Call"
+          "label": "Call",
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Per try",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Tries",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Worst case",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Fit above",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -363,10 +375,13 @@
       "caption": "Other changes. Fix the top one first, then run again.",
       "columns": [
         {
-          "label": "Call"
+          "label": "Call",
+          "wrap": "none",
+          "rowHeader": true
         },
         {
-          "label": "Change"
+          "label": "Change",
+          "wrap": "prose"
         }
       ],
       "rows": [
@@ -405,27 +420,33 @@
       "caption": "Each call, top first, when the bottom hangs",
       "columns": [
         {
-          "label": "Call"
+          "label": "Call",
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Per try",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Tries",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Worst case",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Fit above",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -510,27 +531,33 @@
       "caption": "1 call cannot finish its tries inside its caller's time",
       "columns": [
         {
-          "label": "Call"
+          "label": "Call",
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Allowed",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Needs",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Fit",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Set per-try to",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [

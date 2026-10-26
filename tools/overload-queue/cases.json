@@ -18,27 +18,33 @@
       "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
       "columns": [
         {
-          "label": "Policy"
+          "label": "Policy",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Answered",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p50",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Recovery",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Wasted",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -299,27 +305,33 @@
       "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
       "columns": [
         {
-          "label": "Policy"
+          "label": "Policy",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Answered",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p50",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Recovery",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Wasted",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -418,27 +430,33 @@
       "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
       "columns": [
         {
-          "label": "Policy"
+          "label": "Policy",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Answered",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p50",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Recovery",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Wasted",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -580,27 +598,33 @@
       "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
       "columns": [
         {
-          "label": "Policy"
+          "label": "Policy",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Answered",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p50",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Recovery",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Wasted",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -745,27 +769,33 @@
       "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
       "columns": [
         {
-          "label": "Policy"
+          "label": "Policy",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Answered",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p50",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Recovery",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Wasted",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -907,27 +937,33 @@
       "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
       "columns": [
         {
-          "label": "Policy"
+          "label": "Policy",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Answered",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p50",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Recovery",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Wasted",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -1069,27 +1105,33 @@
       "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
       "columns": [
         {
-          "label": "Policy"
+          "label": "Policy",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Answered",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p50",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Recovery",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Wasted",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -1231,27 +1273,33 @@
       "caption": "Every policy at these numbers. Recovery: until every 10 s answers 90% again. Wasted: served after the client gave up",
       "columns": [
         {
-          "label": "Policy"
+          "label": "Policy",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Answered",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p50",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Recovery",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Wasted",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [

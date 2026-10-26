@@ -144,21 +144,26 @@
         {
           "label": "ID",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Length",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Offset",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Data",
-          "mono": true
+          "mono": true,
+          "wrap": "prose"
         }
       ],
       "rows": [
@@ -364,26 +369,32 @@
       "columns": [
         {
           "label": "Reports on",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Lost (interval)",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Cum. lost",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Jitter",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "RTT",
-          "align": "end"
+          "align": "end",
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -801,26 +812,32 @@
       "columns": [
         {
           "label": "Reports on",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Lost (interval)",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Cum. lost",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Jitter",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "RTT",
-          "align": "end"
+          "align": "end",
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -1266,26 +1283,32 @@
       "columns": [
         {
           "label": "Reports on",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Lost (interval)",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Cum. lost",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Jitter",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "RTT",
-          "align": "end"
+          "align": "end",
+          "wrap": "none"
         }
       ],
       "rows": [

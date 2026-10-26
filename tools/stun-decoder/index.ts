@@ -743,7 +743,7 @@ export default {
 				{ label: "Transaction ID", value: hexBytes(m.txid), note: "Random, so the answer can be matched to the request.", group: "Header" },
 			];
 			// Only what the reading changed: a plain hex paste read in full says nothing worth a row.
-			if (read.dump) method.push({ label: "Read as", value: "a hex dump", note: "The offsets and the ASCII column were left out.", group: "Input" });
+			if (read.dump) method.push({ label: "Read as", value: "a hex dump", mono: false, note: "The offsets and the ASCII column were left out.", group: "Input" });
 			if (skip > 0) method.push({ label: "Skipped before it", value: `${skip} bytes`, note: `The STUN message starts after ${describePrefix(all, skip)}.`, group: "Input" });
 			if (after > 0) method.push({ label: "Left out after it", value: plural(after, "byte"), note: "Past the length the header gives.", group: "Input" });
 
@@ -753,7 +753,11 @@ export default {
 					kind: "table",
 					role: "findings",
 					caption: "What to fix, most serious first",
-					columns: [{ label: "Severity" }, { label: "What is wrong" }, { label: "What to do" }],
+					columns: [
+						{ label: "Severity", wrap: "none" },
+						{ label: "What is wrong", wrap: "prose" },
+						{ label: "What to do", wrap: "prose" },
+					],
 					rows: findings.map((f): Cell[] => [{ text: LEVEL[f.level], ...(f.level !== "normal" ? { tone: f.level } : { tone: "muted" as const }) }, f.problem, f.fix]),
 				});
 			}
@@ -763,11 +767,11 @@ export default {
 					role: "decoded",
 					caption: `${plural(m.attrs.length, "attribute")}, each padded to 4 bytes`,
 					columns: [
-						{ label: "Offset", align: "end", mono: true },
-						{ label: "Attribute" },
-						{ label: "Value", mono: true },
-						{ label: "How it was decoded" },
-						{ label: "Value bytes", align: "end", mono: true },
+						{ label: "Offset", align: "end", mono: true, wrap: "none" },
+						{ label: "Attribute", wrap: "none", rowHeader: true },
+						{ label: "Value", mono: true, wrap: "prose" },
+						{ label: "How it was decoded", wrap: "prose" },
+						{ label: "Value bytes", align: "end", mono: true, wrap: "none" },
 					],
 					rows: m.attrs.map((a): Cell[] => [
 						{ text: hex(a.at, 4), mono: true, tone: "muted" },

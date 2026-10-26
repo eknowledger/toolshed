@@ -387,7 +387,11 @@ function histogramRollup(groups: Histogram[], src: HistSource, name: string, q: 
 			kind: "table",
 			role: "comparison",
 			caption: `${name} across ${across(groups.length, noun)}`,
-			columns: [{ label: "Method" }, { label: name, align: "end", mono: true }, { label: "What you can claim" }],
+			columns: [
+				{ label: "Method", wrap: "prose" },
+				{ label: name, align: "end", mono: true, wrap: "none" },
+				{ label: "What you can claim", wrap: "prose" },
+			],
 			rows: [
 				[
 					src.method,
@@ -492,11 +496,11 @@ function histogramRollup(groups: Histogram[], src: HistSource, name: string, q: 
 		kind: "table",
 		caption: `Each ${noun.one} on its own, slowest first, estimated from its own buckets`,
 		columns: [
-			{ label: capital(noun.one) },
-			{ label: "Requests", align: "end", mono: true },
-			{ label: `${name} estimate`, align: "end", mono: true },
-			{ label: "Somewhere between", align: "end", mono: true },
-			{ label: `${Under} ${d(threshold)}`, align: "end", mono: true },
+			{ label: capital(noun.one), wrap: "none", rowHeader: true },
+			{ label: "Requests", align: "end", mono: true, wrap: "none" },
+			{ label: `${name} estimate`, align: "end", mono: true, wrap: "none" },
+			{ label: "Somewhere between", align: "end", mono: true, wrap: "none" },
+			{ label: `${Under} ${d(threshold)}`, align: "end", mono: true, wrap: "none" },
 		],
 		rows: order.map((i) => {
 			const g = groups[i]!;
@@ -516,10 +520,10 @@ function histogramRollup(groups: Histogram[], src: HistSource, name: string, q: 
 		kind: "table",
 		caption: `Every ${noun.one} together: the share ${under} each edge is exact`,
 		columns: [
-			{ label: src.edgeColumn, mono: true },
-			{ label: `Requests ${under} it`, align: "end", mono: true },
-			{ label: "Share", align: "end", mono: true },
-			{ label: "Note" },
+			{ label: src.edgeColumn, mono: true, wrap: "none", rowHeader: true },
+			{ label: `Requests ${under} it`, align: "end", mono: true, wrap: "none" },
+			{ label: "Share", align: "end", mono: true, wrap: "none" },
+			{ label: "Note", wrap: "prose" },
 		],
 		rows: edges.map((e, j) => {
 			const words = [j === edgeAt ? "your threshold" : "", e === est.upper && !unbounded ? `the ${name} falls in the bucket ending here` : ""].filter(Boolean).join("; ");
@@ -1159,7 +1163,11 @@ function rawRollup(groups: Weighted[], src: RawSource, name: string, p: number, 
 			kind: "table",
 			role: "comparison",
 			caption: `${name} across ${across(groups.length, noun)}`,
-			columns: [{ label: "Method" }, { label: name, align: "end", mono: true }, { label: "What you can claim" }],
+			columns: [
+				{ label: "Method", wrap: "prose" },
+				{ label: name, align: "end", mono: true, wrap: "none" },
+				{ label: "What you can claim", wrap: "prose" },
+			],
 			rows: [
 				[`Every ${src.things === "requests" ? "request" : "measurement"}, ranked`, { text: d(truth), mono: true }, `exact: nearest rank of ${count(n)}`],
 				...(groups.length > 1 ? [[`Average of the ${poss(noun.many)} ${name}s`, { text: d(averaged), mono: true }, r ? r.text : "the true value is 0"] as Cell[]] : []),
@@ -1226,12 +1234,12 @@ function rawRollup(groups: Weighted[], src: RawSource, name: string, p: number, 
 		kind: "table",
 		caption: `Each ${noun.one} on its own, slowest first, nearest rank`,
 		columns: [
-			{ label: capital(noun.one) },
-			{ label: "Count", align: "end", mono: true },
-			{ label: "Mean", align: "end", mono: true },
-			{ label: "p50", align: "end", mono: true },
-			{ label: name, align: "end", mono: true },
-			{ label: `Under ${d(threshold)}`, align: "end", mono: true },
+			{ label: capital(noun.one), wrap: "none", rowHeader: true },
+			{ label: "Count", align: "end", mono: true, wrap: "none" },
+			{ label: "Mean", align: "end", mono: true, wrap: "none" },
+			{ label: "p50", align: "end", mono: true, wrap: "none" },
+			{ label: name, align: "end", mono: true, wrap: "none" },
+			{ label: `Under ${d(threshold)}`, align: "end", mono: true, wrap: "none" },
 		],
 		rows: order.map((i) => {
 			const g = groups[i]!;
@@ -1249,13 +1257,13 @@ function rawRollup(groups: Weighted[], src: RawSource, name: string, p: number, 
 		kind: "table",
 		caption: `Every ${src.things === "requests" ? "request" : "measurement"} together, under both definitions. On a small or lumpy sample they disagree.`,
 		columns: [
-			{ label: "Percentile" },
-			{ label: "Nearest rank", align: "end", mono: true },
-			{ label: "Linear, as numpy and R", align: "end", mono: true },
+			{ label: "Percentile", wrap: "none", rowHeader: true },
+			{ label: "Nearest rank", align: "end", mono: true, wrap: "none" },
+			{ label: "Linear, as numpy and R", align: "end", mono: true, wrap: "none" },
 		],
 		rows: Object.entries(PERCENTILES).map(([label, q]) => [label, { text: d(nearest(pooled, q)), mono: true }, { text: d(linear(pooled, q)), mono: true }]),
 	});
-	if (groups.length === 1) parts.push({ kind: "fields", role: "method", fields: [{ label: "One group", value: src.single }] });
+	if (groups.length === 1) parts.push({ kind: "fields", role: "method", fields: [{ label: "One group", value: src.single, mono: false }] });
 	return { kind: "group", parts };
 }
 

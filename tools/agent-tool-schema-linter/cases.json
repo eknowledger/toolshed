@@ -15,17 +15,21 @@
 					"caption": "2 problems, worst first",
 					"columns": [
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
 							"label": "Where",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
-							"label": "Problem"
+							"label": "Problem",
+							"wrap": "prose"
 						},
 						{
-							"label": "Change"
+							"label": "Change",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -88,20 +92,26 @@
 					"columns": [
 						{
 							"label": "Tool",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
 							"label": "Field",
-							"mono": true
+							"mono": true,
+							"wrap": "none",
+							"rowHeader": true
 						},
 						{
-							"label": "Accepts"
+							"label": "Accepts",
+							"wrap": "prose"
 						},
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
-							"label": "Why"
+							"label": "Why",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -312,17 +322,21 @@
 					"caption": "2 problems, worst first",
 					"columns": [
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
 							"label": "Where",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
-							"label": "Problem"
+							"label": "Problem",
+							"wrap": "prose"
 						},
 						{
-							"label": "Change"
+							"label": "Change",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -385,20 +399,26 @@
 					"columns": [
 						{
 							"label": "Tool",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
 							"label": "Field",
-							"mono": true
+							"mono": true,
+							"wrap": "none",
+							"rowHeader": true
 						},
 						{
-							"label": "Accepts"
+							"label": "Accepts",
+							"wrap": "prose"
 						},
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
-							"label": "Why"
+							"label": "Why",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -609,17 +629,21 @@
 					"caption": "2 problems, worst first",
 					"columns": [
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
 							"label": "Where",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
-							"label": "Problem"
+							"label": "Problem",
+							"wrap": "prose"
 						},
 						{
-							"label": "Change"
+							"label": "Change",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -682,20 +706,26 @@
 					"columns": [
 						{
 							"label": "Tool",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
 							"label": "Field",
-							"mono": true
+							"mono": true,
+							"wrap": "none",
+							"rowHeader": true
 						},
 						{
-							"label": "Accepts"
+							"label": "Accepts",
+							"wrap": "prose"
 						},
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
-							"label": "Why"
+							"label": "Why",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -906,17 +936,21 @@
 					"caption": "2 problems, worst first",
 					"columns": [
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
 							"label": "Where",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
-							"label": "Problem"
+							"label": "Problem",
+							"wrap": "prose"
 						},
 						{
-							"label": "Change"
+							"label": "Change",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -979,20 +1013,26 @@
 					"columns": [
 						{
 							"label": "Tool",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
 							"label": "Field",
-							"mono": true
+							"mono": true,
+							"wrap": "none",
+							"rowHeader": true
 						},
 						{
-							"label": "Accepts"
+							"label": "Accepts",
+							"wrap": "prose"
 						},
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
-							"label": "Why"
+							"label": "Why",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -1243,20 +1283,26 @@
 					"columns": [
 						{
 							"label": "Event",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
 							"label": "Field",
-							"mono": true
+							"mono": true,
+							"wrap": "none",
+							"rowHeader": true
 						},
 						{
-							"label": "Accepts"
+							"label": "Accepts",
+							"wrap": "prose"
 						},
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
-							"label": "Why"
+							"label": "Why",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -1499,17 +1545,21 @@
 					"caption": "6 problems, worst first",
 					"columns": [
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
 							"label": "Where",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
-							"label": "Problem"
+							"label": "Problem",
+							"wrap": "prose"
 						},
 						{
-							"label": "Change"
+							"label": "Change",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -1636,20 +1686,26 @@
 					"columns": [
 						{
 							"label": "Event",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
 							"label": "Field",
-							"mono": true
+							"mono": true,
+							"wrap": "none",
+							"rowHeader": true
 						},
 						{
-							"label": "Accepts"
+							"label": "Accepts",
+							"wrap": "prose"
 						},
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
-							"label": "Why"
+							"label": "Why",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -1774,17 +1830,21 @@
 					"caption": "2 problems, worst first",
 					"columns": [
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
 							"label": "Where",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
-							"label": "Problem"
+							"label": "Problem",
+							"wrap": "prose"
 						},
 						{
-							"label": "Change"
+							"label": "Change",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -1847,20 +1907,26 @@
 					"columns": [
 						{
 							"label": "Event",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
 							"label": "Field",
-							"mono": true
+							"mono": true,
+							"wrap": "none",
+							"rowHeader": true
 						},
 						{
-							"label": "Accepts"
+							"label": "Accepts",
+							"wrap": "prose"
 						},
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
-							"label": "Why"
+							"label": "Why",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -1955,17 +2021,21 @@
 					"caption": "6 problems, worst first",
 					"columns": [
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
 							"label": "Where",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
-							"label": "Problem"
+							"label": "Problem",
+							"wrap": "prose"
 						},
 						{
-							"label": "Change"
+							"label": "Change",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -2092,20 +2162,26 @@
 					"columns": [
 						{
 							"label": "Event",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
 							"label": "Field",
-							"mono": true
+							"mono": true,
+							"wrap": "none",
+							"rowHeader": true
 						},
 						{
-							"label": "Accepts"
+							"label": "Accepts",
+							"wrap": "prose"
 						},
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
-							"label": "Why"
+							"label": "Why",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -2232,17 +2308,21 @@
 					"caption": "2 problems, worst first",
 					"columns": [
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
 							"label": "Where",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
-							"label": "Problem"
+							"label": "Problem",
+							"wrap": "prose"
 						},
 						{
-							"label": "Change"
+							"label": "Change",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -2301,20 +2381,26 @@
 					"columns": [
 						{
 							"label": "Message",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
 							"label": "Field",
-							"mono": true
+							"mono": true,
+							"wrap": "none",
+							"rowHeader": true
 						},
 						{
-							"label": "Holds"
+							"label": "Holds",
+							"wrap": "prose"
 						},
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
-							"label": "Why"
+							"label": "Why",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -2439,17 +2525,21 @@
 					"caption": "2 problems, worst first",
 					"columns": [
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
 							"label": "Where",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
-							"label": "Problem"
+							"label": "Problem",
+							"wrap": "prose"
 						},
 						{
-							"label": "Change"
+							"label": "Change",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -2512,20 +2602,26 @@
 					"columns": [
 						{
 							"label": "Tool",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
 							"label": "Field",
-							"mono": true
+							"mono": true,
+							"wrap": "none",
+							"rowHeader": true
 						},
 						{
-							"label": "Accepts"
+							"label": "Accepts",
+							"wrap": "prose"
 						},
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
-							"label": "Why"
+							"label": "Why",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -2588,20 +2684,26 @@
 					"columns": [
 						{
 							"label": "Tool",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
 							"label": "Field",
-							"mono": true
+							"mono": true,
+							"wrap": "none",
+							"rowHeader": true
 						},
 						{
-							"label": "Accepts"
+							"label": "Accepts",
+							"wrap": "prose"
 						},
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
-							"label": "Why"
+							"label": "Why",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -2725,17 +2827,21 @@
 					"caption": "6 problems, worst first",
 					"columns": [
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
 							"label": "Where",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
-							"label": "Problem"
+							"label": "Problem",
+							"wrap": "prose"
 						},
 						{
-							"label": "Change"
+							"label": "Change",
+							"wrap": "prose"
 						}
 					],
 					"rows": [
@@ -2862,20 +2968,26 @@
 					"columns": [
 						{
 							"label": "Event",
-							"mono": true
+							"mono": true,
+							"wrap": "none"
 						},
 						{
 							"label": "Field",
-							"mono": true
+							"mono": true,
+							"wrap": "none",
+							"rowHeader": true
 						},
 						{
-							"label": "Accepts"
+							"label": "Accepts",
+							"wrap": "prose"
 						},
 						{
-							"label": "Risk"
+							"label": "Risk",
+							"wrap": "none"
 						},
 						{
-							"label": "Why"
+							"label": "Why",
+							"wrap": "prose"
 						}
 					],
 					"rows": [

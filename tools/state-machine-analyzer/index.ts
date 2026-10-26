@@ -304,7 +304,7 @@ function shape(m: Machine, unreachable: string[], noExit: string[]): Field | nul
 					...(unreachable.length ? [`${and(unreachable)} can't be reached`] : []),
 					...(noExit.length ? [`${and(noExit)} can't be left`] : []),
 				].join(", and ");
-		return { label: "Shape", value };
+		return { label: "Shape", value, mono: false };
 	}
 	return null;
 }
@@ -458,7 +458,7 @@ export default {
 				kind: "table",
 				role: "matrix",
 				caption: LEGEND,
-				columns: [{ label: "Event" }, ...m.states.map((s) => ({ label: s, mono: true }))],
+				columns: [{ label: "Event", wrap: "none", rowHeader: true }, ...m.states.map((s) => ({ label: s, mono: true, wrap: "none" as const }))],
 				rows: byOpen.map((e): Cell[] => [{ text: e, mono: true }, ...m.states.map((s) => cell(s, e))]),
 			};
 
@@ -488,7 +488,11 @@ export default {
 				parts.push({
 					kind: "table",
 					caption: "Gaps",
-					columns: [{ label: "Gap" }, { label: "Where", mono: true }, { label: "Why" }],
+					columns: [
+						{ label: "Gap", wrap: "none" },
+						{ label: "Where", mono: true, wrap: "none" },
+						{ label: "Why", wrap: "prose" },
+					],
 					rows: gaps.map((g): Cell[] => [{ text: g.gap, tone: g.tone }, { text: g.where, mono: true }, g.why]),
 				});
 			if (input.also === "markdown") {

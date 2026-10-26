@@ -403,12 +403,14 @@
       "caption": "What each change leaves at the bottom",
       "columns": [
         {
-          "label": "Change"
+          "label": "Change",
+          "wrap": "prose"
         },
         {
           "label": "Calls at the bottom",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -484,12 +486,14 @@
       "caption": "What each change leaves at the bottom",
       "columns": [
         {
-          "label": "Change"
+          "label": "Change",
+          "wrap": "prose"
         },
         {
           "label": "Calls at the bottom",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [

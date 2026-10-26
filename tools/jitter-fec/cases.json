@@ -98,25 +98,31 @@
       "caption": "Protection, at a 40 ms buffer",
       "columns": [
         {
-          "label": "Protection"
+          "label": "Protection",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Recovered",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Concealed",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Longest gap",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "What it sends"
+          "label": "What it sends",
+          "wrap": "prose"
         }
       ],
       "rows": [
@@ -408,18 +414,22 @@
       "caption": "What to change, each tried on this same minute of network. Made-up audio is 15.1% now.",
       "columns": [
         {
-          "label": "Change"
+          "label": "Change",
+          "wrap": "prose"
         },
         {
           "label": "Made-up audio after",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Delay"
+          "label": "Delay",
+          "wrap": "prose"
         },
         {
-          "label": "What it costs"
+          "label": "What it costs",
+          "wrap": "prose"
         }
       ],
       "rows": [

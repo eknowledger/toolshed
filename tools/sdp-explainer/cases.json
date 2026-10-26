@@ -275,13 +275,16 @@
       "caption": "Worth knowing, nothing to fix",
       "columns": [
         {
-          "label": "Severity"
+          "label": "Severity",
+          "wrap": "none"
         },
         {
-          "label": "Where"
+          "label": "Where",
+          "wrap": "none"
         },
         {
-          "label": "Problem"
+          "label": "Problem",
+          "wrap": "prose"
         }
       ],
       "rows": [
@@ -446,13 +449,16 @@
       "caption": "What to fix, worst first",
       "columns": [
         {
-          "label": "Severity"
+          "label": "Severity",
+          "wrap": "none"
         },
         {
-          "label": "Where"
+          "label": "Where",
+          "wrap": "none"
         },
         {
-          "label": "Problem"
+          "label": "Problem",
+          "wrap": "prose"
         }
       ],
       "rows": [

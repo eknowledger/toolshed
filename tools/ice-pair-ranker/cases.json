@@ -17,23 +17,29 @@
         {
           "label": "#",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Local",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Remote",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Route"
+          "label": "Route",
+          "wrap": "prose"
         },
         {
           "label": "Priority",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -97,19 +103,24 @@
       "columns": [
         {
           "label": "Local",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Sent from",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Remote",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Same as",
-          "align": "end"
+          "align": "end",
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -149,23 +160,29 @@
         {
           "label": "#",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Local",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Remote",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Route"
+          "label": "Route",
+          "wrap": "prose"
         },
         {
           "label": "Priority",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -380,13 +397,16 @@
       "caption": "What to look at, most serious first",
       "columns": [
         {
-          "label": "Severity"
+          "label": "Severity",
+          "wrap": "none"
         },
         {
-          "label": "What we found"
+          "label": "What we found",
+          "wrap": "prose"
         },
         {
-          "label": "What it means and what to do"
+          "label": "What it means and what to do",
+          "wrap": "prose"
         }
       ],
       "rows": [
@@ -435,23 +455,29 @@
         {
           "label": "#",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Local",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Remote",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Route"
+          "label": "Route",
+          "wrap": "prose"
         },
         {
           "label": "Priority",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -514,13 +540,16 @@
       "caption": "What to look at, most serious first",
       "columns": [
         {
-          "label": "Severity"
+          "label": "Severity",
+          "wrap": "none"
         },
         {
-          "label": "What we found"
+          "label": "What we found",
+          "wrap": "prose"
         },
         {
-          "label": "What it means and what to do"
+          "label": "What it means and what to do",
+          "wrap": "prose"
         }
       ],
       "rows": [
@@ -553,23 +582,29 @@
         {
           "label": "#",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Local",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Remote",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Route"
+          "label": "Route",
+          "wrap": "prose"
         },
         {
           "label": "Priority",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -774,23 +809,29 @@
         {
           "label": "#",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
           "label": "Local",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Remote",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
-          "label": "Route"
+          "label": "Route",
+          "wrap": "prose"
         },
         {
           "label": "Priority",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -833,13 +874,16 @@
       "caption": "What to look at, most serious first",
       "columns": [
         {
-          "label": "Severity"
+          "label": "Severity",
+          "wrap": "none"
         },
         {
-          "label": "What we found"
+          "label": "What we found",
+          "wrap": "prose"
         },
         {
-          "label": "What it means and what to do"
+          "label": "What it means and what to do",
+          "wrap": "prose"
         }
       ],
       "rows": [

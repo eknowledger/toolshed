@@ -256,11 +256,11 @@ export default {
 				role: "comparison",
 				caption: `Each failure, for one task of up to ${turns}, worst first`,
 				columns: [
-					{ label: "Failure" },
-					{ label: "Attempt", align: "end", mono: true },
-					{ label: "Call", align: "end", mono: true },
-					{ label: "Task", align: "end", mono: true },
-					{ label: "Stopped by" },
+					{ label: "Failure", wrap: "prose", rowHeader: true },
+					{ label: "Attempt", align: "end", mono: true, wrap: "none" },
+					{ label: "Call", align: "end", mono: true, wrap: "none" },
+					{ label: "Task", align: "end", mono: true, wrap: "none" },
+					{ label: "Stopped by", wrap: "prose" },
 				],
 				rows,
 			};
@@ -278,6 +278,7 @@ export default {
 				fields: [
 					{
 						label: "Assumes",
+						mono: false,
 						value: `A trickle of ${TRICKLE} tokens a second, and a loop that starts another turn after a failed call.`,
 					},
 					{

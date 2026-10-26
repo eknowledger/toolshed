@@ -62,20 +62,25 @@
       "columns": [
         {
           "label": "Servers",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
-          "label": "Your 5% target"
+          "label": "Your 5% target",
+          "wrap": "none"
         },
         {
           "label": "Wait at all",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p99 wait",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -225,20 +230,25 @@
       "columns": [
         {
           "label": "Servers",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
-          "label": "Your 10% target"
+          "label": "Your 10% target",
+          "wrap": "none"
         },
         {
           "label": "Wait at all",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p99 wait",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -337,20 +347,25 @@
       "columns": [
         {
           "label": "Servers",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
-          "label": "Your 50% target"
+          "label": "Your 50% target",
+          "wrap": "none"
         },
         {
           "label": "Wait at all",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p99 wait",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -462,20 +477,25 @@
       "columns": [
         {
           "label": "Servers",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
-          "label": "Your 20% target"
+          "label": "Your 20% target",
+          "wrap": "none"
         },
         {
           "label": "Wait at all",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p99 wait",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -599,25 +619,31 @@
       "columns": [
         {
           "label": "Servers",
-          "mono": true
+          "mono": true,
+          "wrap": "none",
+          "rowHeader": true
         },
         {
-          "label": "Your 1% target"
+          "label": "Your 1% target",
+          "wrap": "none"
         },
         {
           "label": "Waits over 10 ms",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Wait at all",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "p99 wait",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [

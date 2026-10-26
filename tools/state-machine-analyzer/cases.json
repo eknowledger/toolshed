@@ -42,14 +42,17 @@
 			"caption": "Gaps",
 			"columns": [
 				{
-					"label": "Gap"
+					"label": "Gap",
+					"wrap": "none"
 				},
 				{
 					"label": "Where",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
-					"label": "Why"
+					"label": "Why",
+					"wrap": "prose"
 				}
 			],
 			"rows": [
@@ -117,14 +120,17 @@
 			"caption": "Gaps",
 			"columns": [
 				{
-					"label": "Gap"
+					"label": "Gap",
+					"wrap": "none"
 				},
 				{
 					"label": "Where",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
-					"label": "Why"
+					"label": "Why",
+					"wrap": "prose"
 				}
 			],
 			"rows": [
@@ -214,27 +220,34 @@
 			"caption": "→ moves to that state, ↩ back returns to the state before, ✕ reject drops the event, ? undecided, 2 rules is a conflict.",
 			"columns": [
 				{
-					"label": "Event"
+					"label": "Event",
+					"wrap": "none",
+					"rowHeader": true
 				},
 				{
 					"label": "pending",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "processing",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "needs_action",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "paid",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "failed",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				}
 			],
 			"rows": [
@@ -384,15 +397,19 @@
 			"caption": "→ moves to that state, ↩ back returns to the state before, ✕ reject drops the event, ? undecided, 2 rules is a conflict.",
 			"columns": [
 				{
-					"label": "Event"
+					"label": "Event",
+					"wrap": "none",
+					"rowHeader": true
 				},
 				{
 					"label": "closed",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "opened",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				}
 			],
 			"rows": [
@@ -478,7 +495,10 @@
 						"label": "close"
 					}
 				],
-				"highlight": ["closed", "opened"]
+				"highlight": [
+					"closed",
+					"opened"
+				]
 			}
 		}
 	},

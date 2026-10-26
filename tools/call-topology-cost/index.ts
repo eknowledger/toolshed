@@ -133,11 +133,11 @@ export default {
 				role: "comparison",
 				caption: `${plural(n, "person", "people")}, everyone talking${k < n ? `, the SFU forwarding the ${k} loudest` : ""}. In kb/s: the client columns are one device, the server columns the whole call`,
 				columns: [
-					{ label: "Pattern" },
-					{ label: "Client up", align: "end", mono: true },
-					{ label: "Client down", align: "end", mono: true },
-					{ label: "Server in", align: "end", mono: true },
-					{ label: "Server out", align: "end", mono: true },
+					{ label: "Pattern", wrap: "prose", rowHeader: true },
+					{ label: "Client up", align: "end", mono: true, wrap: "none" },
+					{ label: "Client down", align: "end", mono: true, wrap: "none" },
+					{ label: "Server in", align: "end", mono: true, wrap: "none" },
+					{ label: "Server out", align: "end", mono: true, wrap: "none" },
 				],
 				rows: all.map((r): Cell[] => [
 					`${r.key === "peer" ? "Peer, per user" : r.name}${r.key === pick.key ? " (picked)" : ""}`,
@@ -244,12 +244,12 @@ export default {
 				role: "comparison",
 				caption: `Server operations every ${frame} ms frame${tag === 0 ? ". Decrypts and encrypts assume SRTP, which WebRTC always uses, though the packet size here leaves out its tag" : ""}`,
 				columns: [
-					{ label: "Pattern" },
-					{ label: "Decrypt", align: "end", mono: true },
-					{ label: "Decode", align: "end", mono: true },
-					{ label: "Mix", align: "end", mono: true },
-					{ label: "Encode", align: "end", mono: true },
-					{ label: "Encrypt", align: "end", mono: true },
+					{ label: "Pattern", wrap: "prose", rowHeader: true },
+					{ label: "Decrypt", align: "end", mono: true, wrap: "none" },
+					{ label: "Decode", align: "end", mono: true, wrap: "none" },
+					{ label: "Mix", align: "end", mono: true, wrap: "none" },
+					{ label: "Encode", align: "end", mono: true, wrap: "none" },
+					{ label: "Encrypt", align: "end", mono: true, wrap: "none" },
 				],
 				rows: servers.map((r): Cell[] => [
 					r.key === "peer" ? "Peer, per user" : r.name,
@@ -275,7 +275,7 @@ export default {
 				fields: [
 					{ label: "One packet", value: `${size} B`, note: `${breakdown.join(", ")}.` },
 					{ label: "One stream", value: `${kb(per)} kb/s`, note: `${pps} packets a second, so the server sends ${pick.serverOut === null ? "none" : kb(pick.serverOut * pps)} a second for the ${pick.key === "peer" ? "peer server, per user" : pick.name}.` },
-					{ label: "Assumes", value: "Everyone talks all the time, with no silence suppression, so these are the busiest case." },
+					{ label: "Assumes", value: "Everyone talks all the time, with no silence suppression, so these are the busiest case.", mono: false },
 				],
 			};
 

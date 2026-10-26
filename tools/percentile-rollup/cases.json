@@ -15,15 +15,18 @@
           "caption": "p50 across both groups",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p50",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -142,32 +145,39 @@
           "caption": "Each group on its own, slowest first, nearest rank",
           "columns": [
             {
-              "label": "Group"
+              "label": "Group",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Count",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Mean",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p50",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p50",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Under 15",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -224,17 +234,21 @@
           "caption": "Every measurement together, under both definitions. On a small or lumpy sample they disagree.",
           "columns": [
             {
-              "label": "Percentile"
+              "label": "Percentile",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Nearest rank",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Linear, as numpy and R",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -314,15 +328,18 @@
           "caption": "p90 across both instances",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p90",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -438,27 +455,33 @@
           "caption": "Each instance on its own, slowest first, estimated from its own buckets",
           "columns": [
             {
-              "label": "Instance"
+              "label": "Instance",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p90 estimate",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Somewhere between",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "At or under 100 ms",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -508,20 +531,25 @@
           "columns": [
             {
               "label": "Bucket edge (le)",
-              "mono": true
+              "mono": true,
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests at or under it",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Share",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "Note"
+              "label": "Note",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -591,15 +619,18 @@
           "caption": "p99 across this instance",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -661,27 +692,33 @@
           "caption": "Each instance on its own, slowest first, estimated from its own buckets",
           "columns": [
             {
-              "label": "Instance"
+              "label": "Instance",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p99 estimate",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Somewhere between",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "At or under 0.1",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -712,20 +749,25 @@
           "columns": [
             {
               "label": "Bucket edge (le)",
-              "mono": true
+              "mono": true,
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests at or under it",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Share",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "Note"
+              "label": "Note",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -780,15 +822,18 @@
           "caption": "p99 across all 4 instances",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -931,27 +976,33 @@
           "caption": "Each instance on its own, slowest first, estimated from its own buckets",
           "columns": [
             {
-              "label": "Instance"
+              "label": "Instance",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p99 estimate",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Somewhere between",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "At or under 100 ms",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -1039,20 +1090,25 @@
           "columns": [
             {
               "label": "Bucket edge (le)",
-              "mono": true
+              "mono": true,
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests at or under it",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Share",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "Note"
+              "label": "Note",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -1257,15 +1313,18 @@
           "caption": "p99 across all 4 instances",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -1408,27 +1467,33 @@
           "caption": "Each instance on its own, slowest first, estimated from its own buckets",
           "columns": [
             {
-              "label": "Instance"
+              "label": "Instance",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p99 estimate",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Somewhere between",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "At or under 100 ms",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -1516,20 +1581,25 @@
           "columns": [
             {
               "label": "Bucket edge (le)",
-              "mono": true
+              "mono": true,
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests at or under it",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Share",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "Note"
+              "label": "Note",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -1734,15 +1804,18 @@
           "caption": "p99 across all 4 instances",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -1866,27 +1939,33 @@
           "caption": "Each instance on its own, slowest first, estimated from its own buckets",
           "columns": [
             {
-              "label": "Instance"
+              "label": "Instance",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p99 estimate",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Somewhere between",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "At or under 100",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -1974,20 +2053,25 @@
           "columns": [
             {
               "label": "Bucket edge (le)",
-              "mono": true
+              "mono": true,
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests at or under it",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Share",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "Note"
+              "label": "Note",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -2147,15 +2231,18 @@
           "caption": "p99 across all 4 instances",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -2286,27 +2373,33 @@
           "caption": "Each instance on its own, slowest first, estimated from its own buckets",
           "columns": [
             {
-              "label": "Instance"
+              "label": "Instance",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p99 estimate",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Somewhere between",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "At or under 75",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -2394,20 +2487,25 @@
           "columns": [
             {
               "label": "Bucket edge (le)",
-              "mono": true
+              "mono": true,
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests at or under it",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Share",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "Note"
+              "label": "Note",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -2567,15 +2665,18 @@
           "caption": "p99 across all 4 groups",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -2742,32 +2843,39 @@
           "caption": "Each group on its own, slowest first, nearest rank",
           "columns": [
             {
-              "label": "Group"
+              "label": "Group",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Count",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Mean",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p50",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Under 100",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -2870,17 +2978,21 @@
           "caption": "Every measurement together, under both definitions. On a small or lumpy sample they disagree.",
           "columns": [
             {
-              "label": "Percentile"
+              "label": "Percentile",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Nearest rank",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Linear, as numpy and R",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -2960,15 +3072,18 @@
           "caption": "p99 across all 4 groups",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -3141,32 +3256,39 @@
           "caption": "Each group on its own, slowest first, nearest rank",
           "columns": [
             {
-              "label": "Group"
+              "label": "Group",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Count",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Mean",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p50",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Under 100",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -3269,17 +3391,21 @@
           "caption": "Every measurement together, under both definitions. On a small or lumpy sample they disagree.",
           "columns": [
             {
-              "label": "Percentile"
+              "label": "Percentile",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Nearest rank",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Linear, as numpy and R",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -3359,15 +3485,18 @@
           "caption": "p99 across this group",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -3478,32 +3607,39 @@
           "caption": "Each group on its own, slowest first, nearest rank",
           "columns": [
             {
-              "label": "Group"
+              "label": "Group",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Count",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Mean",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p50",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Under 100",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -3537,17 +3673,21 @@
           "caption": "Every measurement together, under both definitions. On a small or lumpy sample they disagree.",
           "columns": [
             {
-              "label": "Percentile"
+              "label": "Percentile",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Nearest rank",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Linear, as numpy and R",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -3614,7 +3754,8 @@
           "fields": [
             {
               "label": "One group",
-              "value": "One group, so there is nothing to roll up: paste two or more, one per host or per minute, separated by a blank line."
+              "value": "One group, so there is nothing to roll up: paste two or more, one per host or per minute, separated by a blank line.",
+              "mono": false
             }
           ]
         }
@@ -3777,15 +3918,18 @@
           "caption": "p90 across this series",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p90",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -3892,27 +4036,33 @@
           "caption": "Each series on its own, slowest first, estimated from its own buckets",
           "columns": [
             {
-              "label": "Series"
+              "label": "Series",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p90 estimate",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Somewhere between",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Under 20 ms",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -3943,20 +4093,25 @@
           "columns": [
             {
               "label": "Bucket upper edge",
-              "mono": true
+              "mono": true,
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests under it",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Share",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "Note"
+              "label": "Note",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -4041,15 +4196,18 @@
           "caption": "p90 across both services",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p90",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -4159,32 +4317,39 @@
           "caption": "Each service on its own, slowest first, nearest rank",
           "columns": [
             {
-              "label": "Service"
+              "label": "Service",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Count",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Mean",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p50",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p90",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Under 100 ms",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -4241,17 +4406,21 @@
           "caption": "Every request together, under both definitions. On a small or lumpy sample they disagree.",
           "columns": [
             {
-              "label": "Percentile"
+              "label": "Percentile",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Nearest rank",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Linear, as numpy and R",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -4331,15 +4500,18 @@
           "caption": "p50 across both instances",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p50",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -4453,27 +4625,33 @@
           "caption": "Each instance on its own, slowest first, estimated from its own buckets",
           "columns": [
             {
-              "label": "Instance"
+              "label": "Instance",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p50 estimate",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Somewhere between",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Under 20 ms",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -4523,20 +4701,25 @@
           "columns": [
             {
               "label": "Bin upper edge",
-              "mono": true
+              "mono": true,
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests under it",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Share",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "Note"
+              "label": "Note",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -4652,15 +4835,18 @@
           "caption": "p99 across both series",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -4825,27 +5011,33 @@
           "caption": "Each series on its own, slowest first, estimated from its own buckets",
           "columns": [
             {
-              "label": "Series"
+              "label": "Series",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p99 estimate",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Somewhere between",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Under 100 ms",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -4895,20 +5087,25 @@
           "columns": [
             {
               "label": "Bucket upper edge",
-              "mono": true
+              "mono": true,
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests under it",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Share",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "Note"
+              "label": "Note",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -5263,15 +5460,18 @@
           "caption": "p99 across all 6 periods",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -5551,32 +5751,39 @@
           "caption": "Each period on its own, slowest first, nearest rank",
           "columns": [
             {
-              "label": "Period"
+              "label": "Period",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Count",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Mean",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p50",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Under 100 ms",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -5725,17 +5932,21 @@
           "caption": "Every request together, under both definitions. On a small or lumpy sample they disagree.",
           "columns": [
             {
-              "label": "Percentile"
+              "label": "Percentile",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Nearest rank",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Linear, as numpy and R",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -5815,15 +6026,18 @@
           "caption": "p99 across all 4 instances",
           "columns": [
             {
-              "label": "Method"
+              "label": "Method",
+              "wrap": "prose"
             },
             {
               "label": "p99",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "What you can claim"
+              "label": "What you can claim",
+              "wrap": "prose"
             }
           ],
           "rows": [
@@ -6003,27 +6217,33 @@
           "caption": "Each instance on its own, slowest first, estimated from its own buckets",
           "columns": [
             {
-              "label": "Instance"
+              "label": "Instance",
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "p99 estimate",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Somewhere between",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Under 100 ms",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -6111,20 +6331,25 @@
           "columns": [
             {
               "label": "Bin upper edge",
-              "mono": true
+              "mono": true,
+              "wrap": "none",
+              "rowHeader": true
             },
             {
               "label": "Requests under it",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "Share",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
-              "label": "Note"
+              "label": "Note",
+              "wrap": "prose"
             }
           ],
           "rows": [

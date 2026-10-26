@@ -789,11 +789,11 @@ export default {
 					kind: "table",
 					caption: `Current differences: ${rows.length} line${rows.length === 1 ? "" : "s"}, ${does} in what the code does and ${count("names")} only in names, strings or numbers${rows.length > MAX_ROWS ? `. The first ${MAX_ROWS} are shown` : ""}`,
 					columns: [
-						{ label: "A", align: "end", mono: true },
-						{ label: "Copy A", mono: true },
-						{ label: "B", align: "end", mono: true },
-						{ label: "Copy B", mono: true },
-						{ label: "Differs in" },
+						{ label: "A", align: "end", mono: true, wrap: "none" },
+						{ label: "Copy A", mono: true, wrap: "prose" },
+						{ label: "B", align: "end", mono: true, wrap: "none" },
+						{ label: "Copy B", mono: true, wrap: "prose" },
+						{ label: "Differs in", wrap: "none" },
 					],
 					rows: shown.map((r): Cell[] => [
 						r.aLine === null ? "" : String(r.aLine),
@@ -813,16 +813,19 @@ export default {
 				{
 					label: "Read as",
 					value: LANG_NAME[lang],
+					mono: false,
 					note: "from the code itself: it decides what counts as a keyword, a comment and a string",
 				},
 				{
 					label: "Compared",
 					value: "The bodies only, leaving out each signature and, in Python, the docstring.",
+					mono: false,
 					note: "A wrapper and the method it wraps can share a body under different parameter lists. The line diff still shows the signatures.",
 				},
 				{
 					label: "Near-duplicate at",
 					value: "85% alike, names set aside",
+					mono: false,
 					note: "the threshold the companion cochange.py uses",
 				},
 			];
@@ -850,7 +853,7 @@ export default {
 					c.sinceFrom === "input"
 						? `Since ${c.since.sha ? c.since.sha.slice(0, 7) : c.since.date}`
 						: "Since both copies existed";
-				parts.push({ kind: "fields", role: "answer", fields: [{ label: since, value: v.value, note: v.note }] });
+				parts.push({ kind: "fields", role: "answer", fields: [{ label: since, value: v.value, note: v.note, mono: false }] });
 
 				const counted = [
 					...c.together.map((x) => ["both", x] as const),
@@ -886,7 +889,12 @@ export default {
 						kind: "table",
 						role: "actions",
 						caption: "Changed only one copy, newest first",
-						columns: [{ label: "Copy" }, { label: "Commit", mono: true }, { label: "Date" }, { label: "Subject" }],
+						columns: [
+							{ label: "Copy", wrap: "none" },
+							{ label: "Commit", mono: true, wrap: "none", rowHeader: true },
+							{ label: "Date", wrap: "none" },
+							{ label: "Subject", wrap: "prose" },
+						],
 						rows: lonely.map(([side, x]): Cell[] => [side, { text: x.sha.slice(0, 7), mono: true }, x.date, x.subject]),
 					});
 				}
@@ -917,7 +925,12 @@ export default {
 					parts.push({
 						kind: "table",
 						caption: "Every counted commit, oldest first",
-						columns: [{ label: "Commit", mono: true }, { label: "Date" }, { label: "Changed" }, { label: "Subject" }],
+						columns: [
+							{ label: "Commit", mono: true, wrap: "none", rowHeader: true },
+							{ label: "Date", wrap: "none" },
+							{ label: "Changed", wrap: "none" },
+							{ label: "Subject", wrap: "prose" },
+						],
 						rows: counted.map(([side, x]): Cell[] => [
 							{ text: x.sha.slice(0, 7), mono: true },
 							x.date,
@@ -942,6 +955,7 @@ export default {
 						{
 							label: "Left out",
 							value: `${c.before} at or before the count starts, ${c.ignored.length} ignored`,
+							mono: false,
 							note: "At or before: in either history up to the commit counted from, when there was one copy or the traced lines were other code. Ignored: by the words or commits you listed.",
 						},
 						...how,
@@ -956,6 +970,7 @@ export default {
 						{
 							label: near ? "Near-duplicates" : "Two different functions",
 							value: `${pct(shapeR)} alike once names, strings and numbers are set aside, ${near ? "at or over" : "under"} the 85% line.`,
+							mono: false,
 							note: near
 								? "Whether to merge them depends on whether they change together. Paste each copy's git log to find out."
 								: "Different enough that a change to one is unlikely to belong in the other.",

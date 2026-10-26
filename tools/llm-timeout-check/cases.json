@@ -100,25 +100,31 @@
 			"caption": "Each failure, for one task of up to 10 turns, worst first",
 			"columns": [
 				{
-					"label": "Failure"
+					"label": "Failure",
+					"wrap": "prose",
+					"rowHeader": true
 				},
 				{
 					"label": "Attempt",
 					"align": "end",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "Call",
 					"align": "end",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
 					"label": "Task",
 					"align": "end",
-					"mono": true
+					"mono": true,
+					"wrap": "none"
 				},
 				{
-					"label": "Stopped by"
+					"label": "Stopped by",
+					"wrap": "prose"
 				}
 			],
 			"rows": [

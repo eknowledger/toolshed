@@ -18,17 +18,21 @@
           "caption": "8 PRs instead of one of 800 lines: the wait for a first review, as a multiple of the one PR's",
           "columns": [
             {
-              "label": "Reviewed"
+              "label": "Reviewed",
+              "wrap": "prose",
+              "rowHeader": true
             },
             {
               "label": "At e = 0.43",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             },
             {
               "label": "If size does not matter",
               "align": "end",
-              "mono": true
+              "mono": true,
+              "wrap": "none"
             }
           ],
           "rows": [
@@ -164,22 +168,26 @@
             {
               "label": "One after another",
               "value": "Each piece waits for its own first review, and the next opens when the last one merges.",
-              "group": "What each way assumes"
+              "group": "What each way assumes",
+              "mono": false
             },
             {
               "label": "Side by side",
               "value": "All the pieces open at once and are picked up independently, so the change waits for the slowest.",
-              "group": "What each way assumes"
+              "group": "What each way assumes",
+              "mono": false
             },
             {
               "label": "In one sitting",
               "value": "One reviewer takes them all together, as soon as they would start one small piece. That is an assumption about how they work, not a measurement.",
-              "group": "What each way assumes"
+              "group": "What each way assumes",
+              "mono": false
             },
             {
               "label": "Measured",
               "value": "Hours from ready for review to the first review by someone else. Not the time to merge.",
-              "group": "What it counts"
+              "group": "What it counts",
+              "mono": false
             }
           ]
         },
@@ -209,17 +217,21 @@
       "caption": "4 PRs instead of one of 100 lines: the wait for a first review, as a multiple of the one PR's",
       "columns": [
         {
-          "label": "Reviewed"
+          "label": "Reviewed",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Fit says",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "If size does not matter",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -326,17 +338,21 @@
       "caption": "4 PRs instead of one of 100 lines: the wait for a first review, as a multiple of the one PR's",
       "columns": [
         {
-          "label": "Reviewed"
+          "label": "Reviewed",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Fit says",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "If size does not matter",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -409,17 +425,21 @@
       "caption": "4 PRs instead of one of 100 lines: the wait for a first review, as a multiple of the one PR's",
       "columns": [
         {
-          "label": "Reviewed"
+          "label": "Reviewed",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Fit says",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "If size does not matter",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -492,17 +512,21 @@
       "caption": "4 PRs instead of one of 100 lines: the wait for a first review, as a multiple of the one PR's",
       "columns": [
         {
-          "label": "Reviewed"
+          "label": "Reviewed",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Fit says",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "If size does not matter",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [

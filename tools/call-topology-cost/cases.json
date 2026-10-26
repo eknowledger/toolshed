@@ -21,27 +21,33 @@
       "caption": "3 people, everyone talking. In kb/s: the client columns are one device, the server columns the whole call",
       "columns": [
         {
-          "label": "Pattern"
+          "label": "Pattern",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Client up",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Client down",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Server in",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Server out",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -199,32 +205,39 @@
       "caption": "Server operations every 20 ms frame. Decrypts and encrypts assume SRTP, which WebRTC always uses, though the packet size here leaves out its tag",
       "columns": [
         {
-          "label": "Pattern"
+          "label": "Pattern",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Decrypt",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Decode",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Mix",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Encode",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Encrypt",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -365,27 +378,33 @@
       "caption": "10 people, everyone talking. In kb/s: the client columns are one device, the server columns the whole call",
       "columns": [
         {
-          "label": "Pattern"
+          "label": "Pattern",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Client up",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Client down",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Server in",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Server out",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -543,32 +562,39 @@
       "caption": "Server operations every 20 ms frame. Decrypts and encrypts assume SRTP, which WebRTC always uses, though the packet size here leaves out its tag",
       "columns": [
         {
-          "label": "Pattern"
+          "label": "Pattern",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Decrypt",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Decode",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Mix",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Encode",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Encrypt",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -719,32 +745,39 @@
       "caption": "Server operations every 20 ms frame. Decrypts and encrypts assume SRTP, which WebRTC always uses, though the packet size here leaves out its tag",
       "columns": [
         {
-          "label": "Pattern"
+          "label": "Pattern",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Decrypt",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Decode",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Mix",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Encode",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Encrypt",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -895,32 +928,39 @@
       "caption": "Server operations every 20 ms frame. Decrypts and encrypts assume SRTP, which WebRTC always uses, though the packet size here leaves out its tag",
       "columns": [
         {
-          "label": "Pattern"
+          "label": "Pattern",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Decrypt",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Decode",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Mix",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Encode",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Encrypt",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -1179,32 +1219,39 @@
       "caption": "Server operations every 20 ms frame",
       "columns": [
         {
-          "label": "Pattern"
+          "label": "Pattern",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Decrypt",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Decode",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Mix",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Encode",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Encrypt",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -1302,32 +1349,39 @@
       "caption": "Server operations every 20 ms frame. Decrypts and encrypts assume SRTP, which WebRTC always uses, though the packet size here leaves out its tag",
       "columns": [
         {
-          "label": "Pattern"
+          "label": "Pattern",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Decrypt",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Decode",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Mix",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Encode",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Encrypt",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [
@@ -1469,27 +1523,33 @@
       "caption": "10 people, everyone talking. In kb/s: the client columns are one device, the server columns the whole call",
       "columns": [
         {
-          "label": "Pattern"
+          "label": "Pattern",
+          "wrap": "prose",
+          "rowHeader": true
         },
         {
           "label": "Client up",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Client down",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Server in",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         },
         {
           "label": "Server out",
           "align": "end",
-          "mono": true
+          "mono": true,
+          "wrap": "none"
         }
       ],
       "rows": [

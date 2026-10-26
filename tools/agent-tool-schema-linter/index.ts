@@ -717,11 +717,11 @@ export default {
 			kind: "table",
 			caption: "Every field",
 			columns: [
-				{ label: subject, mono: true },
-				{ label: "Field", mono: true },
-				{ label: result.mode === "example" ? "Holds" : "Accepts" },
-				{ label: "Risk" },
-				{ label: "Why" },
+				{ label: subject, mono: true, wrap: "none" },
+				{ label: "Field", mono: true, wrap: "none", rowHeader: true },
+				{ label: result.mode === "example" ? "Holds" : "Accepts", wrap: "prose" },
+				{ label: "Risk", wrap: "none" },
+				{ label: "Why", wrap: "prose" },
 			],
 			rows: all.map((f) => {
 				const quiet = f.tone === "good" ? "muted" : undefined;
@@ -746,7 +746,12 @@ export default {
 				kind: "table",
 				role: "findings",
 				caption: todo.length === 1 ? "1 problem" : `${todo.length} problems, worst first`,
-				columns: [{ label: "Risk" }, { label: "Where", mono: true }, { label: "Problem" }, { label: "Change" }],
+				columns: [
+					{ label: "Risk", wrap: "none" },
+					{ label: "Where", mono: true, wrap: "none" },
+					{ label: "Problem", wrap: "prose" },
+					{ label: "Change", wrap: "prose" },
+				],
 				rows: todo.map((t) => [
 					cell(t.severity, t.tone),
 					cell(t.where, undefined, true),

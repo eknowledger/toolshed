@@ -281,7 +281,12 @@ export default {
 					distinct.every((x) => x.after >= CLEAN)
 						? `No buffer up to ${top} ms gets made-up audio under 1% with any protection on this network. It is ${share.concealed}% now.`
 						: `What to change, each tried on this same minute of network. Made-up audio is ${share.concealed}% now.`,
-				columns: [{ label: "Change" }, { label: "Made-up audio after", align: "end", mono: true }, { label: "Delay" }, { label: "What it costs" }],
+				columns: [
+					{ label: "Change", wrap: "prose" },
+					{ label: "Made-up audio after", align: "end", mono: true, wrap: "none" },
+					{ label: "Delay", wrap: "prose" },
+					{ label: "What it costs", wrap: "prose" },
+				],
 				rows: distinct.map((a) => [a.change, { text: `${a.after}%`, mono: true }, a.delay, a.cost]),
 			};
 
@@ -413,12 +418,12 @@ export default {
 				role: "comparison",
 				caption: `Protection, at a ${buffer} ms buffer`,
 				columns: [
-					{ label: "Protection" },
-					{ label: "Recovered", align: "end", mono: true },
-					{ label: "Concealed", align: "end", mono: true },
-					{ label: "Longest gap", align: "end", mono: true },
+					{ label: "Protection", wrap: "prose", rowHeader: true },
+					{ label: "Recovered", align: "end", mono: true, wrap: "none" },
+					{ label: "Concealed", align: "end", mono: true, wrap: "none" },
+					{ label: "Longest gap", align: "end", mono: true, wrap: "none" },
 					// Words, not a measurement: start-aligned, so on a phone it falls under the row's name as a note.
-					{ label: "What it sends" },
+					{ label: "What it sends", wrap: "prose" },
 				],
 				rows: SCHEMES.map((s, i) => {
 					const o = byScheme[i] ?? [];

@@ -565,9 +565,9 @@ export default {
 					role: "comparison",
 					caption: "Each change on its own",
 					columns: [
-						{ label: "Change" },
-						{ label: `${backend.unit === "custom metrics" ? "Metrics" : "Series"} after`, align: "end", mono: true },
-						{ label: "Saves", align: "end", mono: true },
+						{ label: "Change", wrap: "prose", rowHeader: true },
+						{ label: `${backend.unit === "custom metrics" ? "Metrics" : "Series"} after`, align: "end", mono: true, wrap: "none" },
+						{ label: "Saves", align: "end", mono: true, wrap: "none" },
 					],
 					rows: changes.map((c) => [
 						c.name,
@@ -594,7 +594,7 @@ export default {
 				},
 			];
 			if (id !== "prometheus")
-				method.push({ group: worked, label: "Stored in", value: backend.name, note: backend.note });
+				method.push({ group: worked, label: "Stored in", value: backend.name, note: backend.note, mono: false });
 			if (!backend.targetsMultiply && targets > 1) {
 				method.push({
 					group: worked,
@@ -627,6 +627,7 @@ export default {
 					group: worked,
 					label: "Limit",
 					value: `${num(lim.n)} ${lim.what}`,
+					mono: false,
 					note: lim.per === "target" ? "Counted per target." : "Shared by every metric there, not this one alone.",
 				});
 			}
@@ -643,6 +644,7 @@ export default {
 					group: how,
 					label: "A label",
 					value: "Drop it, or group its values into a few",
+					mono: false,
 					note: "The table counts dropping it; grouping leaves more. Put the detail on a span or a log line instead.",
 				});
 			}
