@@ -495,10 +495,7 @@
 						"label": "close"
 					}
 				],
-				"highlight": [
-					"closed",
-					"opened"
-				]
+				"highlight": ["closed", "opened"]
 			}
 		}
 	},

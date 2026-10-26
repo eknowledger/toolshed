@@ -458,7 +458,10 @@ export default {
 				kind: "table",
 				role: "matrix",
 				caption: LEGEND,
-				columns: [{ label: "Event", wrap: "none", rowHeader: true }, ...m.states.map((s) => ({ label: s, mono: true, wrap: "none" as const }))],
+				columns: [
+					{ label: "Event", wrap: "none", rowHeader: true },
+					...m.states.map((s) => ({ label: s, mono: true, wrap: "none" as const })),
+				],
 				rows: byOpen.map((e): Cell[] => [{ text: e, mono: true }, ...m.states.map((s) => cell(s, e))]),
 			};
 

@@ -853,7 +853,11 @@ export default {
 					c.sinceFrom === "input"
 						? `Since ${c.since.sha ? c.since.sha.slice(0, 7) : c.since.date}`
 						: "Since both copies existed";
-				parts.push({ kind: "fields", role: "answer", fields: [{ label: since, value: v.value, note: v.note, mono: false }] });
+				parts.push({
+					kind: "fields",
+					role: "answer",
+					fields: [{ label: since, value: v.value, note: v.note, mono: false }],
+				});
 
 				const counted = [
 					...c.together.map((x) => ["both", x] as const),

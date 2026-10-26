@@ -566,7 +566,12 @@ export default {
 					caption: "Each change on its own",
 					columns: [
 						{ label: "Change", wrap: "prose", rowHeader: true },
-						{ label: `${backend.unit === "custom metrics" ? "Metrics" : "Series"} after`, align: "end", mono: true, wrap: "none" },
+						{
+							label: `${backend.unit === "custom metrics" ? "Metrics" : "Series"} after`,
+							align: "end",
+							mono: true,
+							wrap: "none",
+						},
 						{ label: "Saves", align: "end", mono: true, wrap: "none" },
 					],
 					rows: changes.map((c) => [
