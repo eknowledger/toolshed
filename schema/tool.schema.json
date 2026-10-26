@@ -18,10 +18,14 @@
   "additionalProperties": false,
   "properties": {
     "sdk": {
-      "description": "Contract version this manifest is written against. 7 is current: 5 adds role and the muted tone, 6 adds select presets (sets) and textarea lang, 7 adds the graph kind and textarea grammar.",
+      "description": "Contract version this manifest is written against. 8 is current: 5 adds role and the muted tone, 6 adds select presets (sets) and textarea lang, 7 adds the graph kind and textarea grammar, 8 adds an input's details, share and role, the manifest's reset, and a table column's wrap and rowHeader.",
       "type": "integer",
       "minimum": 1,
-      "maximum": 7
+      "maximum": 8
+    },
+    "reset": {
+      "description": "false leaves the Reset button out, for a tool with one input where it adds nothing.",
+      "type": "boolean"
     },
     "id": {
       "description": "Directory name, and the id every route and relation uses.",
@@ -201,6 +205,19 @@
             "minLength": 1
           },
           "description": {
+            "description": "The one-line hint under the control. Takes light markup: a blank line, \"- \" list items, `code`, **bold** and {good|tones}.",
+            "type": "string"
+          },
+          "details": {
+            "description": "The rest of the help, behind a closed disclosure under the description. The same markup.",
+            "type": "string"
+          },
+          "share": {
+            "description": "false keeps the value out of any link a host builds: a credential, or pasted private material.",
+            "type": "boolean"
+          },
+          "role": {
+            "description": "A name for the input's row, rendered as data-role, for a host stylesheet.",
             "type": "string"
           },
           "unit": {
