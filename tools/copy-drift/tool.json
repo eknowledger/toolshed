@@ -1,5 +1,5 @@
 {
-	"sdk": 5,
+	"sdk": 8,
 	"id": "copy-drift",
 	"name": "Copy drift",
 	"blurb": "Paste two copies of a function and each one's git log, and see whether they have been changing together or drifting apart, which commits changed only one, and where the copies differ.",
@@ -15,9 +15,11 @@
 	"inputs": [
 		{
 			"id": "a",
+			"share": false,
 			"type": "textarea",
 			"label": "Copy A",
-			"description": "The first function, as it is now, in Python, JavaScript or TypeScript, or a C-family language: the language is read from the code. Indentation is removed, so a method can be pasted straight from its class.",
+			"description": "The first function, as it is now.",
+			"details": "Python, JavaScript or TypeScript, or a C-family language: the language is read from the code. Indentation is removed, so a method can be pasted straight from its class.",
 			"primary": true,
 			"dir": "ltr",
 			"rows": 10,
@@ -26,6 +28,7 @@
 		},
 		{
 			"id": "b",
+			"share": false,
 			"type": "textarea",
 			"label": "Copy B",
 			"description": "The second function.",
@@ -37,9 +40,11 @@
 		},
 		{
 			"id": "historya",
+			"share": false,
 			"type": "textarea",
 			"label": "Copy A's history (optional)",
-			"description": "From git log --no-patch --format='%h %cI %s' -L <first line>,<last line>:<file>, with the line numbers of copy A. Git's default log format also works.",
+			"description": "From `git log -L` over copy A's lines.",
+			"details": "The full command, with the line numbers of copy A:\n\n`git log --no-patch --format='%h %cI %s' -L <first line>,<last line>:<file>`\n\nGit's default log format also works.",
 			"dir": "ltr",
 			"rows": 6,
 			"maxLength": 60000,
@@ -47,6 +52,7 @@
 		},
 		{
 			"id": "historyb",
+			"share": false,
 			"type": "textarea",
 			"label": "Copy B's history (optional)",
 			"description": "The same command, with copy B's lines.",
@@ -59,7 +65,8 @@
 			"id": "since",
 			"type": "text",
 			"label": "Count from",
-			"description": "A commit or a date. Leave it empty to count from the younger copy's first commit. Set it when a history reaches back before its copy existed, which git log -L does when the same lines used to be something else.",
+			"description": "A commit or a date. Leave it empty to count from the younger copy's first commit.",
+			"details": "Set it when a history reaches back before its copy existed, which `git log -L` does when the same lines used to be something else.",
 			"dir": "ltr",
 			"maxLength": 64,
 			"default": "e107e0f"
@@ -68,7 +75,8 @@
 			"id": "ignore",
 			"type": "text",
 			"label": "Ignore commits",
-			"description": "Commits to leave out, with commas between them: words to match in a subject (format, lint), or commit hashes. For sweeping commits that touched both copies for reasons that say nothing about them.\n\nThe first sample ignores 8e36f2b, a 29-file TLS change that cochange.py sets aside on its own. Clear it and that commit counts as changing both.",
+			"description": "Commits to leave out, with commas between them: words to match in a subject, or hashes.",
+			"details": "For sweeping commits that touched both copies for reasons that say nothing about them: `format`, `lint`, or a hash such as `8e36f2b`.\n\nThe first sample ignores `8e36f2b`, a 29-file TLS change that `cochange.py` sets aside on its own. Clear it and that commit counts as changing both.",
 			"dir": "ltr",
 			"maxLength": 400,
 			"default": "8e36f2b"

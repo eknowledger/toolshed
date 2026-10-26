@@ -1,5 +1,5 @@
 {
-  "sdk": 7,
+  "sdk": 8,
   "id": "timeout-budget",
   "name": "Timeout budget checker",
   "blurb": "A call chain's per-try timeouts and retries, top first: the worst case when the bottom hangs, whether it fits the caller's deadline, and which retries can never finish in time.",
@@ -26,7 +26,8 @@
       "id": "chain",
       "type": "textarea",
       "label": "The chain",
-      "description": "One call per line, top first: caller -> callee, the per-try timeout (ms, s, or none), and the retries. A # starts a comment. Assumes every layer retries a try that timed out.",
+      "description": "One call per line, top first: `caller -> callee`, the per-try timeout, and the retries.",
+      "details": "The timeout is in `ms` or `s`, or `none`. A `#` starts a comment. Assumes every layer retries a try that timed out.",
       "primary": true,
       "dir": "ltr",
       "rows": 4,

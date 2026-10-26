@@ -1,5 +1,5 @@
 {
-  "sdk": 5,
+  "sdk": 8,
   "id": "jitter-fec",
   "name": "Jitter and FEC simulator",
   "blurb": "A minute of voice over a network that delays and loses packets: how much audio the decoder makes up, and which buffer and protection fix it, at what cost in delay and bitrate.",

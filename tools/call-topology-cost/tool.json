@@ -1,5 +1,5 @@
 {
-  "sdk": 7,
+  "sdk": 8,
   "id": "call-topology-cost",
   "name": "Call topology cost",
   "blurb": "Pick a call size and see where a voice call's cost lands for mesh, an SFU, an MCU and a server that is the other peer, with real packet sizes, and what would make it cheaper.",

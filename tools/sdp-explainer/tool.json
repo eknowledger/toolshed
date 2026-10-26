@@ -1,5 +1,5 @@
 {
-  "sdk": 5,
+  "sdk": 8,
   "id": "sdp-explainer",
   "name": "SDP explainer",
   "blurb": "Paste a WebRTC offer or answer and see every line: what it sets, which phase of the call reads it, and what breaks a rule, with the RFC for each.",
@@ -23,6 +23,7 @@
   "inputs": [
     {
       "id": "sdp",
+      "share": false,
       "type": "textarea",
       "label": "SDP",
       "description": "An offer or an answer, as createOffer or webrtc-internals shows it. CRLF or LF; blank lines are ignored.",
@@ -34,6 +35,7 @@
     },
     {
       "id": "other",
+      "share": false,
       "type": "textarea",
       "label": "The other side's SDP (optional)",
       "description": "Paste the matching answer or offer to see what the two settle between them: ICE roles, who sends the ClientHello, the codec.",

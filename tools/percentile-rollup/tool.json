@@ -1,5 +1,5 @@
 {
-  "sdk": 5,
+  "sdk": 8,
   "id": "percentile-rollup",
   "name": "Percentiles across hosts",
   "blurb": "Paste latency histograms from Prometheus, Google Cloud, AWS X-Ray or a log query, or raw latencies. See the service's real p99, how far off it can be, and how wrong the averaged per-host p99 is.",
@@ -32,9 +32,11 @@
   "inputs": [
     {
       "id": "values",
+      "share": false,
       "type": "textarea",
       "label": "Latency histogram, or raw latencies",
-      "description": "Paste any one of these; the format is detected.\n- Prometheus: bucket lines such as x_bucket{instance=\"a\",le=\"0.05\"} 120, the query API's JSON (Amazon's and Azure's managed Prometheus too), or a CSV of instance,le,count with cumulative counts.\n- Google Cloud Monitoring: the timeSeries.list JSON of a distribution metric.\n- AWS X-Ray: the JSON from GetTimeSeriesServiceStatistics or GetServiceGraph.\n- Azure Log Analytics or CloudWatch Logs Insights: a query result of duration bins and counts, as CSV or JSON.\n- Anything else: raw latencies, a group per host separated by a blank line, as in host 1: 12 14 15.",
+      "description": "Paste a latency histogram or raw latencies; the format is detected.",
+      "details": "Any one of these:\n- **Prometheus**: bucket lines such as `x_bucket{instance=\"a\",le=\"0.05\"} 120`, the query API's JSON (Amazon's and Azure's managed Prometheus too), or a CSV of `instance,le,count` with cumulative counts.\n- **Google Cloud Monitoring**: the `timeSeries.list` JSON of a distribution metric.\n- **AWS X-Ray**: the JSON from `GetTimeSeriesServiceStatistics` or `GetServiceGraph`.\n- **Azure Log Analytics or CloudWatch Logs Insights**: a query result of duration bins and counts, as CSV or JSON.\n- **Anything else**: raw latencies, a group per host separated by a blank line, as in `host 1: 12 14 15`.",
       "primary": true,
       "rows": 12,
       "dir": "ltr",
@@ -75,7 +77,8 @@
       "id": "threshold",
       "type": "number",
       "label": "Threshold",
-      "description": "The promise to count against, in the same units as the input: 0.1 is 100 ms when the edges are in seconds, as in Prometheus and X-Ray, and 100 is 100 ms for Cloud Monitoring or a KQL query in milliseconds.",
+      "description": "The promise to count against, in the same units as the input.",
+      "details": "`0.1` is 100 ms when the edges are in seconds, as in Prometheus and X-Ray, and `100` is 100 ms for Cloud Monitoring or a KQL query in milliseconds.",
       "unit": "same units as the input",
       "default": 0.1,
       "min": 1e-06,

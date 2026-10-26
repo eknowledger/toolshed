@@ -1,5 +1,5 @@
 {
-	"sdk": 6,
+	"sdk": 8,
 	"id": "llm-timeout-check",
 	"name": "LLM timeout check",
 	"blurb": "How long one agent task can run before your SDK and loop settings stop it, when the model is silent, trickling or overloaded, and what to set when that is too long.",
@@ -18,7 +18,8 @@
 			"id": "stack",
 			"type": "select",
 			"label": "Stack",
-			"description": "Fills the read timeout, retries and turns with that SDK's defaults. The Anthropic and OpenAI Python SDKs share theirs and have no turn limit, so they leave Turns as it is.",
+			"description": "Fills the read timeout, retries and turns with that SDK's defaults.",
+			"details": "The Anthropic and OpenAI Python SDKs share theirs and have no turn limit, so they leave Turns as it is.",
 			"default": "python",
 			"options": [
 				{

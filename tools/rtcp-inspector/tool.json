@@ -1,5 +1,5 @@
 {
-  "sdk": 5,
+  "sdk": 8,
   "id": "rtcp-inspector",
   "name": "RTP / RTCP inspector",
   "blurb": "Paste an RTP or RTCP packet as hex and see what it says: each field marked on the bytes, the loss and round trip in its reports, and the NACK, PLI, FIR, REMB and TWCC feedback WebRTC sends.",
@@ -25,9 +25,11 @@
   "inputs": [
     {
       "id": "packet",
+      "share": false,
       "type": "textarea",
       "label": "Packet",
-      "description": "Hex, however you copied it: a Wireshark or tcpdump dump, offsets, text column and all, or a log line. A whole frame's Ethernet, IP and UDP headers are stripped.",
+      "description": "Hex, however you copied it.",
+      "details": "A Wireshark or tcpdump dump, offsets, text column and all, or a log line. A whole frame's Ethernet, IP and UDP headers are stripped.",
       "primary": true,
       "dir": "ltr",
       "rows": 4,
@@ -84,7 +86,8 @@
       "id": "arrival",
       "type": "text",
       "label": "Report arrived at (A)",
-      "description": "Optional. When the report reached you, as the middle 32 bits of your NTP clock in hex, such as d8f1:4ccc. Gives the round trip, A - LSR - DLSR.",
+      "description": "Optional. When the report reached you, as the middle 32 bits of your NTP clock in hex, such as `d8f1:4ccc`.",
+      "details": "With it, the round trip is `A - LSR - DLSR`.",
       "dir": "ltr",
       "maxLength": 32,
       "default": ""

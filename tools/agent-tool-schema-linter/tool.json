@@ -1,5 +1,5 @@
 {
-	"sdk": 5,
+	"sdk": 8,
 	"id": "agent-tool-schema-linter",
 	"name": "Agent tool schema linter",
 	"blurb": "Paste the tools your agent can call, an MCP server's tool list included, or the events your agents send each other, and see which fields let someone else's words reach the model on the other side.",
@@ -16,9 +16,11 @@
 	"inputs": [
 		{
 			"id": "contract",
+			"share": false,
 			"type": "textarea",
 			"label": "Tools, schema or example",
-			"description": "An MCP tools/list result or its tools array, a tool definition in any model API's shape, a JSON Schema for one event type (or a map of them, or $defs), or one example message.",
+			"description": "Tool definitions, a schema, or one example message.",
+			"details": "Any one of these:\n- an MCP `tools/list` result, or its `tools` array\n- a tool definition in any model API's shape\n- a JSON Schema for one event type, a map of them, or `$defs`\n- one example message",
 			"primary": true,
 			"dir": "ltr",
 			"rows": 14,
@@ -29,7 +31,8 @@
 			"id": "reader",
 			"type": "select",
 			"label": "Who reads the fields",
-			"description": "Who reads the free-text fields.\n- A model: it reads every free-text field like any other text, so a field that carries words is an instruction channel. An agent offered as a tool, or a server that prompts a model with its arguments.\n- Only code: free text is still unchecked input, but it can't instruct a model.\n\nA command stays a command either way.",
+			"description": "Who reads the free-text fields.",
+			"details": "- **A model**: it reads every free-text field like any other text, so a field that carries words is an instruction channel. An agent offered as a tool, or a server that prompts a model with its arguments.\n- **Only code**: free text is still unchecked input, but it can't instruct a model.\n\nA command stays a command either way.",
 			"default": "model",
 			"options": [
 				{

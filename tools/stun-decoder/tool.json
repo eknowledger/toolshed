@@ -1,5 +1,5 @@
 {
-  "sdk": 5,
+  "sdk": 8,
   "id": "stun-decoder",
   "name": "STUN message decoder",
   "blurb": "Paste a STUN message as hex or a Wireshark hex dump: what it is, what to fix, every attribute with addresses un-XORed, and its integrity checked, TURN long-term credentials included.",
@@ -23,9 +23,11 @@
   "inputs": [
     {
       "id": "message",
+      "share": false,
       "type": "textarea",
       "label": "Message",
-      "description": "Hex, however you copied it: a hex stream, bytes with spaces or colons, or a hex dump from Wireshark, tcpdump or xxd. A captured frame's Ethernet, IP and UDP headers are skipped.",
+      "description": "Hex, however you copied it.",
+      "details": "A hex stream, bytes with spaces or colons, or a hex dump from Wireshark, tcpdump or xxd. A captured frame's Ethernet, IP and UDP headers are skipped.",
       "primary": true,
       "dir": "ltr",
       "rows": 6,
@@ -34,6 +36,7 @@
     },
     {
       "id": "password",
+      "share": false,
       "type": "text",
       "label": "Password",
       "description": "Optional, to check MESSAGE-INTEGRITY. For ICE, the ice-pwd of the side that receives the check. For TURN, the account's password. It never leaves this page.",

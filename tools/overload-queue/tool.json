@@ -1,5 +1,5 @@
 {
-  "sdk": 5,
+  "sdk": 8,
   "id": "overload-queue",
   "name": "Load shedding simulator",
   "blurb": "More requests than a service can answer, for a minute. Your workers, traffic, timeout, retries, queue policy and queue size: who is answered in time, who waits for nothing, and does it recover.",

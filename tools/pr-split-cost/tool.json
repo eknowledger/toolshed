@@ -1,5 +1,5 @@
 {
-  "sdk": 5,
+  "sdk": 8,
   "id": "pr-split-cost",
   "name": "PR split cost",
   "blurb": "Paste your PRs' sizes and review waits. Get how much the wait grows with size, and what splitting a change into k PRs costs in waiting, reviewed one after another, side by side, or in one sitting.",
@@ -34,9 +34,11 @@
   "inputs": [
     {
       "id": "pairs",
+      "share": false,
       "type": "textarea",
       "label": "Merged PRs: size, hours to first review",
-      "description": "One PR per line: lines changed, then hours from ready-for-review to the first review by someone else, separated by a comma, tab or space. A header line is skipped. The default is grafana/grafana's 857 most recent reviewed PRs.",
+      "description": "One PR per line: lines changed, then hours to its first review.",
+      "details": "The hours run from ready-for-review to the first review by someone else. Separate the two numbers with a comma, tab or space; a header line is skipped.\n\nThe default is grafana/grafana's 857 most recent reviewed PRs.",
       "primary": true,
       "rows": 6,
       "dir": "ltr",
@@ -97,7 +99,8 @@
       "id": "review",
       "type": "select",
       "label": "Reviewed",
-      "description": "How the pieces get reviewed.\n- One after another: each waits for the last to merge.\n- Side by side: all open at once, picked up independently.\n- In one sitting: one reviewer takes them all together, as soon as they'd start one small piece.",
+      "description": "How the pieces get reviewed.",
+      "details": "- **One after another**: each waits for the last to merge.\n- **Side by side**: all open at once, picked up independently.\n- **In one sitting**: one reviewer takes them all together, as soon as they'd start one small piece.",
       "default": "serial",
       "options": [
         {

@@ -1,5 +1,5 @@
 {
-  "sdk": 5,
+  "sdk": 8,
   "id": "ice-pair-ranker",
   "name": "ICE pair ranker",
   "blurb": "Paste both sides' ICE candidates, as SDP lines, a whole offer, candidate JSON or getStats(): the pairs ICE forms, the ones it drops, the order it tries them, and what to fix.",
@@ -23,6 +23,7 @@
   "inputs": [
     {
       "id": "local",
+      "share": false,
       "type": "textarea",
       "label": "Local candidates",
       "description": "Anything with candidates in it: a=candidate lines, a whole SDP, RTCIceCandidate JSON, or the JSON of getStats(), which holds both sides.",
@@ -34,6 +35,7 @@
     },
     {
       "id": "remote",
+      "share": false,
       "type": "textarea",
       "label": "Remote candidates",
       "description": "The other side's, the same way. Leave it empty when the local box holds getStats() JSON with remote-candidate entries.",

@@ -1,5 +1,5 @@
 {
-	"sdk": 7,
+	"sdk": 8,
 	"id": "state-machine-analyzer",
 	"name": "State machine analyzer",
 	"blurb": "A completeness check for a state machine. Write each state and what its events do, and see which pairs nobody decided, which states can't be reached or left, and where two rules disagree.",
@@ -18,7 +18,8 @@
 			"id": "machine",
 			"type": "textarea",
 			"label": "Machine",
-			"description": "A state is a line ending in a colon, with its rules beneath it: event -> next state, or stay, defer, reject, ignore or back. Text after # is the reason. The guide below has the rest.",
+			"description": "A state is a line ending in a colon, with its rules beneath it.",
+			"details": "A rule is `event -> next state`, or `stay`, `defer`, `reject`, `ignore` or `back` in place of a state. Text after `#` is the reason. The guide below has the rest.",
 			"default": "# The dinner booking as first drawn: the happy path and its obvious branches.\ngather:\n  slots_complete -> search\n  slots_missing  -> stay\nsearch:\n  slot_free -> confirm\n  none_free -> gather\nconfirm:\n  user_yes -> book\n  user_no  -> gather\nbook:\n  committed -> stay\n  unknown   -> stay\n  refused   -> gather\n  paid      -> notify\nnotify:\n  sent        -> done\n  send_failed -> report\nreport:\n  told -> done\ndegraded:\n\n# Events the code can observe that no rule uses yet.\nevents: user_revises, slot_gone, model_unavailable, model_back",
 			"rows": 24,
 			"dir": "ltr",

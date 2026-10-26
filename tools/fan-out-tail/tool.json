@@ -1,5 +1,5 @@
 {
-  "sdk": 5,
+  "sdk": 8,
   "id": "fan-out-tail",
   "name": "Fan-out tail latency calculator",
   "blurb": "A request fans out to N calls and waits for all of them. See how many requests are slow, and what percentile each call needs to meet your target.",
@@ -67,7 +67,8 @@
       "id": "dependencies",
       "type": "textarea",
       "label": "Several dependencies (optional)",
-      "description": "Leave this empty unless a request calls services with different tails. One per line: name, calls, share slow, as in pricing 20 0.5% or ads 1 5%. A list here replaces the first two inputs.",
+      "description": "Leave this empty unless a request calls services with different tails.",
+      "details": "One per line: name, calls, share slow, as in `pricing 20 0.5%` or `ads 1 5%`. A list here replaces the first two inputs.",
       "default": "",
       "rows": 4,
       "maxLength": 4000,
