@@ -112,9 +112,27 @@ describe("metric-cardinality", () => {
 			const out = tool.run({ ...base, labels });
 			return out.kind === "error" ? [out.input, out.row] : [];
 		};
-		assert.deepEqual(refused([{ name: "route", values: 8 }, { name: " ", values: 5 }]), ["labels", 1]);
-		assert.deepEqual(refused([{ name: "route", values: 8 }, { name: "route", values: 3 }]), ["labels", 1]);
-		assert.deepEqual(refused([{ name: "status", values: 5 }, { name: "le", values: 5 }]), ["labels", 1]);
+		assert.deepEqual(
+			refused([
+				{ name: "route", values: 8 },
+				{ name: " ", values: 5 },
+			]),
+			["labels", 1],
+		);
+		assert.deepEqual(
+			refused([
+				{ name: "route", values: 8 },
+				{ name: "route", values: 3 },
+			]),
+			["labels", 1],
+		);
+		assert.deepEqual(
+			refused([
+				{ name: "status", values: 5 },
+				{ name: "le", values: 5 },
+			]),
+			["labels", 1],
+		);
 		assert.deepEqual(refused([{ name: "2xx", values: 5 }]), ["labels", 0]);
 	});
 

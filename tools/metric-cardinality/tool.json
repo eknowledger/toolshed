@@ -38,10 +38,7 @@
 				}
 			],
 			"maxRows": 30,
-			"default": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			]
+			"default": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }]
 		},
 		{
 			"id": "backend",
@@ -225,10 +222,7 @@
 			"label": "One label set, Python",
 			"input": {
 				"backend": "prometheus",
-				"labels": [
-					{ "name": "route", "values": 1 },
-					{ "name": "status", "values": 1 }
-				],
+				"labels": [{ "name": "route", "values": 1 }, { "name": "status", "values": 1 }],
 				"type": "histogram",
 				"client": "python",
 				"buckets": 14,

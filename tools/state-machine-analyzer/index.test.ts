@@ -320,9 +320,7 @@ describe("state-machine-analyzer", () => {
 	it("tones the state that can't be reached or left, and follows the written happy path", () => {
 		const m = parse(sample("Booking, first draft"));
 		assert.deepEqual(mainPath(m), ["gather", "search", "confirm", "book", "notify", "done"]);
-		const g = parts(tool.run({ machine: sample("Booking, first draft"), also: [] })).find(
-			(p) => p.kind === "graph",
-		);
+		const g = parts(tool.run({ machine: sample("Booking, first draft"), also: [] })).find((p) => p.kind === "graph");
 		assert.ok(g?.kind === "graph");
 		const degraded = g.graph.nodes.find((n) => n.id === "degraded");
 		assert.deepEqual([degraded?.tone, degraded?.note], ["warn", "can't be reached or left"]);

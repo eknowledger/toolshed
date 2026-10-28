@@ -2,10 +2,7 @@
 	{
 		"name": "the defaults lead with the number: 720 series",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -32,10 +29,7 @@
 	{
 		"name": "and the multiplication under it, factor by factor",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -57,10 +51,7 @@
 	{
 		"name": "the defaults' changes, fewest series first, with the native histogram the biggest cut",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -150,10 +141,7 @@
 	{
 		"name": "the chart draws every change against the series now",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -189,10 +177,7 @@
 	{
 		"name": "the defaults' quiet numbers: 40 label sets against the guide, samples and disk",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -231,10 +216,7 @@
 	{
 		"name": "the defaults' method: what one label set writes, and how to make each change",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -281,10 +263,7 @@
 	{
 		"name": "one label set from prometheus_client for python",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 1 },
-				{ "name": "status", "values": 1 }
-			],
+			"labels": [{ "name": "route", "values": 1 }, { "name": "status", "values": 1 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -494,9 +473,7 @@
 	{
 		"name": "exactly 10 label sets is not below 10",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 10 }
-			],
+			"labels": [{ "name": "route", "values": 10 }],
 			"type": "gauge",
 			"client": "python",
 			"buckets": 14,
@@ -564,9 +541,7 @@
 	{
 		"name": "a summary with three quantiles",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 8 }
-			],
+			"labels": [{ "name": "route", "values": 8 }],
 			"type": "summary3",
 			"client": "python",
 			"buckets": 14,
@@ -593,9 +568,7 @@
 	{
 		"name": "a summary with three quantiles: six series per label set",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 8 }
-			],
+			"labels": [{ "name": "route", "values": 8 }],
 			"type": "summary3",
 			"client": "python",
 			"buckets": 14,
@@ -636,10 +609,7 @@
 	{
 		"name": "a native histogram is one series per label set",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "native",
 			"client": "python",
 			"buckets": 14,
@@ -714,10 +684,7 @@
 	{
 		"name": "a label with no name names its row",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -739,9 +706,7 @@
 	{
 		"name": "le on a histogram collides",
 		"input": {
-			"labels": [
-				{ "name": "le", "values": 5 }
-			],
+			"labels": [{ "name": "le", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -763,10 +728,7 @@
 	{
 		"name": "a label listed twice",
 		"input": {
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "route", "values": 3 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "route", "values": 3 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -865,10 +827,7 @@
 		"name": "Azure managed Prometheus: the defaults' samples",
 		"input": {
 			"backend": "azure-prom",
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -903,9 +862,7 @@
 		"name": "Azure managed Prometheus: one metric over the workspace's series and events limits",
 		"input": {
 			"backend": "azure-prom",
-			"labels": [
-				{ "name": "user", "values": 2000000 }
-			],
+			"labels": [{ "name": "user", "values": 2000000 }],
 			"type": "counter",
 			"client": "python",
 			"buckets": 14,
@@ -952,10 +909,7 @@
 		"name": "Google Managed Prometheus: a histogram is one distribution series",
 		"input": {
 			"backend": "gmp",
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -983,10 +937,7 @@
 		"name": "Google Managed Prometheus: billed up to buckets + 3 samples a scrape",
 		"input": {
 			"backend": "gmp",
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -1123,10 +1074,7 @@
 		"name": "Azure custom metrics: one series per dimension combination",
 		"input": {
 			"backend": "azure-custom",
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "tenant", "values": 500 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "tenant", "values": 500 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -1201,10 +1149,7 @@
 		"name": "Cloud Monitoring custom metrics: a distribution is 80 bytes a point",
 		"input": {
 			"backend": "gcm-custom",
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -1233,10 +1178,7 @@
 		"name": "Cloud Monitoring custom metrics: a counter is 8 bytes a point",
 		"input": {
 			"backend": "gcm-custom",
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "counter",
 			"client": "python",
 			"buckets": 14,
@@ -1265,10 +1207,7 @@
 		"name": "Cloud Monitoring custom metrics refuse a point more often than every 5 s",
 		"input": {
 			"backend": "gcm-custom",
-			"labels": [
-				{ "name": "route", "values": 8 },
-				{ "name": "status", "values": 5 }
-			],
+			"labels": [{ "name": "route", "values": 8 }, { "name": "status", "values": 5 }],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
