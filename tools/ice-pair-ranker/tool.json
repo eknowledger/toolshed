@@ -1,5 +1,5 @@
 {
-  "sdk": 8,
+  "sdk": 9,
   "id": "ice-pair-ranker",
   "name": "ICE pair ranker",
   "blurb": "Paste both sides' ICE candidates, as SDP lines, a whole offer, candidate JSON or getStats(): the pairs ICE forms, the ones it drops, the order it tries them, and what to fix.",
@@ -48,6 +48,7 @@
     {
       "id": "controlling",
       "type": "select",
+      "control": "segmented",
       "label": "Controlling side",
       "description": "The agent that nominates the pair. Its candidates are G in the pair formula, the other side's D.",
       "default": "local",

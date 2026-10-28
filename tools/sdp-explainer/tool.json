@@ -1,5 +1,5 @@
 {
-  "sdk": 8,
+  "sdk": 9,
   "id": "sdp-explainer",
   "name": "SDP explainer",
   "blurb": "Paste a WebRTC offer or answer and see every line: what it sets, which phase of the call reads it, and what breaks a rule, with the RFC for each.",
@@ -47,6 +47,7 @@
     {
       "id": "show",
       "type": "select",
+      "control": "segmented",
       "label": "Lines",
       "description": "The problem list always covers every line.",
       "default": "all",

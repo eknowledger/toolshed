@@ -1,5 +1,5 @@
 {
-  "sdk": 8,
+  "sdk": 9,
   "id": "tcp-throughput",
   "name": "TCP throughput ceiling",
   "blurb": "A fast link is not a fast transfer. One connection is capped by its window and by packet loss, and on a long path the cap is far below what was paid for.",
@@ -73,6 +73,7 @@
     {
       "id": "sweep",
       "type": "select",
+      "control": "segmented",
       "label": "Chart",
       "description": "Which variable the curve moves. Against loss the two ceilings cross; against distance they fall together and never cross.",
       "default": "loss",

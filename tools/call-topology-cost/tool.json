@@ -1,5 +1,5 @@
 {
-  "sdk": 8,
+  "sdk": 9,
   "id": "call-topology-cost",
   "name": "Call topology cost",
   "blurb": "Pick a call size and see where a voice call's cost lands for mesh, an SFU, an MCU and a server that is the other peer, with real packet sizes, and what would make it cheaper.",
@@ -186,6 +186,7 @@
     {
       "id": "ip",
       "type": "select",
+      "control": "segmented",
       "label": "IP version",
       "description": "The IP header on every packet: 20 B for IPv4 without options, 40 B for IPv6.",
       "default": "4",

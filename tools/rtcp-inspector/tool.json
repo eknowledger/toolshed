@@ -1,5 +1,5 @@
 {
-  "sdk": 8,
+  "sdk": 9,
   "id": "rtcp-inspector",
   "name": "RTP / RTCP inspector",
   "blurb": "Paste an RTP or RTCP packet as hex and see what it says: each field marked on the bytes, the loss and round trip in its reports, and the NACK, PLI, FIR, REMB and TWCC feedback WebRTC sends.",
@@ -39,6 +39,7 @@
     {
       "id": "view",
       "type": "select",
+      "control": "segmented",
       "label": "Show",
       "description": "The byte view marks every field in place. Turn it off for a long packet.",
       "default": "all",

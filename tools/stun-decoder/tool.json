@@ -1,5 +1,5 @@
 {
-  "sdk": 8,
+  "sdk": 9,
   "id": "stun-decoder",
   "name": "STUN message decoder",
   "blurb": "Paste a STUN message as hex or a Wireshark hex dump: what it is, what to fix, every attribute with addresses un-XORed, and its integrity checked, TURN long-term credentials included.",
@@ -59,6 +59,7 @@
     {
       "id": "view",
       "type": "select",
+      "control": "segmented",
       "label": "Byte view",
       "description": "The byte view marks the header and every attribute in place.",
       "default": "all",

@@ -1,5 +1,5 @@
 {
-  "sdk": 8,
+  "sdk": 9,
   "id": "capacity-planner",
   "name": "Queueing capacity planner",
   "blurb": "Requests at a rate, work that takes a while, and a target for how many may wait, at all or longer than a limit. Erlang C answers how many servers, shows what one fewer would cost, and draws the cliff.",
@@ -72,6 +72,7 @@
     {
       "id": "mode",
       "type": "select",
+      "control": "segmented",
       "label": "Check",
       "description": "Simulating runs a seeded Monte Carlo of the same queue, so the formula has something to disagree with.",
       "default": "closed",

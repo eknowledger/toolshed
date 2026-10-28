@@ -1,5 +1,5 @@
 {
-  "sdk": 8,
+  "sdk": 9,
   "id": "pr-split-cost",
   "name": "PR split cost",
   "blurb": "Paste your PRs' sizes and review waits. Get how much the wait grows with size, and what splitting a change into k PRs costs in waiting, reviewed one after another, side by side, or in one sitting.",
@@ -48,6 +48,7 @@
     {
       "id": "source",
       "type": "select",
+      "control": "segmented",
       "label": "Elasticity",
       "description": "Fit it from the PRs above, or type one in.",
       "default": "fit",
@@ -98,6 +99,7 @@
     {
       "id": "review",
       "type": "select",
+      "control": "segmented",
       "label": "Reviewed",
       "description": "How the pieces get reviewed.",
       "details": "- **One after another**: each waits for the last to merge.\n- **Side by side**: all open at once, picked up independently.\n- **In one sitting**: one reviewer takes them all together, as soon as they'd start one small piece.",
