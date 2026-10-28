@@ -15,7 +15,7 @@ You write the states and what each event does in them. The tool shows:
 | **The grid** | Every event against every state, each cell in words or a symbol: `→ search`, `stay`, a faint `✕` for reject. A red `?` is undecided. The events open in the most states come first |
 | **The graph** | The states and the moves between them, laid out along the happy path, with each arrow labelled by its events. A state that can't be reached or left is amber |
 | **Gaps** | States that can't be reached, states that can't be left, and cells two rules disagree about, by line |
-| **Text to copy** | Under **Also write**: the grid as a markdown table with the gaps as a list, for your docs; or a pytest skeleton, one test per cell, failing where no rule decides |
+| **Text to copy** | Under **Also write**: the grid as a markdown table with the gaps as a list, for your docs, a pytest skeleton, one test per cell, failing where no rule decides, or both |
 
 It's for anything that reacts to events: an agent workflow, a webhook handler, a protocol, an order's lifecycle.
 
@@ -124,7 +124,7 @@ Undecided drops to 0 and Decided reads `13 moves, 3 stays and 103 rejects`. That
 **Booking, all cells decided** makes each of those decisions on purpose: 32 move, 22 stay, 6 defer and 59
 reject.
 
-**8. Take it with you.** Set **Also write** to *The table as markdown* and Run. Under the gaps comes the grid as a
+**8. Take it with you.** Under **Also write**, tick *Markdown* and Run. Under the gaps comes the grid as a
 markdown table, starting `119 cells: 13 decided, 106 undecided.` and ending with the gaps as a list:
 
 ```text
@@ -134,8 +134,8 @@ Gaps:
 - No way out: degraded. No event moves it to another state.
 ```
 
-Paste it into the design doc, and the open questions are in front of whoever reviews it. *A pytest skeleton* gives
-the same cells as tests instead.
+Paste it into the design doc, and the open questions are in front of whoever reviews it. Ticking *pytest* gives
+the same cells as tests, after the table when both are ticked.
 
 ## The syntax
 

@@ -23,7 +23,7 @@
  */
 import type { Cell, Field, GraphEdge, GraphNode, Output, Tool } from "@toolbench/sdk";
 
-type Input = { machine: string; also: string };
+type Input = { machine: string; also: string[] };
 
 class InputError extends Error {
 	readonly at?: number;
@@ -498,7 +498,7 @@ export default {
 					],
 					rows: gaps.map((g): Cell[] => [{ text: g.gap, tone: g.tone }, { text: g.where, mono: true }, g.why]),
 				});
-			if (input.also === "markdown") {
+			if (input.also.includes("markdown")) {
 				const row = (cells: string[]) => `| ${cells.join(" | ")} |`;
 				const md = [
 					`${all.length} cells: ${decided.length} decided, ${open} undecided.`,
@@ -513,7 +513,7 @@ export default {
 				];
 				parts.push({ kind: "code", lang: "markdown", source: md.join("\n") });
 			}
-			if (input.also === "pytest") parts.push({ kind: "code", lang: "python", source: skeleton(m) });
+			if (input.also.includes("pytest")) parts.push({ kind: "code", lang: "python", source: skeleton(m) });
 			return { kind: "group", parts };
 		} catch (error) {
 			if (error instanceof InputError)

@@ -3,7 +3,7 @@
 		"name": "the booking as first drawn: 13 of 119 pairs decided, and degraded can't be reached or left",
 		"input": {
 			"machine": "# The dinner booking as first drawn: the happy path and its obvious branches.\ngather:\n  slots_complete -> search\n  slots_missing  -> stay\nsearch:\n  slot_free -> confirm\n  none_free -> gather\nconfirm:\n  user_yes -> book\n  user_no  -> gather\nbook:\n  committed -> stay\n  unknown   -> stay\n  refused   -> gather\n  paid      -> notify\nnotify:\n  sent        -> done\n  send_failed -> report\nreport:\n  told -> done\ndegraded:\n\n# Events the code can observe that no rule uses yet.\nevents: user_revises, slot_gone, model_unavailable, model_back",
-			"also": "none"
+			"also": []
 		},
 		"match": "subset",
 		"fieldCount": 3,
@@ -33,7 +33,7 @@
 		"name": "the booking as first drawn: degraded can't be reached and can't be left",
 		"input": {
 			"machine": "# The dinner booking as first drawn: the happy path and its obvious branches.\ngather:\n  slots_complete -> search\n  slots_missing  -> stay\nsearch:\n  slot_free -> confirm\n  none_free -> gather\nconfirm:\n  user_yes -> book\n  user_no  -> gather\nbook:\n  committed -> stay\n  unknown   -> stay\n  refused   -> gather\n  paid      -> notify\nnotify:\n  sent        -> done\n  send_failed -> report\nreport:\n  told -> done\ndegraded:\n\n# Events the code can observe that no rule uses yet.\nevents: user_revises, slot_gone, model_unavailable, model_back",
-			"also": "none"
+			"also": []
 		},
 		"match": "subset",
 		"why": "The gaps table only. No rule moves into degraded, and degraded has no rules at all, so nothing moves out. Every other state is reached from gather (gather, search, confirm, book, notify, report in that order) and leaves by at least one move.",
@@ -85,7 +85,7 @@
 		"name": "the booking with every cell decided matches booking.py: 32 moves, 22 stays, 6 defers, 59 rejects, nothing open",
 		"input": {
 			"machine": "# The dinner booking, every cell decided. The first part is the drawing.\ngather:\n  slots_complete -> search\n  slots_missing  -> stay\nsearch:\n  slot_free -> confirm\n  none_free -> gather\nconfirm:\n  user_yes -> book\n  user_no  -> gather\nbook:\n  committed -> stay\n  unknown   -> stay\n  refused   -> gather\n  paid      -> notify\nnotify:\n  sent        -> done\n  send_failed -> report\nreport:\n  told -> done\n\n# Everything below is a decision the drawing didn't make.\ngather, search, confirm:\n  user_revises -> gather     # nothing is committed yet, so start again\nevery state except gather, search, confirm:\n  user_revises -> defer      # a booking or a text exists; finish, then revise\ngather, search:\n  slot_gone -> stay          # no slot chosen yet; the next search covers it\nconfirm:\n  slot_gone -> search        # the slot on offer is gone; search before asking\nbook, degraded:\n  slot_gone -> defer         # what the booking, or the state resumed, says decides\nnotify, report:\n  slot_gone -> report        # a booking that existed is gone; tell the user\ngather, notify:\n  model_unavailable -> degraded   # these states need the model\ndegraded:\n  model_back -> back         # return to the state it left\n  told       -> stay         # the user knows; keep waiting for the model\n\nevery state:\n  committed -> report        # a reservation this state didn't make is real; report it\n  paid      -> report        # a payment this state didn't make is real money; report it\n  sent      -> report        # a text went out; it can't be recalled\n  model_unavailable -> stay  # this state runs as code\n  model_back -> stay         # nothing was waiting for the model\n  anything else -> reject    # a result this state never asked for: log it, do nothing",
-			"also": "none"
+			"also": []
 		},
 		"match": "subset",
 		"fieldCount": 2,
@@ -111,7 +111,7 @@
 		"name": "two people edited this one: paused on stop has two answers",
 		"input": {
 			"machine": "# Two people edited this one.\nidle:\n  start -> running\nrunning:\n  pause -> paused\n  stop  -> idle\npaused:\n  resume -> running\n  stop   -> reject    # resume first, then stop\n\n# Added later, by someone else.\npaused:\n  stop -> idle        # stopping is always allowed\nevery state:\n  archive -> archived",
-			"also": "none"
+			"also": []
 		},
 		"match": "subset",
 		"why": "The gaps table only. paused appears as a header twice, so lines 9 and 13 are equally narrow (one state each) and say different things: reject, and a move to idle. The cell is left undecided. archived is a target with no header, an end, so it is not checked for a way out; every row is reached from idle and leaves.",
@@ -152,7 +152,7 @@
 		"name": "two people edited this one: the coverage line counts the conflict as undecided, and names it",
 		"input": {
 			"machine": "# Two people edited this one.\nidle:\n  start -> running\nrunning:\n  pause -> paused\n  stop  -> idle\npaused:\n  resume -> running\n  stop   -> reject    # resume first, then stop\n\n# Added later, by someone else.\npaused:\n  stop -> idle        # stopping is always allowed\nevery state:\n  archive -> archived",
-			"also": "none"
+			"also": []
 		},
 		"match": "subset",
 		"fieldCount": 3,
@@ -184,7 +184,7 @@
 		"name": "a webhook payment: 15 of 25 pairs decided",
 		"input": {
 			"machine": "# A card payment driven by webhooks. They can arrive twice, late, or out of order.\npending:\n  payment.processing      -> processing\n  payment.action_required -> needs_action\n  payment.succeeded       -> paid\n  payment.failed          -> failed\nprocessing:\n  payment.succeeded -> paid\n  payment.failed    -> failed\nneeds_action:\n  payment.processing -> processing\n  payment.failed     -> failed\npaid:\n  payment.succeeded -> ignore   # the same webhook, delivered again\n  charge.refunded   -> refunded\nfailed:\n  payment.action_required -> needs_action   # the customer tries another card\nevery state except paid:\n  charge.refunded -> reject     # nothing was charged, so nothing to refund",
-			"also": "none"
+			"also": []
 		},
 		"match": "subset",
 		"fieldCount": 2,
@@ -210,7 +210,7 @@
 		"name": "a webhook payment: the grid puts the two events open in 3 states on top, the duplicate and out-of-order deliveries",
 		"input": {
 			"machine": "# A card payment driven by webhooks. They can arrive twice, late, or out of order.\npending:\n  payment.processing      -> processing\n  payment.action_required -> needs_action\n  payment.succeeded       -> paid\n  payment.failed          -> failed\nprocessing:\n  payment.succeeded -> paid\n  payment.failed    -> failed\nneeds_action:\n  payment.processing -> processing\n  payment.failed     -> failed\npaid:\n  payment.succeeded -> ignore   # the same webhook, delivered again\n  charge.refunded   -> refunded\nfailed:\n  payment.action_required -> needs_action   # the customer tries another card\nevery state except paid:\n  charge.refunded -> reject     # nothing was charged, so nothing to refund",
-			"also": "none"
+			"also": []
 		},
 		"match": "subset",
 		"why": "The grid, matched exactly. Open, by event: payment.processing in processing, paid and failed (3); payment.action_required in processing, needs_action and paid (3); payment.succeeded in needs_action and failed (2); payment.failed in paid and failed (2); charge.refunded none. Rows go most open first, ties in the order written, so the two 3s lead and charge.refunded is last.",
@@ -387,7 +387,7 @@
 		"name": "a door: the grid is events down the side, states across, each cell in words",
 		"input": {
 			"machine": "closed:\n  open -> opened\nopened:\n  close -> closed\n  lock  -> reject   # no lock on an open door",
-			"also": "none"
+			"also": []
 		},
 		"match": "subset",
 		"why": "The grid only; the gaps table is the other table part, and it is empty here, so it is left out. Rows are the events with the most open cells first, ties in the order first written; here each event is open in one state, so the order is open, close, lock, columns the states (closed, opened). A move reads -> and its state, the reject from line 5 reads a bare x in the muted tone, explained by the legend, and the three cells no rule covers read ?, in the bad tone.",
@@ -462,7 +462,7 @@
 		"name": "a door: the graph draws the two moves and leaves the reject out",
 		"input": {
 			"machine": "closed:\n  open -> opened\nopened:\n  close -> closed\n  lock  -> reject   # no lock on an open door",
-			"also": "none"
+			"also": []
 		},
 		"match": "subset",
 		"why": "The graph only, matched exactly. closed and opened, in the order written, closed first with the start badge; open moves closed to opened and close moves it back, one arrow each, labelled with the event. The reject on line 5 keeps the door where it is, so it draws nothing. The written happy path is closed, then opened, the first move from each state to somewhere new, and it is highlighted.",
@@ -503,7 +503,7 @@
 		"name": "a door: the same grid as markdown, to copy",
 		"input": {
 			"machine": "closed:\n  open -> opened\nopened:\n  close -> closed\n  lock  -> reject   # no lock on an open door",
-			"also": "markdown"
+			"also": ["markdown"]
 		},
 		"match": "subset",
 		"why": "The markdown part only: the counts (6 cells, 3 decided, 3 undecided), the grid with the same words except that the reject keeps its word, x reject, because a pasted table travels without the grid around it; the legend, and no gaps list because both states are reached and both leave.",
@@ -517,7 +517,7 @@
 		"name": "the booking as first drawn, as markdown, ends with its gaps",
 		"input": {
 			"machine": "# The dinner booking as first drawn: the happy path and its obvious branches.\ngather:\n  slots_complete -> search\n  slots_missing  -> stay\nsearch:\n  slot_free -> confirm\n  none_free -> gather\nconfirm:\n  user_yes -> book\n  user_no  -> gather\nbook:\n  committed -> stay\n  unknown   -> stay\n  refused   -> gather\n  paid      -> notify\nnotify:\n  sent        -> done\n  send_failed -> report\nreport:\n  told -> done\ndegraded:\n\n# Events the code can observe that no rule uses yet.\nevents: user_revises, slot_gone, model_unavailable, model_back",
-			"also": "markdown"
+			"also": ["markdown"]
 		},
 		"match": "subset",
 		"why": "Checked as a whole because the gaps list is the part a table cannot carry: the two degraded rows, worded as in the gaps table. The grid rows are the 13 decided cells from booking.py's TRANSITIONS and ? everywhere else; degraded's column is all ?.",
@@ -531,7 +531,7 @@
 		"name": "a door: one test per cell, None where no rule decides",
 		"input": {
 			"machine": "closed:\n  open -> opened\nopened:\n  close -> closed\n  lock  -> reject   # no lock on an open door",
-			"also": "pytest"
+			"also": ["pytest"]
 		},
 		"match": "subset",
 		"why": "The skeleton only: 2 states x 3 events = 6 cases in row order, the reason from line 5 as a comment, and None for the 3 open cells.",
@@ -545,7 +545,7 @@
 		"name": "a rule before any state",
 		"input": {
 			"machine": "\n  open -> opened\nclosed:",
-			"also": "none"
+			"also": []
 		},
 		"expect": {
 			"kind": "error",
@@ -559,7 +559,7 @@
 		"name": "the old one-line form names the line and both shapes",
 		"input": {
 			"machine": "closed:\n  open -> opened\ngather + found : stay",
-			"also": "none"
+			"also": []
 		},
 		"expect": {
 			"kind": "error",
@@ -573,7 +573,7 @@
 		"name": "two words after the arrow",
 		"input": {
 			"machine": "closed:\n  open -> go home",
-			"also": "none"
+			"also": []
 		},
 		"expect": {
 			"kind": "error",
@@ -587,7 +587,7 @@
 		"name": "a misspelt state after except",
 		"input": {
 			"machine": "closed:\n  open -> opened\nevery state except closd:\n  lock -> reject",
-			"also": "none"
+			"also": []
 		},
 		"expect": {
 			"kind": "error",
@@ -601,7 +601,7 @@
 		"name": "an outcome used as a state's name",
 		"input": {
 			"machine": "stay:\n  open -> opened",
-			"also": "none"
+			"also": []
 		},
 		"expect": {
 			"kind": "error",
@@ -615,7 +615,7 @@
 		"name": "nothing but comments",
 		"input": {
 			"machine": "# nothing yet",
-			"also": "none"
+			"also": []
 		},
 		"expect": {
 			"kind": "error",

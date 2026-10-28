@@ -192,7 +192,7 @@ describe("state-machine-analyzer", () => {
 			const text = sample(label);
 			const m = parse(text);
 			const disputed = new Map(m.conflicts.map((c) => [key(c.state, c.event), c.rules.length]));
-			const out = parts(tool.run({ machine: text, also: "pytest" }));
+			const out = parts(tool.run({ machine: text, also: ["pytest"] }));
 			const head = out.find((p) => p.role === "answer");
 			const grid = out.find((p) => p.kind === "table");
 			assert.ok(head?.kind === "fields" && grid?.kind === "table");
@@ -216,7 +216,14 @@ describe("state-machine-analyzer", () => {
 			const code = out.at(-1);
 			assert.ok(code?.kind === "code" && code.source === skeleton(m));
 
-			const md = parts(tool.run({ machine: text, also: "markdown" })).at(-1);
+			const both = parts(tool.run({ machine: text, also: ["markdown", "pytest"] })).slice(-2);
+			assert.deepEqual(
+				both.map((p) => (p.kind === "code" ? p.lang : p.kind)),
+				["markdown", "python"],
+				`${label}: both, the table before the tests`,
+			);
+
+			const md = parts(tool.run({ machine: text, also: ["markdown"] })).at(-1);
 			assert.ok(md?.kind === "code" && md.lang === "markdown", label);
 			const lines = md.source.split("\n").filter((l) => l.startsWith("| ") && !l.startsWith("| ---"));
 			assert.equal(lines.length, m.events.length + 1, `${label}: a header and one line per event`);
@@ -252,7 +259,7 @@ describe("state-machine-analyzer", () => {
 
 	it("leads with the coverage line, then the grid, then the graph", () => {
 		for (const label of manifest.samples.map((s) => s.label)) {
-			const out = parts(tool.run({ machine: sample(label), also: "none" }));
+			const out = parts(tool.run({ machine: sample(label), also: [] }));
 			assert.deepEqual(
 				out.slice(0, 3).map((p) => [p.kind, p.role]),
 				[
@@ -271,14 +278,14 @@ describe("state-machine-analyzer", () => {
 		const text2 = (c: unknown) => (typeof c === "object" && c !== null ? (c as { text: string }).text : String(c));
 		for (const label of manifest.samples.map((s) => s.label)) {
 			const m = parse(sample(label));
-			const grid = parts(tool.run({ machine: sample(label), also: "none" })).find((p) => p.role === "matrix");
+			const grid = parts(tool.run({ machine: sample(label), also: [] })).find((p) => p.role === "matrix");
 			assert.ok(grid?.kind === "table", label);
 			const order = grid.rows.map((r) => text2(r[0]));
 			const open = (e: string) => m.states.filter((s) => !m.cells.get(key(s, e))).length;
 			const want = [...m.events].sort((a, b) => open(b) - open(a) || m.events.indexOf(a) - m.events.indexOf(b));
 			assert.deepEqual(order, want, label);
 		}
-		const first = parts(tool.run({ machine: sample("Booking, first draft"), also: "none" })).find(
+		const first = parts(tool.run({ machine: sample("Booking, first draft"), also: [] })).find(
 			(p) => p.role === "matrix",
 		);
 		assert.ok(first?.kind === "table");
@@ -291,7 +298,7 @@ describe("state-machine-analyzer", () => {
 	it("draws every move as an arrow, and stays, rejects and the rest as nothing", () => {
 		for (const label of manifest.samples.map((s) => s.label)) {
 			const m = parse(sample(label));
-			const g = parts(tool.run({ machine: sample(label), also: "none" })).find((p) => p.kind === "graph");
+			const g = parts(tool.run({ machine: sample(label), also: [] })).find((p) => p.kind === "graph");
 			assert.ok(g?.kind === "graph", label);
 			assert.equal(graphProblem(g.graph), undefined, label);
 			const pairs = new Set<string>();
@@ -313,7 +320,7 @@ describe("state-machine-analyzer", () => {
 	it("tones the state that can't be reached or left, and follows the written happy path", () => {
 		const m = parse(sample("Booking, first draft"));
 		assert.deepEqual(mainPath(m), ["gather", "search", "confirm", "book", "notify", "done"]);
-		const g = parts(tool.run({ machine: sample("Booking, first draft"), also: "none" })).find(
+		const g = parts(tool.run({ machine: sample("Booking, first draft"), also: [] })).find(
 			(p) => p.kind === "graph",
 		);
 		assert.ok(g?.kind === "graph");
@@ -321,7 +328,7 @@ describe("state-machine-analyzer", () => {
 		assert.deepEqual([degraded?.tone, degraded?.note], ["warn", "can't be reached or left"]);
 		assert.deepEqual(g.graph.highlight, mainPath(m));
 		// The decided booking's back returns to the two states that move into degraded, drawn dashed.
-		const decided = parts(tool.run({ machine: sample("Booking, all cells decided"), also: "none" })).find(
+		const decided = parts(tool.run({ machine: sample("Booking, all cells decided"), also: [] })).find(
 			(p) => p.kind === "graph",
 		);
 		assert.ok(decided?.kind === "graph");
@@ -339,7 +346,7 @@ describe("state-machine-analyzer", () => {
 			["a:\n x -> b\nevery state except:\n y -> a", 3],
 			["a:\n x -> b c", 2],
 		] as const) {
-			const out = tool.run({ machine: text, also: "none" });
+			const out = tool.run({ machine: text, also: [] });
 			assert.equal(out.kind, "error", text);
 			if (out.kind === "error") assert.match(out.message, new RegExp(`^Line ${line}: `), text);
 		}
