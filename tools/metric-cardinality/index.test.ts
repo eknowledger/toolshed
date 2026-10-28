@@ -16,8 +16,8 @@
  */
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import type { Output } from "@toolbench/sdk";
-import tool, { BACKENDS, count, parseLabels, perLabelSet } from "./index.ts";
+import type { Output, Row } from "@toolbench/sdk";
+import tool, { BACKENDS, count, perLabelSet, readLabels } from "./index.ts";
 
 const base = {
 	backend: "prometheus",
@@ -32,8 +32,19 @@ const base = {
 	price: 0,
 };
 
+/** "route 8\nstatus 5" as the rows the form gives `run`, so a test reads like the metric it describes. */
+function rows(text: string): Row[] {
+	return text
+		.split("\n")
+		.filter((line) => line.trim())
+		.map((line) => {
+			const [name, values] = line.trim().split(/\s+/);
+			return { name: name!, values: Number(values) };
+		});
+}
+
 function parts(values: Partial<typeof base>): Output[] {
-	const out = tool.run({ ...base, ...values });
+	const out = tool.run({ ...base, ...values, labels: rows(values.labels ?? base.labels) });
 	assert.equal(out.kind, "group");
 	return out.kind === "group" ? out.parts : [];
 }
@@ -56,7 +67,7 @@ describe("metric-cardinality", () => {
 	it("multiplies the labels, as listing every combination does", () => {
 		for (const counts of [[1], [3, 4], [2, 3, 5], [7, 1, 2, 3], [4, 4, 4, 4]]) {
 			const text = counts.map((c, i) => `l${i} ${c}`).join("\n");
-			assert.equal(count(parseLabels(text), 100), combinations(counts), text);
+			assert.equal(count(readLabels(rows(text)), 100), combinations(counts), text);
 			assert.equal(seriesOf({ labels: text, type: "gauge" }), combinations(counts), text);
 		}
 	});
@@ -96,13 +107,15 @@ describe("metric-cardinality", () => {
 		});
 	});
 
-	it("reads the three ways of writing a label", () => {
-		assert.deepEqual(parseLabels("a 1\nb=2, c: 3\n# a comment\n\nd 1_000"), [
-			{ name: "a", values: 1 },
-			{ name: "b", values: 2 },
-			{ name: "c", values: 3 },
-			{ name: "d", values: 1000 },
-		]);
+	it("names the row a label is refused on", () => {
+		const refused = (labels: Row[]) => {
+			const out = tool.run({ ...base, labels });
+			return out.kind === "error" ? [out.input, out.row] : [];
+		};
+		assert.deepEqual(refused([{ name: "route", values: 8 }, { name: " ", values: 5 }]), ["labels", 1]);
+		assert.deepEqual(refused([{ name: "route", values: 8 }, { name: "route", values: 3 }]), ["labels", 1]);
+		assert.deepEqual(refused([{ name: "status", values: 5 }, { name: "le", values: 5 }]), ["labels", 1]);
+		assert.deepEqual(refused([{ name: "2xx", values: 5 }]), ["labels", 0]);
 	});
 
 	it("leads with the number and its multiplication, then the changes, then the quiet numbers and the method", () => {
@@ -199,9 +212,9 @@ describe("metric-cardinality", () => {
 
 	it("refuses an interval shorter than Google accepts", () => {
 		for (const backend of ["gmp", "gcm-custom"]) {
-			const out = tool.run({ ...base, backend, interval: 4 });
+			const out = tool.run({ ...base, labels: rows(base.labels), backend, interval: 4 });
 			assert.equal(out.kind, "error", backend);
-			assert.equal(tool.run({ ...base, backend, interval: 5 }).kind, "group", backend);
+			assert.equal(tool.run({ ...base, labels: rows(base.labels), backend, interval: 5 }).kind, "group", backend);
 		}
 	});
 

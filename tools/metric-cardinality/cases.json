@@ -2,7 +2,10 @@
 	{
 		"name": "the defaults lead with the number: 720 series",
 		"input": {
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -29,7 +32,10 @@
 	{
 		"name": "and the multiplication under it, factor by factor",
 		"input": {
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -51,7 +57,10 @@
 	{
 		"name": "the defaults' changes, fewest series first, with the native histogram the biggest cut",
 		"input": {
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -141,7 +150,10 @@
 	{
 		"name": "the chart draws every change against the series now",
 		"input": {
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -177,7 +189,10 @@
 	{
 		"name": "the defaults' quiet numbers: 40 label sets against the guide, samples and disk",
 		"input": {
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -216,7 +231,10 @@
 	{
 		"name": "the defaults' method: what one label set writes, and how to make each change",
 		"input": {
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -263,7 +281,10 @@
 	{
 		"name": "one label set from prometheus_client for python",
 		"input": {
-			"labels": "route 1\nstatus 1",
+			"labels": [
+				{ "name": "route", "values": 1 },
+				{ "name": "status", "values": 1 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -290,7 +311,11 @@
 	{
 		"name": "a tenant label with 500 values",
 		"input": {
-			"labels": "route 1\nstatus 1\ntenant 500",
+			"labels": [
+				{ "name": "route", "values": 1 },
+				{ "name": "status", "values": 1 },
+				{ "name": "tenant", "values": 500 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -329,7 +354,11 @@
 	{
 		"name": "a 500-value tenant label is the first thing to change",
 		"input": {
-			"labels": "route 1\nstatus 1\ntenant 500",
+			"labels": [
+				{ "name": "route", "values": 1 },
+				{ "name": "status", "values": 1 },
+				{ "name": "tenant", "values": 500 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -408,7 +437,11 @@
 	{
 		"name": "twenty pods, a quarter of the combinations, go's buckets",
 		"input": {
-			"labels": "route 12\nmethod 3\nstatus 6",
+			"labels": [
+				{ "name": "route", "values": 12 },
+				{ "name": "method", "values": 3 },
+				{ "name": "status", "values": 6 }
+			],
 			"type": "histogram",
 			"client": "go",
 			"buckets": 11,
@@ -430,7 +463,11 @@
 	{
 		"name": "twenty pods, a quarter of the combinations, go's buckets: the count",
 		"input": {
-			"labels": "route 12\nmethod 3\nstatus 6",
+			"labels": [
+				{ "name": "route", "values": 12 },
+				{ "name": "method", "values": 3 },
+				{ "name": "status", "values": 6 }
+			],
 			"type": "histogram",
 			"client": "go",
 			"buckets": 11,
@@ -457,7 +494,9 @@
 	{
 		"name": "exactly 10 label sets is not below 10",
 		"input": {
-			"labels": "route 10",
+			"labels": [
+				{ "name": "route", "values": 10 }
+			],
 			"type": "gauge",
 			"client": "python",
 			"buckets": 14,
@@ -496,7 +535,7 @@
 	{
 		"name": "a counter with no labels and no _created",
 		"input": {
-			"labels": "",
+			"labels": [],
 			"type": "counter",
 			"client": "python-nocreated",
 			"buckets": 14,
@@ -525,7 +564,9 @@
 	{
 		"name": "a summary with three quantiles",
 		"input": {
-			"labels": "route 8",
+			"labels": [
+				{ "name": "route", "values": 8 }
+			],
 			"type": "summary3",
 			"client": "python",
 			"buckets": 14,
@@ -552,7 +593,9 @@
 	{
 		"name": "a summary with three quantiles: six series per label set",
 		"input": {
-			"labels": "route 8",
+			"labels": [
+				{ "name": "route", "values": 8 }
+			],
 			"type": "summary3",
 			"client": "python",
 			"buckets": 14,
@@ -593,7 +636,10 @@
 	{
 		"name": "a native histogram is one series per label set",
 		"input": {
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "native",
 			"client": "python",
 			"buckets": 14,
@@ -620,7 +666,11 @@
 	{
 		"name": "a price turns series into a bill",
 		"input": {
-			"labels": "route 1\nstatus 1\ntenant 500",
+			"labels": [
+				{ "name": "route", "values": 1 },
+				{ "name": "status", "values": 1 },
+				{ "name": "tenant", "values": 500 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -662,9 +712,12 @@
 		}
 	},
 	{
-		"name": "a count that is not a number",
+		"name": "a label with no name names its row",
 		"input": {
-			"labels": "route lots",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -678,14 +731,17 @@
 		"why": "The message names the line it could not read.",
 		"expect": {
 			"kind": "error",
-			"message": "\"route lots\" is not a label and a count",
-			"input": "labels"
+			"message": "Give the label a name.",
+			"input": "labels",
+			"row": 1
 		}
 	},
 	{
 		"name": "le on a histogram collides",
 		"input": {
-			"labels": "le 5",
+			"labels": [
+				{ "name": "le", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -700,13 +756,17 @@
 		"expect": {
 			"kind": "error",
 			"message": "\"le\" is the label a histogram writes itself",
-			"input": "labels"
+			"input": "labels",
+			"row": 0
 		}
 	},
 	{
 		"name": "a label listed twice",
 		"input": {
-			"labels": "route 8\nroute 3",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "route", "values": 3 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -721,14 +781,19 @@
 		"expect": {
 			"kind": "error",
 			"message": "route is listed twice",
-			"input": "labels"
+			"input": "labels",
+			"row": 1
 		}
 	},
 	{
 		"name": "Amazon Managed Prometheus bills samples: the Go service at 30 s",
 		"input": {
 			"backend": "amp",
-			"labels": "route 12\nmethod 3\nstatus 6",
+			"labels": [
+				{ "name": "route", "values": 12 },
+				{ "name": "method", "values": 3 },
+				{ "name": "status", "values": 6 }
+			],
 			"type": "histogram",
 			"client": "go",
 			"buckets": 11,
@@ -768,7 +833,11 @@
 		"name": "Amazon Managed Prometheus: the same series as self-hosted",
 		"input": {
 			"backend": "amp",
-			"labels": "route 12\nmethod 3\nstatus 6",
+			"labels": [
+				{ "name": "route", "values": 12 },
+				{ "name": "method", "values": 3 },
+				{ "name": "status", "values": 6 }
+			],
 			"type": "histogram",
 			"client": "go",
 			"buckets": 11,
@@ -796,7 +865,10 @@
 		"name": "Azure managed Prometheus: the defaults' samples",
 		"input": {
 			"backend": "azure-prom",
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -831,7 +903,9 @@
 		"name": "Azure managed Prometheus: one metric over the workspace's series and events limits",
 		"input": {
 			"backend": "azure-prom",
-			"labels": "user 2000000",
+			"labels": [
+				{ "name": "user", "values": 2000000 }
+			],
 			"type": "counter",
 			"client": "python",
 			"buckets": 14,
@@ -878,7 +952,10 @@
 		"name": "Google Managed Prometheus: a histogram is one distribution series",
 		"input": {
 			"backend": "gmp",
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -906,7 +983,10 @@
 		"name": "Google Managed Prometheus: billed up to buckets + 3 samples a scrape",
 		"input": {
 			"backend": "gmp",
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -946,7 +1026,11 @@
 		"name": "CloudWatch EMF: one metric per dimension combination, targets not a factor",
 		"input": {
 			"backend": "cloudwatch",
-			"labels": "operation 6\nstatus 3\ncustomer 200",
+			"labels": [
+				{ "name": "operation", "values": 6 },
+				{ "name": "status", "values": 3 },
+				{ "name": "customer", "values": 200 }
+			],
 			"type": "histogram",
 			"client": "custom",
 			"buckets": 11,
@@ -969,7 +1053,11 @@
 		"name": "CloudWatch EMF: 1,800 custom metrics",
 		"input": {
 			"backend": "cloudwatch",
-			"labels": "operation 6\nstatus 3\ncustomer 200",
+			"labels": [
+				{ "name": "operation", "values": 6 },
+				{ "name": "status", "values": 3 },
+				{ "name": "customer", "values": 200 }
+			],
 			"type": "histogram",
 			"client": "custom",
 			"buckets": 11,
@@ -997,7 +1085,11 @@
 		"name": "CloudWatch: billed per metric-month",
 		"input": {
 			"backend": "cloudwatch",
-			"labels": "operation 6\nstatus 3\ncustomer 200",
+			"labels": [
+				{ "name": "operation", "values": 6 },
+				{ "name": "status", "values": 3 },
+				{ "name": "customer", "values": 200 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -1031,7 +1123,10 @@
 		"name": "Azure custom metrics: one series per dimension combination",
 		"input": {
 			"backend": "azure-custom",
-			"labels": "route 8\ntenant 500",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "tenant", "values": 500 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -1059,7 +1154,19 @@
 		"name": "Azure custom metrics: 11 dimensions is over the 10 a metric can have",
 		"input": {
 			"backend": "azure-custom",
-			"labels": "a 1\nb 1\nc 1\nd 1\ne 1\nf 1\ng 1\nh 1\ni 1\nj 1\nk 1",
+			"labels": [
+				{ "name": "a", "values": 1 },
+				{ "name": "b", "values": 1 },
+				{ "name": "c", "values": 1 },
+				{ "name": "d", "values": 1 },
+				{ "name": "e", "values": 1 },
+				{ "name": "f", "values": 1 },
+				{ "name": "g", "values": 1 },
+				{ "name": "h", "values": 1 },
+				{ "name": "i", "values": 1 },
+				{ "name": "j", "values": 1 },
+				{ "name": "k", "values": 1 }
+			],
 			"type": "gauge",
 			"client": "python",
 			"buckets": 14,
@@ -1094,7 +1201,10 @@
 		"name": "Cloud Monitoring custom metrics: a distribution is 80 bytes a point",
 		"input": {
 			"backend": "gcm-custom",
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,
@@ -1123,7 +1233,10 @@
 		"name": "Cloud Monitoring custom metrics: a counter is 8 bytes a point",
 		"input": {
 			"backend": "gcm-custom",
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "counter",
 			"client": "python",
 			"buckets": 14,
@@ -1152,7 +1265,10 @@
 		"name": "Cloud Monitoring custom metrics refuse a point more often than every 5 s",
 		"input": {
 			"backend": "gcm-custom",
-			"labels": "route 8\nstatus 5",
+			"labels": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			],
 			"type": "histogram",
 			"client": "python",
 			"buckets": 14,

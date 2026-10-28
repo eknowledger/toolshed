@@ -15,13 +15,13 @@ CloudWatch, Azure Monitor and Google Cloud Monitoring. The provider table below 
 Leave *Where the metric is stored* at **Prometheus, self-hosted**. A Go service exposes one request-duration histogram with three labels. Its routes, methods and statuses take 12, 3
 and 6 values, but most routes only ever see one or two methods and a few statuses, so about a quarter of the 216
 combinations actually occur. It runs on 20 pods. Choose **Go client_golang** under *Client library*, which fills in
-11 buckets and no `_created`, and enter:
+11 buckets and no `_created`, and list the labels, one row each:
 
-```text
-route 12
-method 3
-status 6
-```
+| Label | Values |
+|---|---|
+| route | 12 |
+| method | 3 |
+| status | 6 |
 
 with *Targets* 20 and *Combinations that occur* 25%, then press **Run**. The answer starts with the number and
 the multiplication that makes it:
@@ -100,9 +100,9 @@ dropping it leaves 9 metrics.
 
 - **Where the metric is stored**, one of seven backends, described in the table below. The default is self-hosted
   Prometheus.
-- **Labels and their values**: one label (or dimension) per line, its name and how many values it takes
-  (`route 12`, `route=12` and `route: 12` all work). Empty is a metric with no labels. Prometheus's naming rule is
-  checked only on the Prometheus backends.
+- **Labels and their values**: one row per label (or dimension), its name and how many values it takes. An empty
+  list is a metric with no labels. Prometheus's naming rule is checked only on the Prometheus backends, and a refusal
+  is shown under the row it is about.
 - **Metric type**. A summary's quantile count is part of the type: Python's prometheus_client writes summaries
   with no quantiles, and three (0.5, 0.9, 0.99) is a typical configuration elsewhere.
 - **Client library** fills in the bucket count and whether `_created` is written with that library's defaults:

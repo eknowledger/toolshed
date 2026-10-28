@@ -25,11 +25,11 @@
  * The mistakes it exists for are the common ones: counting a histogram as one series, forgetting the targets, and
  * treating a label's value count as additive rather than a multiplier.
  */
-import type { Field, Output, Tool } from "@toolbench/sdk";
+import type { Field, Output, Row, Tool } from "@toolbench/sdk";
 
 type Input = {
 	backend: string;
-	labels: string;
+	labels: Row[];
 	type: string;
 	client: string;
 	buckets: number;
@@ -149,9 +149,12 @@ export const BACKENDS: Record<string, Backend> = {
 
 class InputError extends Error {
 	readonly input: string;
-	constructor(message: string, input: string) {
+	/** The row of a rows input at fault, 0 first, which the runtime shows the message under. */
+	readonly row: number | undefined;
+	constructor(message: string, input: string, row?: number) {
 		super(message);
 		this.input = input;
+		this.row = row;
 	}
 }
 
@@ -164,31 +167,29 @@ const RESERVED: Record<string, string[]> = { histogram: ["le"], summary: ["quant
 const HAS_CREATED = new Set(["counter", "histogram", "summary", "summary3"]);
 
 /**
- * One label per line, or comma-separated: `route 12`, `route=12` and `route: 12` all read the same. Prometheus's
- * naming rule is checked only for a Prometheus backend; CloudWatch dimensions and Azure dimensions take other names.
+ * The labels, one row each: a name and how many values it takes. Prometheus's naming rule is checked only for a
+ * Prometheus backend; CloudWatch dimensions and Azure dimensions take other names. Each refusal names its row.
  */
-export function parseLabels(text: string, prom = true): Label[] {
+export function readLabels(rows: readonly Row[], prom = true): Label[] {
 	const out: Label[] = [];
-	const parts = text
-		.split(/[\n,]/)
-		.map((s) => s.trim())
-		.filter((s) => s && !s.startsWith("#"));
-	for (const part of parts) {
-		const m = /^([^\s=:]+)\s*[=:\s]\s*([0-9][0-9_]*)$/.exec(part);
-		if (!m) throw new InputError(`"${part}" is not a label and a count, such as "route 12".`, "labels");
-		const name = m[1]!;
+	rows.forEach((r, row) => {
+		const name = String(r.name ?? "").trim();
+		if (!name) throw new InputError("Give the label a name.", "labels", row);
 		if (prom && !NAME.test(name))
 			throw new InputError(
 				`"${name}" is not a valid label name: letters, digits and _, not starting with a digit.`,
 				"labels",
+				row,
 			);
 		if (prom && name.startsWith("__"))
-			throw new InputError("Label names starting with __ are reserved for Prometheus itself.", "labels");
-		const values = Number(m[2]!.replace(/_/g, ""));
-		if (!Number.isSafeInteger(values) || values < 1) throw new InputError(`${name} needs at least 1 value.`, "labels");
-		if (out.some((l) => l.name === name)) throw new InputError(`${name} is listed twice.`, "labels");
+			throw new InputError("Label names starting with __ are reserved for Prometheus itself.", "labels", row);
+		const values = Number(r.values);
+		if (!Number.isSafeInteger(values) || values < 1)
+			throw new InputError(`${name} needs a whole number of values, at least 1.`, "labels", row);
+		if (out.some((l) => l.name === name)) throw new InputError(`${name} is listed twice.`, "labels", row);
 		out.push({ name, values });
-	}
+	});
+	// The manifest's maxRows stops a reader at 30; this stops a caller that is not a form.
 	if (out.length > 30) throw new InputError("At most 30 labels.", "labels");
 	return out;
 }
@@ -337,17 +338,18 @@ export default {
 			const backend = BACKENDS[id];
 			if (!backend) throw new InputError(`Unknown backend "${id}".`, "backend");
 			const prom = backend.family === "prom";
-			const labels = parseLabels(String(input.labels ?? ""), prom);
+			const labels = readLabels(input.labels ?? [], prom);
 			const type = String(input.type);
-			for (const l of labels) {
+			labels.forEach((l, row) => {
 				if (prom && (RESERVED[type] ?? []).includes(l.name)) {
 					const what = type === "histogram" ? "histogram" : "summary";
 					throw new InputError(
 						`"${l.name}" is the label a ${what} writes itself, so yours would collide with it.`,
 						"labels",
+						row,
 					);
 				}
-			}
+			});
 			const buckets = Number(input.buckets);
 			if (type === "histogram" && (!Number.isInteger(buckets) || buckets < 0 || buckets > 1000)) {
 				throw new InputError("Buckets is a whole number from 0 to 1,000, not counting +Inf.", "buckets");
@@ -677,7 +679,13 @@ export default {
 			parts.push({ kind: "fields", role: "method", fields: method });
 			return { kind: "group", parts };
 		} catch (error) {
-			if (error instanceof InputError) return { kind: "error", message: error.message, input: error.input };
+			if (error instanceof InputError)
+				return {
+					kind: "error",
+					message: error.message,
+					input: error.input,
+					...(error.row === undefined ? {} : { row: error.row }),
+				};
 			throw error;
 		}
 	},

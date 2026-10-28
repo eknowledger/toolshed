@@ -1,9 +1,9 @@
 {
-	"sdk": 8,
+	"sdk": 9,
 	"id": "metric-cardinality",
 	"name": "Metric cardinality calculator",
 	"blurb": "List a metric's labels and how many values each takes, pick where it is stored, and see how many time series it really writes, which change saves the most, and what that backend bills it in.",
-	"version": "3.1.1",
+	"version": "4.0.0",
 	"capabilities": ["pure"],
 	"runtime": {
 		"entry": "index.ts",
@@ -15,15 +15,33 @@
 	"inputs": [
 		{
 			"id": "labels",
-			"type": "textarea",
+			"type": "rows",
 			"label": "Labels and their values",
-			"description": "One label per line, with how many different values it takes, such as `route 8`.",
-			"details": "On CloudWatch and Azure, a label is a dimension. Leave this empty for a metric with no labels.",
+			"description": "Each label the metric carries, and how many different values it takes.",
+			"details": "On CloudWatch and Azure, a label is a dimension. Leave the list empty for a metric with no labels.",
 			"primary": true,
-			"default": "route 8\nstatus 5",
-			"rows": 4,
-			"maxLength": 2000,
-			"dir": "ltr"
+			"columns": [
+				{
+					"id": "name",
+					"type": "text",
+					"label": "Label",
+					"maxLength": 100,
+					"dir": "ltr"
+				},
+				{
+					"id": "values",
+					"type": "number",
+					"label": "Values",
+					"min": 1,
+					"max": 1000000000,
+					"step": 1
+				}
+			],
+			"maxRows": 30,
+			"default": [
+				{ "name": "route", "values": 8 },
+				{ "name": "status", "values": 5 }
+			]
 		},
 		{
 			"id": "backend",
@@ -207,7 +225,10 @@
 			"label": "One label set, Python",
 			"input": {
 				"backend": "prometheus",
-				"labels": "route 1\nstatus 1",
+				"labels": [
+					{ "name": "route", "values": 1 },
+					{ "name": "status", "values": 1 }
+				],
 				"type": "histogram",
 				"client": "python",
 				"buckets": 14,
@@ -220,7 +241,11 @@
 			"label": "Add a tenant label",
 			"input": {
 				"backend": "prometheus",
-				"labels": "route 1\nstatus 1\ntenant 500",
+				"labels": [
+					{ "name": "route", "values": 1 },
+					{ "name": "status", "values": 1 },
+					{ "name": "tenant", "values": 500 }
+				],
 				"type": "histogram",
 				"client": "python",
 				"buckets": 14,
@@ -233,7 +258,11 @@
 			"label": "A Go service on 20 pods",
 			"input": {
 				"backend": "prometheus",
-				"labels": "route 12\nmethod 3\nstatus 6",
+				"labels": [
+					{ "name": "route", "values": 12 },
+					{ "name": "method", "values": 3 },
+					{ "name": "status", "values": 6 }
+				],
 				"type": "histogram",
 				"client": "go",
 				"buckets": 11,
@@ -246,7 +275,11 @@
 			"label": "Same, Amazon Prometheus",
 			"input": {
 				"backend": "amp",
-				"labels": "route 12\nmethod 3\nstatus 6",
+				"labels": [
+					{ "name": "route", "values": 12 },
+					{ "name": "method", "values": 3 },
+					{ "name": "status", "values": 6 }
+				],
 				"type": "histogram",
 				"client": "go",
 				"buckets": 11,
@@ -260,7 +293,11 @@
 			"label": "CloudWatch EMF, per customer",
 			"input": {
 				"backend": "cloudwatch",
-				"labels": "operation 6\nstatus 3\ncustomer 200",
+				"labels": [
+					{ "name": "operation", "values": 6 },
+					{ "name": "status", "values": 3 },
+					{ "name": "customer", "values": 200 }
+				],
 				"type": "histogram",
 				"client": "custom",
 				"buckets": 11,
@@ -268,13 +305,6 @@
 				"targets": 12,
 				"occur": 50,
 				"interval": 60
-			}
-		},
-		{
-			"label": "Not a count",
-			"input": {
-				"backend": "prometheus",
-				"labels": "route lots"
 			}
 		}
 	],
